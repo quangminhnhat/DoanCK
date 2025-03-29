@@ -1,0 +1,42 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+  }
+  
+  .container {
+    margin: 20px;
+  }
+
+/* dấu gạch ngang */
+.divider {
+  width: 100%;
+  height: 4px;
+  background-color: grey;
+  position: relative;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.center-line {
+  width: 100px; /* Độ dài đoạn màu đỏ */
+  height: 100%;
+  background-color: #B73A37;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* chữ cho từng phần tiêu đề */
+h1{
+  font-size: 30px;
+  color: #595959;
+  text-align: center;
+  text-transform: uppercase;
+  padding-top: 40px;
+}

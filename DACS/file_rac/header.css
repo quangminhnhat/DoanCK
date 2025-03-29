@@ -1,0 +1,132 @@
+/* Reset mặc định */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+/* Header chính */
+.header {
+  background-color: #f8f8f8;
+  padding: 10px 0;
+}
+
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Logo */
+.logo img {
+  height: 50px; 
+  width: auto;
+}
+
+/* Tên trường */
+.school-name h1 {
+  font-size: 24px;
+  font-weight: bold;
+  color: #000;
+  padding: 0;
+}
+
+/* Menu chính */
+.nav-menu ul {
+  list-style: none;
+  display: flex;
+  align-items: center;
+}
+
+.nav-menu li {
+  margin-left: 30px;
+  position: relative;
+}
+
+/* Link trong menu */
+.nav-menu a {
+  text-decoration: none;
+  color: #333;
+  font-size: 16px;
+}
+
+/* Màu active */
+.nav-menu a.active {
+  color: #b91c1c;
+  font-weight: bold;
+}
+
+/* Hiệu ứng hover */
+.nav-menu a:hover {
+  color: #b91c1c;
+}
+
+/* Giữ dấu gạch đứng giữa các mục trong header (không ảnh hưởng dropdown) */
+.nav-menu > ul > li:not(:last-child)::after {
+  content: '|';
+  color: #ccc;
+  margin-left: 15px;
+}
+
+/* Xóa dấu gạch dọc trong dropdown menu */
+.dropdown-menu li::after {
+  content: none;
+}
+
+/* Dropdown Menu */
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 5px); /* Đẩy dropdown xuống 5px */
+  left: 0;
+  background-color: white;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  z-index: 100;
+  width: 180px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+}
+
+/* Hiển thị dropdown khi hover */
+.dropdown:hover .dropdown-menu {
+  display: block;
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* Style cho menu con */
+.dropdown-menu li {
+  width: 100%;
+  border-bottom: 1px solid #ccc; /* Đường viền giữa các mục */
+  margin: 0;
+  padding: 0;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+/* Loại bỏ border cuối cùng */
+.dropdown-menu li:last-child {
+  border-bottom: none;
+}
+
+/* Text Styling */
+.dropdown-menu li a {
+  padding: 12px 16px;
+  display: block;
+  color: #333;
+  text-decoration: none;
+}
+
+/* Hiệu ứng hover cho dropdown */
+.dropdown-menu li a:hover {
+  background-color: #f5f5f5;
+  color: #b91c1c;
+}
