@@ -1,0 +1,15 @@
+{
+  "name": "do_an_cs_cntt",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "do_an_cs_cntt": "file:",
+    "express": "^4.21.2"
+  }
+}
