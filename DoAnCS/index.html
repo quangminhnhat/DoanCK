@@ -1,0 +1,154 @@
+<section id="Slider"></section>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Web Project</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<header>
+    <div class="logo">
+        <img src="images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png" alt="Logo">
+    </div>
+    <div class="menu">
+        <li><a href="">Trang Chủ</a></li>
+
+        <li><a href=""></a>Nhà Trường</a>
+            <ul class="sub-menu">
+                <li><a href="">Giới thiệu</a></li>
+                <li><a href="">Đội ngũ giáo viên</a></li>
+                <li><a href="">Cơ sở vật chất</a></li>
+                <li><a href="">Học phí</a></li>
+            </ul>
+        </li>
+
+        <li><a href=""></a>Học Sinh</a>
+            <ul class="sub-menu">
+                <li><a href="">Tuyển Sinh</a></li>
+                <li><a href="">Thời Khoá Biểu</a></li>
+                <li><a href="">Góp Ý</a></li>
+                <li><a href="">Thông Tin Cá Nhân</a></li>
+            </ul>
+        </li>
+
+        <li><a href=""></a>Giáo Viên</a>
+            <ul class="sub-menu">
+                <li><a href="">Thông Tin Lớp Học</a></li>
+                <li><a href="">Lịch Dạy</a></li>
+                <li><a href="">Góp Ý</a></li>
+                <li><a href="">Thông Tin Cá Nhân</a></li>
+            </ul>
+        </li>
+
+        <li><a href=""></a>Thư Viện</a>
+            <ul class="sub-menu">
+                <li><a href="">Tài Liệu</a></li>
+                <li><a href="">Đề Thi</a></li>
+            </ul>
+        </li>
+
+        <li><a href=""></a>Tin Tức - Sự Kiện</a>
+            <ul class="sub-menu">
+                <li><a href="">Tin Tức</a></li>
+                <li><a href="">Sự Kiện</a></li>
+            </ul>
+        </li>
+
+        <li><a href=""></a>Liên Hệ</a></li>
+    </div>
+    <div class="other" ></div>
+    <i class="fas fa-user"></i>
+        
+    </div>
+</header>
+<section id="Slider">
+    <div class="aspect-ratio-169">
+      <img src="images/1.jpg">
+      <img src="images/2.jpg" >
+      <img src="images/3.jpg" >
+      <img src="images/4.jpg" >
+      <img src="images/5.jpg" >
+    </div>
+    <div class="dot-container">
+        <div class="dot active"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+    </div>
+  </section>
+  <section class="dot-container">
+    <div class="dot active"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+</section>
+
+<section class="app-container">
+    <p>Tải ứng dụng </p>
+    <div class="app-google">
+        <img src="images/appstore.png" >
+        <img src="images/googleplay.png">
+    </div>
+    <p>Nhận bản tin IVY moda</p>
+    <input type="email" placeholder="Nhập email của bạn...">
+</section>
+
+  <div class="footer-top">
+    <ul>
+        <li><a href=""><img src="images/logo.png" alt=""></a></li>
+        <li><a href="">Liên hệ</a></li>
+        <li><a href="">Tuyển dụng</a></li>
+        <li><a href="">Giới thiệu</a></li>
+        <li>
+            <div class="social-links">
+                <a href="" class="fab fa-facebook-f"></a>
+                <a href="" class="fab fa-twitter"></a>
+                <a href="" class="fab fa-youtube"></a>
+            </div>
+        </li>
+    </ul>
+</div>
+<div class="footer-bottom">
+    <p>
+        Công ty Cổ phần Giáo dục với số đăng ký kinh doanh: 46346724 <br>
+        Địa chỉ đăng ký: TP.Hà Tĩnh, Việt Nam - 0822 488 288 <br>
+        Đặt hàng online: 0822 488 288
+    </p>
+</div>
+
+    <div class="footer-bottom">
+        ©copy; Cổ phần Giáo dục. All rights reserved.
+    </div>
+</body>
+<script>
+    const imgPosition = document.querySelectorAll(".aspect-ratio-169 img")
+    const imgContainer = document.querySelector('.aspect-ratio-169')
+    const dotItem = document.querySelectorAll(".dot")
+    let imgNuber = imgPosition.length
+    let index = 0
+    console.log(imgPosition);
+    imgPosition.forEach(function(image, index){
+        image.style.left = index*100 + "%"
+        dotItem[index].addEventListener("click",function(){
+            slider(index)
+        })
+    })
+    function imgSlide(){
+        index++;
+        console.log(index)
+        if(index >= imgNuber) {index = 0}
+        slider(index)
+    }
+    function slider(index) {
+        imgContainer.style.left = "-" + index*100 + "%"
+        const dotActive = document.querySelector(".active")
+        dotActive.classList.remove("active")
+        dotItem[index].classList.add("active")
+    }
+    setInterval(imgSlider, 5000)
+</script> 
+</html>
