@@ -76,27 +76,17 @@ const valuesUser = [username, hashpassword, role];*/
         FROM users
         WHERE username = ?;
       `;
-      const values = [username, hashpassword, role, username, email, phone, address, birth, username];
-
-
-      sql.query(connectionString, insertQuery, values, (err, result) => {
-        if (err) {
-          console.error("Insert error:", err);
-          return res.status(500).send("Database insert error");
-        }
-        console.log("User registered:", result);       
-      });
-
-    } else if (role === "teacher") {
-      const insertQuery = `INSERT INTO users (username, password, role, created_at, updated_at) VALUES (?, ?, ?, GETDATE(), GETDATE());
-      INSERT INTO teachers (user_id, full_name, email, phone_number, address, date_of_birth, salary, created_at, updated_at)
-        SELECT id, ?, ?, ?, ?, ?, ?, GETDATE(), GETDATE()
-        FROM users
-        WHERE username = ?;
-      `;
-      const values = [username, hashpassword, role,username, email, phone, address, birth, salary, username];
-
-
+      const values = [
+        username,
+        hashpassword,
+        role,
+        username,
+        email,
+        phone,
+        address,
+        birth,
+        username,
+      ];
 
       sql.query(connectionString, insertQuery, values, (err, result) => {
         if (err) {
@@ -104,7 +94,33 @@ const valuesUser = [username, hashpassword, role];*/
           return res.status(500).send("Database insert error");
         }
         console.log("User registered:", result);
+      });
+    } else if (role === "teacher") {
+      const insertQuery = `INSERT INTO users (username, password, role, created_at, updated_at) VALUES (?, ?, ?, GETDATE(), GETDATE());
+      INSERT INTO teachers (user_id, full_name, email, phone_number, address, date_of_birth, salary, created_at, updated_at)
+        SELECT id, ?, ?, ?, ?, ?, ?, GETDATE(), GETDATE()
+        FROM users
+        WHERE username = ?;
+      `;
+      const values = [
+        username,
+        hashpassword,
+        role,
+        username,
+        email,
+        phone,
+        address,
+        birth,
+        salary,
+        username,
+      ];
 
+      sql.query(connectionString, insertQuery, values, (err, result) => {
+        if (err) {
+          console.error("Insert error:", err);
+          return res.status(500).send("Database insert error");
+        }
+        console.log("User registered:", result);
       });
     } else {
       const insertQuery = `INSERT INTO users (username, password, role, created_at, updated_at) VALUES (?, ?, ?, GETDATE(), GETDATE());`;
@@ -123,7 +139,6 @@ const valuesUser = [username, hashpassword, role];*/
     res.redirect("/register");
   }
 });
-
 
 //routing
 app.get("/", (req, res) => {
