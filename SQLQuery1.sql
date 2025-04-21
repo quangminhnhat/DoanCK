@@ -137,6 +137,8 @@ FROM users u
 LEFT JOIN students s ON u.id = s.user_id
 LEFT JOIN teachers t ON u.id = t.user_id;
 
+DELETE FROM users;DELETE FROM students;DELETE FROM teachers;
+
 
 
 

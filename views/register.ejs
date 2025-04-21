@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registration Page</title>
-
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Bootstrap & Font Awesome -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" rel="stylesheet">
@@ -63,7 +63,7 @@
                     <div class="card card-registration shadow">
                         <div class="card-body">
                             <h3 class="mb-4">Registration Form</h3>
-                            <form action="/submit-form" method="POST">
+                            <form action="/register" method="POST">
                                 <div class="form-row">
                                     <div class="form-group col-md-12">
                                         <label for="firstName">Full Name</label>
@@ -76,20 +76,7 @@
                                         <label for="birthdayDate">Birthday</label>
                                         <input type="date" class="form-control" id="birthdayDate" name="birthday"
                                             required>
-                                    </div>
-                                    <div class="form-group col-md-6">
-                                        <label>Gender</label><br>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="gender" id="femaleGender"
-                                                value="female" checked>
-                                            <label class="form-check-label" for="femaleGender">Female</label>
-                                        </div>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="gender" id="maleGender"
-                                                value="male">
-                                            <label class="form-check-label" for="maleGender">Male</label>
-                                        </div>
-                                    </div>
+                                    </div>                                
                                 </div>
 
                                 <div class="form-row">
@@ -110,6 +97,22 @@
                                         <label for="phoneNumber">Password</label>
                                         <input type="Password" class="form-control" id="Password" name="Password" required>
                                     </div>
+                                </div>
+                                <script>
+                                    $(document).ready(function () {
+                                        $('#subjectSelect').change(function () {
+                                            if ($(this).val() === 'subject2') {
+                                                $('#salaryInput').show();
+                                            } else {
+                                                $('#salaryInput').hide();
+                                            }
+                                        });
+                                    });
+                                </script>
+
+                                <div class="form-group" id="salaryInput" style="display: none;">
+                                    <label for="salary">Salary</label>
+                                    <input type="number" class="form-control" id="salary" name="salary" placeholder="Enter salary">
                                 </div>
 
 
