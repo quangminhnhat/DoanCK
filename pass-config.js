@@ -6,7 +6,7 @@ const bcrypt = require("bcrypt");
 function initalize(passport, getUserByEmail, getUserById) {
   const authenticateUser = async (email, password, done) => {
     const user = await getUserByEmail(email); // Replace with your user retrieval logic
-    
+    console.log("User retrieved:", user);
     if (user == null) {
       return done(null, false, { message: "No user with that email" });
     }

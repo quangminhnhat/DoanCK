@@ -2,9 +2,6 @@ if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }
 
-
-
-
 //lib import
 const express = require("express");
 const app = express();
@@ -15,11 +12,7 @@ const passport = require("passport");
 const flash = require("express-flash");
 const session = require("express-session");
 const methodOverride = require("method-override");
-
-
-
-
-
+const { authenticateRole } = require("./roleAuth");
 
 app.use(express.urlencoded({ extended: false }));
 const connectionString =
@@ -33,54 +26,55 @@ app.use(
   })
 );
 const initalizePassport = require("./pass-config");
-initalizePassport(passport, email => {
-  // Replace with your user retrieval logic
-  const query = ` SELECT u.*
+initalizePassport(
+  passport,
+  (email) => {
+    // Replace with your user retrieval logic
+    const query = ` SELECT u.*
       FROM users u
       LEFT JOIN students s ON u.id = s.user_id
       LEFT JOIN teachers t ON u.id = t.user_id
       WHERE s.email = ? OR t.email = ?
     `;
-  return new Promise((resolve, reject) => {
-    sql.query(connectionString, query, [email, email], (err, rows) => {
-      if (err) {
-        console.error("SQL error:", err);
-        return reject(err);
-      }
-      if (rows.length > 0) {
-        resolve(rows[0]);
-      } else {
-        resolve(null);
-      }
+    return new Promise((resolve, reject) => {
+      sql.query(connectionString, query, [email, email], (err, rows) => {
+        if (err) {
+          console.error("SQL error:", err);
+          return reject(err);
+        }
+        if (rows.length > 0) {
+          resolve(rows[0]);
+        } else {
+          resolve(null);
+        }
+      });
     });
-  });
-}, (id => {
-  const query = `SELECT * FROM users WHERE id = ?`;
-  return new Promise((resolve, reject) => {
-    sql.query(connectionString, query, [id], (err, rows) => {
-      if (err) {
-        console.error("SQL error:", err);
-        return reject(err);
-      }
-      if (rows.length > 0) {
-        resolve(rows[0]);
-      } else {
-        resolve(null);
-      }
+  },
+  (id) => {
+    const query = `SELECT * FROM users WHERE id = ?`;
+    return new Promise((resolve, reject) => {
+      sql.query(connectionString, query, [id], (err, rows) => {
+        if (err) {
+          console.error("SQL error:", err);
+          return reject(err);
+        }
+        if (rows.length > 0) {
+          resolve(rows[0]);
+        } else {
+          resolve(null);
+        }
+      });
     });
-  });
-}));
-
-
-
+  }
+);
 
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(methodOverride("_method"));
 
-
 app.post(
-  "/login", checkNotAuthenticated,
+  "/login",
+  checkNotAuthenticated,
   passport.authenticate("local", {
     successRedirect: "/",
     failureRedirect: "/login",
@@ -124,20 +118,11 @@ app.post(
 
 });*/
 
-
-
-
-
-
-
-
 const mapRole = {
   subject1: "student",
   subject2: "teacher",
   subject3: "admin",
 };
-
-
 
 app.post("/register", checkNotAuthenticated, async (req, res) => {
   try {
@@ -172,7 +157,6 @@ app.post("/register", checkNotAuthenticated, async (req, res) => {
       return res.status(400).send("Salary is required for teachers");
     }
 
-    res.redirect("/login");
     /* const insertQuery = `
       INSERT INTO users (username, password, role, email, name, gender, birthday, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, GETDATE(), GETDATE());
@@ -244,8 +228,8 @@ const valuesUser = [username, hashpassword, role];*/
           console.error("Insert error:", err);
           return res.status(500).send("Database insert error");
         }
-        console.log("User registered:", result);
       });
+      res.redirect("/login");
     } else {
       const insertQuery = `INSERT INTO users (username, password, role, created_at, updated_at) VALUES (?, ?, ?, GETDATE(), GETDATE());`;
       const values = [username, hashpassword, role];
@@ -267,7 +251,7 @@ app.set("view engine", "ejs");
 
 //routing
 app.get("/", (req, res) => {
-  res.render("index.ejs",{user : req.user});
+  res.render("index.ejs", { user: req.user });
 });
 app.get("/login", checkNotAuthenticated, (req, res) => {
   res.render("login.ejs");
@@ -275,21 +259,23 @@ app.get("/login", checkNotAuthenticated, (req, res) => {
 app.get("/register", checkNotAuthenticated, (req, res) => {
   res.render("register.ejs");
 });
-//route end
+
 
 app.use(express.static(path.join(__dirname, "public")));
 
-
-/*app.get("link ở đây", (req, res) => {
+/*
+link bình thường
+app.get("link ở đây", (req, res) => {
   res.render("view ở đây ");
-});*/
+});
+*/
 
-
-
-
-
-
-
+/*
+link role
+app.get("/admin", checkAuthenticated, authenticateRole("admin"), (req, res) => {
+  res.render("admin.ejs", { user: req.user });
+});
+*/
 app.delete("/logout", (req, res) => {
   req.logOut((err) => {
     if (err) {
@@ -299,12 +285,7 @@ app.delete("/logout", (req, res) => {
     res.redirect("/login");
   });
 });
-
-
-
-
-
-
+//route end
 
 
 
@@ -323,9 +304,5 @@ function checkNotAuthenticated(req, res, next) {
   }
   next();
 }
-
-
-
-
 
 app.listen(3000);

@@ -1,0 +1,2 @@
+tải node.js
+dô cmd của file: chạy npm run dev start

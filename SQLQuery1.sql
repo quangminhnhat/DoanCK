@@ -147,5 +147,5 @@ DELETE FROM users;DELETE FROM students;DELETE FROM teachers;
 SELECT username
 from users
 
-= 
+
 

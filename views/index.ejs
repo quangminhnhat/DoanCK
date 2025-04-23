@@ -5,8 +5,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Web Project</title>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <link rel="stylesheet"  href="/css/style.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="https://demos.creative-tim.com/notus-js/assets/styles/tailwind.css">
   <link rel="stylesheet"
@@ -30,23 +30,7 @@
         </ul>
       </li>
 
-      <li><a href=""></a>Học Sinh</a>
-        <ul class="sub-menu">
-          <li><a href="">Tuyển Sinh</a></li>
-          <li><a href="">Thời Khoá Biểu</a></li>
-          <li><a href="">Góp Ý</a></li>
-          <li><a href="">Thông Tin Cá Nhân</a></li>
-        </ul>
-      </li>
 
-      <li><a href=""></a>Giáo Viên</a>
-        <ul class="sub-menu">
-          <li><a href="">Thông Tin Lớp Học</a></li>
-          <li><a href="">Lịch Dạy</a></li>
-          <li><a href="">Góp Ý</a></li>
-          <li><a href="">Thông Tin Cá Nhân</a></li>
-        </ul>
-      </li>
 
       <li><a href=""></a>Thư Viện</a>
         <ul class="sub-menu">
@@ -65,18 +49,61 @@
       <li><a href=""></a>Liên Hệ</a></li>
     </div>
     <div class="other"></div>
-  
+
 
     <% if (user) { %>
-      <form action="/logout?_method=DELETE" method="post">
-        <button type="submit" class="btn btn-danger">Logout</button>
-      </form>
-      <% } %>
-      <% if (!user) { %>
-        <a href="/login"><i class="fas fa-user"></i></a>
-        <% } %>
 
-    </div>
+
+      <div id="mySidebar" class="sidebar">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <% if ( user.role==="student" ) { %>
+          <a href="">Tuyển Sinh</a>
+          <a href="">Thời Khoá Biểu</a>
+          <a href="">Góp Ý</a>
+          <a href="">Thông Tin Cá Nhân</a>
+          <% } %>
+            <% if (user.role==="teacher" ) { %>
+               <a href="">Thông Tin Lớp Học</a> 
+               <a href="">Lịch Dạy</a> 
+               <a href="">Góp Ý</a> 
+               <a href="">Thông Tin Cá Nhân</a> 
+              <% } %>
+                <form action="/logout?_method=DELETE" method="post">
+                  <button type="submit" class="btn btn-danger"><a>logout<a /></a></button>
+                </form>
+      </div>
+
+      <div id="main">
+        <button class="openbtn" onclick="openNav()">&#9776; Open Sidebar</button>
+
+      </div>
+      <% } %>
+        <% if (!user) { %>
+          <a href="/login"><i class="fas fa-user"></i></a>
+          <% } %>
+
+            <!--<li><a href=""></a>Học Sinh</a>
+        <ul class="sub-menu">
+          <li><a href="">Tuyển Sinh</a></li>
+          <li><a href="">Thời Khoá Biểu</a></li>
+          <li><a href="">Góp Ý</a></li>
+          <li><a href="">Thông Tin Cá Nhân</a></li>
+        </ul>
+      </li>-->
+
+
+
+
+            <!-- <li><a href=""></a>Giáo Viên</a>
+        <ul class="sub-menu">
+          <li><a href="">Thông Tin Lớp Học</a></li>
+          <li><a href="">Lịch Dạy</a></li>
+          <li><a href="">Góp Ý</a></li>
+          <li><a href="">Thông Tin Cá Nhân</a></li>
+        </ul>
+      </li>-->
+
+            </div>
   </header>
 
 
@@ -174,33 +201,46 @@
       </div>
     </div>
   </footer>
-</body>
-<script>
-  const imgPosition = document.querySelectorAll(".aspect-ratio-169 img")
-  const imgContainer = document.querySelector('.aspect-ratio-169')
-  const dotItem = document.querySelectorAll(".dot")
-  let imgNuber = imgPosition.length
-  let index = 0
-  console.log(imgPosition);
-  imgPosition.forEach(function (image, index) {
-    image.style.left = index * 100 + "%"
-    dotItem[index].addEventListener("click", function () {
-      slider(index)
+
+  <script>
+    const imgPosition = document.querySelectorAll(".aspect-ratio-169 img")
+    const imgContainer = document.querySelector('.aspect-ratio-169')
+    const dotItem = document.querySelectorAll(".dot")
+    let imgNuber = imgPosition.length
+    let index = 0
+    console.log(imgPosition);
+    imgPosition.forEach(function (image, index) {
+      image.style.left = index * 100 + "%"
+      dotItem[index].addEventListener("click", function () {
+        slider(index)
+      })
     })
-  })
-  function imgSlide() {
-    index++;
-    console.log(index)
-    if (index >= imgNuber) { index = 0 }
-    slider(index)
-  }
-  function slider(index) {
-    imgContainer.style.left = "-" + index * 100 + "%"
-    const dotActive = document.querySelector(".active")
-    dotActive.classList.remove("active")
-    dotItem[index].classList.add("active")
-  }
-  setInterval(imgSlider, 5000)
-</script>
+    function imgSlide() {
+      index++;
+      console.log(index)
+      if (index >= imgNuber) { index = 0 }
+      slider(index)
+    }
+    function slider(index) {
+      imgContainer.style.left = "-" + index * 100 + "%"
+      const dotActive = document.querySelector(".active")
+      dotActive.classList.remove("active")
+      dotItem[index].classList.add("active")
+    }
+    setInterval(imgSlider, 5000)
+  </script>
+
+  <script>
+    function openNav() {
+      document.getElementById("mySidebar").style.width = "250px";
+      document.getElementById("main").style.marginRight = "250px";
+    }
+
+    function closeNav() {
+      document.getElementById("mySidebar").style.width = "0";
+      document.getElementById("main").style.marginRight = "0";
+    }
+  </script>
+</body>
 
 </html>
