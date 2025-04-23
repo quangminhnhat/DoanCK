@@ -38,6 +38,10 @@ CREATE TABLE teachers (
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
+ALTER TABLE users
+ADD CONSTRAINT UQ_username UNIQUE (username);
+
+
 CREATE TABLE notifications (
     id INT PRIMARY KEY IDENTITY,
     user_id INT,
@@ -140,5 +144,8 @@ LEFT JOIN teachers t ON u.id = t.user_id;
 DELETE FROM users;DELETE FROM students;DELETE FROM teachers;
 
 
+SELECT username
+from users
 
+= 
 

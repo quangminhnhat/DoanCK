@@ -65,7 +65,16 @@
       <li><a href=""></a>Liên Hệ</a></li>
     </div>
     <div class="other"></div>
-    <a href="/login"><i class="fas fa-user"></i></a>
+  
+
+    <% if (user) { %>
+      <form action="/logout?_method=DELETE" method="post">
+        <button type="submit" class="btn btn-danger">Logout</button>
+      </form>
+      <% } %>
+      <% if (!user) { %>
+        <a href="/login"><i class="fas fa-user"></i></a>
+        <% } %>
 
     </div>
   </header>
