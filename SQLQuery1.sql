@@ -135,8 +135,8 @@ SELECT
     CASE 
         WHEN s.id IS NOT NULL THEN 'Student'
         WHEN t.id IS NOT NULL THEN 'Teacher'
-        ELSE 'Unknown'
-    END AS user_type
+        ELSE 'employee'
+    END AS "Role"
 FROM users u
 LEFT JOIN students s ON u.id = s.user_id
 LEFT JOIN teachers t ON u.id = t.user_id;
