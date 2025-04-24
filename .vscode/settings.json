@@ -1,9 +1,4 @@
 {
   "liveServer.settings.multiRootWorkspaceName": "DoAnCS",
-  
-  "editor.bracketPairColorization.enabled": true,
-
-  "editor.guides.bracketPairs": "active",
-
-  "editor.guides.bracketPairsHorizontal": true
+ 
 }
