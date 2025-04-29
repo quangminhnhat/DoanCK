@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Your Schedule</title>
+</head>
+<body>
+  <h1>Hello, <%= user.username %>! Here is your schedule:</h1>
+
+  <% if (schedule.length === 0) { %>
+    <p>No classes found.</p>
+  <% } else { %>
+    <table border="1">
+      <thead>
+        <tr>
+          <th>Class</th>
+          <th>Course</th>
+          <th>Day</th>
+          <th>Start Time</th>
+          <th>End Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% schedule.forEach(s => { %>
+          <tr>
+            <td><%= s.class_name %></td>
+            <td><%= s.course_name %></td>
+            <td><%= s.day_of_week %></td>
+            <td><%= s.start_time %></td>
+            <td><%= s.end_time %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+
+  <a href="/">Back to Home</a>
+</body>
+</html>

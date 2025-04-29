@@ -13,10 +13,11 @@ const flash = require("express-flash");
 const session = require("express-session");
 const methodOverride = require("method-override");
 const { authenticateRole } = require("./roleAuth");
+//require ("./schedular")
 
 app.use(express.urlencoded({ extended: false }));
 const connectionString =
-  "Driver={ODBC Driver 17 for SQL Server};Server=DESKTOP-ILINDAV\\SQLEXPRESS;Database=DOANCS;Trusted_Connection=Yes;";
+  "Driver={ODBC Driver 17 for SQL Server};Server=LAPTOP-ND7KAD0J;Database=DOANCS;Trusted_Connection=Yes;";
 app.use(flash());
 app.use(
   session({
@@ -229,7 +230,6 @@ const valuesUser = [username, hashpassword, role];*/
           return res.status(500).send("Database insert error");
         }
       });
-      res.redirect("/login");
     } else {
       const insertQuery = `INSERT INTO users (username, password, role, created_at, updated_at) VALUES (?, ?, ?, GETDATE(), GETDATE());`;
       const values = [username, hashpassword, role];
@@ -242,6 +242,7 @@ const valuesUser = [username, hashpassword, role];*/
         }
       });
     }
+    res.redirect("/login");
   } catch (error) {
     console.error("Error during registration:", error);
     res.redirect("/register");
@@ -259,7 +260,6 @@ app.get("/login", checkNotAuthenticated, (req, res) => {
 app.get("/register", checkNotAuthenticated, (req, res) => {
   res.render("register.ejs");
 });
-
 
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -285,11 +285,58 @@ app.delete("/logout", (req, res) => {
     res.redirect("/login");
   });
 });
+
+app.get("/schedule", checkAuthenticated, (req, res) => {
+  const userId = req.user.id;
+  const role = req.user.role;
+
+  let query = "";
+  let params = [];
+
+  if (role === "student") {
+    query = `
+     SELECT 
+    c.class_name,
+    co.course_name,
+    s.day_of_week,
+    s.start_time,
+    s.end_time
+FROM students st
+JOIN enrollments e ON st.id = e.student_id
+JOIN classes c ON e.class_id = c.id
+JOIN schedules s ON c.id = s.class_id
+JOIN courses co ON c.course_id = co.id
+    `;
+    params = [userId];
+  } else if (role === "teacher") {
+    query = `
+    SELECT 
+    c.class_name,
+    co.course_name,
+    s.day_of_week,
+    s.start_time,
+    s.end_time
+FROM teachers t
+JOIN classes c ON t.id = c.teacher_id
+JOIN schedules s ON c.id = s.class_id
+JOIN courses co ON c.course_id = co.id
+
+    `;
+    params = [userId];
+  } else {
+    return res.status(403).send("Unauthorized role");
+  }
+
+  sql.query(connectionString, query, params, (err, result) => {
+    if (err) {
+      console.error("Schedule fetch error:", err);
+      return res.status(500).send("Failed to load schedule");
+    }
+    res.render("schedule.ejs", { user: req.user, schedule: result });
+  });
+});
+
 //route end
-
-
-
-
 
 function checkAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {
