@@ -1,38 +1,64 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-  <title>Your Schedule</title>
-</head>
-<body>
-  <h1>Hello, <%= user.username %>! Here is your schedule:</h1>
+  <meta charset="utf-8" />
+  <title>TKB Tuần</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    </head>
 
-  <% if (schedule.length === 0) { %>
-    <p>No classes found.</p>
-  <% } else { %>
-    <table border="1">
-      <thead>
-        <tr>
-          <th>Class</th>
-          <th>Course</th>
-          <th>Day</th>
-          <th>Start Time</th>
-          <th>End Time</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% schedule.forEach(s => { %>
-          <tr>
-            <td><%= s.class_name %></td>
-            <td><%= s.course_name %></td>
-            <td><%= s.day_of_week %></td>
-            <td><%= s.start_time %></td>
-            <td><%= s.end_time %></td>
-          </tr>
+<body class="p-6 bg-gray-50">
+  <div class="max-w-6xl mx-auto bg-white shadow p-4">
+    <div class="flex items-center mb-4">
+    
+      <div class="ml-auto flex gap-2">
+        <a href="/schedule" class="px-4 py-1 bg-blue-600 text-white rounded">Tuần hiện tại</a>
+        <% const prev=new Date(weekStart); prev.setDate(prev.getDate() - 7); const next=new Date(weekStart);
+          next.setDate(next.getDate() + 7); %>
+          <a href="/schedule?weekStart=<%= prev.toISOString().slice(0,10) %>" class="px-2 bg-gray-200 rounded">&lt;</a>
+          <div class="px-4 py-1 border rounded">
+            Tuần: <%= days[0].date %> – <%= days[6].date %>
+          </div>
+          <a href="/schedule?weekStart=<%= next.toISOString().slice(0,10) %>" class="px-2 bg-gray-200 rounded">&gt;</a>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-8 border border-gray-300">
+      <!-- empty top-left corner -->
+      <div class="bg-blue-700 text-white font-semibold p-2 text-center">&nbsp;</div>
+
+      <!-- day headers -->
+      <% days.forEach(day=> { %>
+        <div class="bg-blue-700 text-white font-semibold p-2 text-center">
+          <%= day.name %><br />
+            <span class="text-xs font-normal">
+              <%= day.date %>
+            </span>
+        </div>
         <% }) %>
-      </tbody>
-    </table>
-  <% } %>
 
-  <a href="/">Back to Home</a>
+          <!-- periods rows -->
+          <% periods.forEach((period, i)=> { %>
+            <div class="bg-blue-600 text-white text-sm font-medium p-2 text-center">
+              <%= period %>
+            </div>
+            <% days.forEach(day=> {
+              const cell = scheduleData.find(c => c.day === day.name && c.periodIndex === i);
+              %>
+              <div class="border border-gray-200 p-2 text-xs text-center h-20">
+                <% if (cell) { %>
+                  <div class="font-medium text-blue-700">
+                    <%= cell.className %>
+                  </div>
+                  <div>
+                    <%= cell.teacher %>
+                  </div>
+                  <% } %>
+              </div>
+              <% }) %>
+                <% }) %>
+    </div>
+  </div>
 </body>
+
 </html>

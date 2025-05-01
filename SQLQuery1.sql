@@ -105,75 +105,74 @@ CREATE TABLE payments (
     FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
 );
 
--- Query to alter all schedules that have a non-null payment_id
-ALTER TABLE schedules
---  Add a new column to indicate it has been paid.
-ADD is_paid BIT DEFAULT 0;
+
+-- Inserting sample data into the 'users' table
+INSERT INTO users (username, password, role) VALUES
+('student1', 'password123', 'student'),
+('teacher1', 'securepass', 'teacher'),
+('admin1', 'adminpass', 'admin');
+
+-- Inserting sample data into the 'students' table
+INSERT INTO students (user_id, full_name, email, phone_number, address, date_of_birth) VALUES
+(1, 'Nguyen Van A', 'a.nguyen@example.com', '0901234567', '123 Main St, HCMC', '2002-05-10');
+
+-- Inserting sample data into the 'teachers' table
+INSERT INTO teachers (user_id, full_name, email, phone_number, address, date_of_birth, salary) VALUES
+(2, 'Tran Thi B', 'b.tran@example.com', '0987654321', '456 High St, Hanoi', '1990-08-15', 5000.00);
+
+-- Inserting sample data into the 'courses' table
+INSERT INTO courses (course_name, description, start_date, end_date) VALUES
+('Introduction to Programming', 'A beginner-friendly programming course.', '2025-06-01', '2025-08-31'),
+('Advanced Mathematics', 'A course on advanced mathematical concepts.', '2025-06-15', '2025-09-30');
+
+
+-- Inserting sample data into the 'classes' table
+INSERT INTO classes (class_name, course_id, teacher_id, start_time, end_time) VALUES
+('PROG101', 1, 2, '09:00:00', '10:30:00'),
+('MATH201', 2, 2, '14:00:00', '15:30:00');
 
 
 
+-- Inserting sample data into the 'schedules' table
+INSERT INTO schedules (class_id, day_of_week, start_time, end_time) VALUES
+(1, 'Monday', '09:00:00', '10:30:00'),
+(1, 'Wednesday', '09:00:00', '10:30:00'),
+(2, 'Tuesday', '14:00:00', '15:30:00'),
+(2, 'Thursday', '14:00:00', '15:30:00');
 
--- Insert users
-INSERT INTO users (username, password, role, created_at, updated_at)
-VALUES 
-('student1', 'hashed_password_1', 'student', GETDATE(), GETDATE()),
-('student2', 'hashed_password_2', 'student', GETDATE(), GETDATE()),
-('teacher1', 'hashed_password_3', 'teacher', GETDATE(), GETDATE()),
-('teacher2', 'hashed_password_4', 'teacher', GETDATE(), GETDATE());
-
--- Insert students
-INSERT INTO students (user_id, full_name, email, phone_number, address, date_of_birth, created_at, updated_at)
-VALUES 
-(1, 'Alice Johnson', 'alice@example.com', '1234567890', '123 Maple Street', '2003-05-21', GETDATE(), GETDATE()),
-(2, 'Bob Smith', 'bob@example.com', '0987654321', '456 Oak Avenue', '2002-08-14', GETDATE(), GETDATE());
-
--- Insert teachers
-INSERT INTO teachers (user_id, full_name, email, phone_number, address, date_of_birth, salary, created_at, updated_at)
-VALUES 
-(3, 'Mr. Anderson', 'anderson@example.com', '1122334455', '789 Pine Road', '1985-11-30', 5000.00, GETDATE(), GETDATE()),
-(4, 'Ms. Clarke', 'clarke@example.com', '6677889900', '321 Birch Lane', '1990-03-18', 5200.00, GETDATE(), GETDATE());
-
--- Insert courses
-INSERT INTO courses (course_name, description, start_date, end_date, created_at, updated_at)
-VALUES 
-('Mathematics 101', 'Basic Mathematics Course', '2025-06-01', '2025-09-30', GETDATE(), GETDATE()),
-('Physics 101', 'Introduction to Physics', '2025-06-01', '2025-09-30', GETDATE(), GETDATE());
-
--- Insert classes
-INSERT INTO classes (class_name, course_id, teacher_id, start_time, end_time, created_at, updated_at)
-VALUES 
-('Math Morning Class', 1, 1, '08:00:00', '10:00:00', GETDATE(), GETDATE()),
-('Physics Afternoon Class', 2, 2, '13:00:00', '15:00:00', GETDATE(), GETDATE());
-
--- Insert schedules
-INSERT INTO schedules (class_id, day_of_week, start_time, end_time)
-VALUES 
-(1, 'Monday', '08:00:00', '10:00:00'),
-(1, 'Wednesday', '08:00:00', '10:00:00'),
-(2, 'Tuesday', '13:00:00', '15:00:00'),
-(2, 'Thursday', '13:00:00', '15:00:00');
-
--- Insert enrollments
-INSERT INTO enrollments (student_id, class_id, enrollment_date)
-VALUES 
+-- Inserting sample data into the 'enrollments' table
+INSERT INTO enrollments (student_id, class_id, enrollment_date) VALUES
 (1, 1, '2025-05-20'),
-(2, 2, '2025-05-21');
+(1, 2, '2025-05-25');
 
--- Insert payments
-INSERT INTO payments (student_id, amount, payment_date)
-VALUES 
-(1, 1000.00, '2025-05-22'),
-(2, 1000.00, '2025-05-23');
+-- Inserting sample data into the 'payments' table
+INSERT INTO payments (student_id, amount, payment_date) VALUES
+(1, 150.00, '2025-05-22'),
+(1, 200.00, '2025-05-28');
 
---do this after running all the above update the column
-UPDATE schedules
-SET is_paid = 1
-WHERE id IN (SELECT s.id FROM schedules AS s
-JOIN classes AS c ON s.class_id = c.id
-LEFT JOIN enrollments AS e ON c.id = e.class_id
-LEFT JOIN students AS st ON e.student_id = st.id
-LEFT JOIN payments AS p ON st.id = p.student_id
-WHERE p.id IS NOT NULL);
+-- Inserting sample data into the 'notifications' table
+INSERT INTO notifications (user_id, message) VALUES
+(1, 'Welcome to our learning platform!'),
+(2, 'A new course has been assigned to you.');
+
+-- Inserting sample data into the 'materials' table
+INSERT INTO materials (course_id, file_name, file_path) VALUES
+(1, 'Introduction.pdf', '/materials/course1/intro.pdf'),
+(2, 'Calculus_Notes.docx', '/materials/course2/calculus.docx');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 SELECT 
@@ -187,6 +186,12 @@ SELECT
 FROM users u
 LEFT JOIN students s ON u.id = s.user_id
 LEFT JOIN teachers t ON u.id = t.user_id;
+
+
+
+
+
+
 
 -- Delete from tables that depend on others first
 DELETE FROM schedules;
@@ -237,31 +242,19 @@ LEFT JOIN payments AS p ON st.id = p.student_id
 FOR JSON PATH;
 
 
--- SQL code to copy the last user to the first user and delete the last user
 
--- Step 1: Create a temporary table to store the data of the last user.  This is crucial in case anything goes wrong.
-SELECT *
-INTO temp_last_user
-FROM users
-WHERE id = (SELECT MAX(id) FROM users);
 
--- Step 2: Update the first user's record with the data from the last user.
-UPDATE users
-SET
-    username = (SELECT username FROM temp_last_user),
-    password = (SELECT password FROM temp_last_user),
-    role = (SELECT role FROM temp_last_user),
-    email = (SELECT email FROM temp_last_user),
-    full_name = (SELECT full_name FROM temp_last_user),
-    gender = (SELECT gender FROM temp_last_user),
-    birthday = (SELECT birthday FROM temp_last_user),
-    created_at = (SELECT created_at FROM temp_last_user),
-    updated_at = GETDATE() -- update the updated_at
-WHERE id = (SELECT MIN(id) FROM users);
 
--- Step 3: Delete the last user's record.
-DELETE FROM users
-WHERE id = (SELECT MAX(id) FROM users);
+SELECT 
+    c.class_name,
+    co.course_name,
+    s.day_of_week,
+    s.start_time,
+    s.end_time
+FROM students st
+JOIN enrollments e ON st.id = e.student_id
+JOIN classes c ON e.class_id = c.id
+JOIN schedules s ON c.id = s.class_id
+JOIN courses co ON c.course_id = co.id
+WHERE st.user_id = 1
 
--- Step 4: (Optional) Drop the temporary table.  Useful to keep the database clean.
-DROP TABLE temp_last_user;

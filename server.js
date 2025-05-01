@@ -287,54 +287,119 @@ app.delete("/logout", (req, res) => {
 });
 
 app.get("/schedule", checkAuthenticated, (req, res) => {
+  // 1. Determine the Monday to show
+  let monday;
+  if (req.query.weekStart) {
+    monday = new Date(req.query.weekStart);
+  } else {
+    const today = new Date();
+    const offset = (today.getDay() + 6) % 7; // Mon=0, …, Sun=6
+    monday = new Date(today);
+    monday.setDate(today.getDate() - offset);
+  }
+
+  // 2. Build days (Mon→Sun) and periods (Tiết 1→15)
+  const fmt = (d) =>
+    d.toLocaleDateString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  const names = [
+    "Thứ 2",
+    "Thứ 3",
+    "Thứ 4",
+    "Thứ 5",
+    "Thứ 6",
+    "Thứ 7",
+    "Chủ nhật",
+  ];
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const dt = new Date(monday);
+    dt.setDate(monday.getDate() + i);
+    return {
+      name: names[i],
+      date: fmt(dt),
+      iso: dt.toISOString().slice(0, 10),
+    };
+  });
+  const periods = Array.from({ length: 15 }, (_, i) => `Tiết ${i + 1}`);
+
+  // 3. SQL query only for those days
   const userId = req.user.id;
   const role = req.user.role;
-
-  let query = "";
-  let params = [];
+  const placeholders = days.map(() => "?").join(",");
+  let query, params;
 
   if (role === "student") {
     query = `
-     SELECT 
-    c.class_name,
-    co.course_name,
-    s.day_of_week,
-    s.start_time,
-    s.end_time
-FROM students st
-JOIN enrollments e ON st.id = e.student_id
-JOIN classes c ON e.class_id = c.id
-JOIN schedules s ON c.id = s.class_id
-JOIN courses co ON c.course_id = co.id
+      SELECT s.day_of_week AS day, s.start_time,
+             c.class_name, t.full_name AS teacher
+      FROM students st
+      JOIN enrollments e   ON st.id = e.student_id
+      JOIN classes c       ON e.class_id = c.id
+      JOIN schedules s     ON c.id = s.class_id
+      JOIN teachers t      ON c.teacher_id = t.id
+      WHERE st.user_id = ?
+        AND s.day_of_week IN (${placeholders})
     `;
-    params = [userId];
+    params = [userId, ...days.map((d) => d.name)];
   } else if (role === "teacher") {
     query = `
-    SELECT 
-    c.class_name,
-    co.course_name,
-    s.day_of_week,
-    s.start_time,
-    s.end_time
-FROM teachers t
-JOIN classes c ON t.id = c.teacher_id
-JOIN schedules s ON c.id = s.class_id
-JOIN courses co ON c.course_id = co.id
-
+      SELECT s.day_of_week AS day, s.start_time,
+             c.class_name, NULL AS teacher
+      FROM teachers t2
+      JOIN classes c    ON t2.id = c.teacher_id
+      JOIN schedules s  ON c.id = s.class_id
+      WHERE t2.user_id = ?
+        AND s.day_of_week IN (${placeholders})
     `;
-    params = [userId];
+    params = [userId, ...days.map((d) => d.name)];
   } else {
     return res.status(403).send("Unauthorized role");
   }
 
-  sql.query(connectionString, query, params, (err, result) => {
+  sql.query(connectionString, query, params, (err, rows) => {
     if (err) {
       console.error("Schedule fetch error:", err);
       return res.status(500).send("Failed to load schedule");
     }
-    res.render("schedule.ejs", { user: req.user, schedule: result });
+
+    // 4. Map start_time → periodIndex (07:00→0, 08:00→1, …)
+    const scheduleData = rows.map((r) => {
+      const hour = parseInt(r.start_time.split(":")[0], 10);
+      return {
+        day: r.day,
+        periodIndex: hour - 7,
+        className: r.class_name,
+        teacher: r.teacher || "",
+      };
+    });
+
+    // 5. Compute prev/next weekStart strings
+    const prevMon = new Date(monday);
+    prevMon.setDate(prevMon.getDate() - 7);
+    const nextMon = new Date(monday);
+    nextMon.setDate(nextMon.getDate() + 7);
+
+    const prevWeekStart = prevMon.toISOString().slice(0, 10);
+    const nextWeekStart = nextMon.toISOString().slice(0, 10);
+
+    // 6. Render with all the locals you need
+    // ✅ correct
+    res.render("schedule", {
+      user: req.user,
+      days,
+      periods,
+      scheduleData,
+      weekStart: monday.toISOString().slice(0, 10),
+      prevWeekStart,
+      nextWeekStart,
+    });
+
   });
 });
+
 
 //route end
 
