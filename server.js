@@ -286,6 +286,10 @@ app.delete("/logout", (req, res) => {
   });
 });
 
+
+
+
+//you gonna need to redo this part
 app.get("/schedule", checkAuthenticated, (req, res) => {
   // 1. Determine the Monday to show
   let monday;
