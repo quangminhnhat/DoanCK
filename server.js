@@ -104,7 +104,9 @@ app.post(
   checkAuthenticated,
   (req, res, next) => {
     if (req.user.role !== "teacher" && req.user.role !== "admin") {
-      return res.status(403).send("Only teachers and admins can upload materials.");
+      return res
+        .status(403)
+        .send("Only teachers and admins can upload materials.");
     }
     next();
   },
@@ -649,11 +651,11 @@ app.get("/schedule", checkAuthenticated, (req, res) => {
       const isoDate = r.schedule_date.toISOString().slice(0, 10);
       const dayObj = days.find((d) => d.iso === isoDate);
 
-      const timeStr = r.start_time.toTimeString().slice(0, 8); 
-      const periodIndex = timeToPeriod[timeStr]; 
+      const timeStr = r.start_time.toTimeString().slice(0, 8);
+      const periodIndex = timeToPeriod[timeStr];
 
       return {
-        date: isoDate, 
+        date: isoDate,
         periodIndex,
         className: r.class_name,
         teacher: r.teacher || "",
@@ -685,10 +687,112 @@ app.get("/schedule", checkAuthenticated, (req, res) => {
   });
 });
 
+app.post("/classes", checkAuthenticated, (req, res) => {
+  const { class_name, course_id, teacher_id, start_time, end_time } = req.body;
+
+  // Only admins or teachers can create classes
+  if (req.user.role !== "admin" && req.user.role !== "teacher") {
+    return res.status(403).send("Unauthorized");
+  }
+
+  if (!class_name || !course_id || !teacher_id || !start_time || !end_time) {
+    return res.status(400).send("Missing required fields");
+  }
+
+  const query = `
+    INSERT INTO classes (class_name, course_id, teacher_id, start_time, end_time)
+    VALUES (?, ?, ?, ?, ?);
+  `;
+
+  sql.query(
+    connectionString,
+    query,
+    [class_name, course_id, teacher_id, start_time, end_time],
+    (err) => {
+      if (err) {
+        console.error("Insert class error:", err);
+        return res.status(500).send("Database error");
+      }
+      res.redirect("/classes"); // or render a success page
+    }
+  );
+});
+
+app.post("/enrollments", checkAuthenticated, (req, res) => {
+  const { student_id, class_id, enrollment_date } = req.body;
+
+  if (req.user.role !== "admin" && req.user.role !== "teacher") {
+    return res.status(403).send("Unauthorized");
+  }
+
+  if (!student_id || !class_id || !enrollment_date) {
+    return res.status(400).send("Missing required fields");
+  }
+
+  const query = `
+    INSERT INTO enrollments (student_id, class_id, enrollment_date)
+    VALUES (?, ?, ?);
+  `;
+
+  sql.query(
+    connectionString,
+    query,
+    [student_id, class_id, enrollment_date],
+    (err) => {
+      if (err) {
+        console.error("Enrollment insert error:", err);
+        return res.status(500).send("Database error");
+      }
+      res.redirect("/enrollments"); // or success message
+    }
+  );
+});
+
+app.post("/payments", checkAuthenticated, (req, res) => {
+  const { student_id, amount, payment_date } = req.body;
+
+  if (req.user.role !== "admin" && req.user.role !== "teacher") { 
+    return res.status(403).send("Only admins can record payments");
+  }
+
+  if (!student_id || !amount || !payment_date) {
+    return res.status(400).send("Missing required fields");
+  }
+
+  const query = `
+    INSERT INTO payments (student_id, amount, payment_date)
+    VALUES (?, ?, ?);
+  `;
+
+  sql.query(
+    connectionString,
+    query,
+    [student_id, amount, payment_date],
+    (err) => {
+      if (err) {
+        console.error("Payment insert error:", err);
+        return res.status(500).send("Database error");
+      }
+      res.redirect("/payments");
+    }
+  );
+});
+
+app.get("/payments", checkAuthenticated, (req, res) => {
+  res.render("payments.ejs", { user: req.user });
+});
+
+app.get("/enrollments", checkAuthenticated, (req, res) => {
+  res.render("enrollments.ejs", { user: req.user });
+});
+
 app.get("/upload", checkAuthenticated, (req, res) => {
   res.render("uploadMaterial.ejs");
 });
 
+app.get("/classes", checkAuthenticated, (req, res) => {
+  res.render("addClass.ejs", { user: req.user });
+});
 //route end
 
 function checkAuthenticated(req, res, next) {
