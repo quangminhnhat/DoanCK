@@ -13,7 +13,13 @@ const flash = require("express-flash");
 const session = require("express-session");
 const methodOverride = require("method-override");
 const { authenticateRole } = require("./roleAuth");
+const multer = require("multer");
+const fs = require("fs");
+
 //require ("./schedular")
+
+app.use(express.json());
+//app.use("/materials", materialsRouter);
 
 app.use(express.urlencoded({ extended: false }));
 const connectionString =
@@ -72,6 +78,67 @@ initalizePassport(
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(methodOverride("_method"));
+app.set("view engine", "ejs");
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+const uploadFolder = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadFolder)) {
+  fs.mkdirSync(uploadFolder);
+}
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadFolder);
+  },
+  filename: function (req, file, cb) {
+    const uniqueName = Date.now() + "-" + file.originalname;
+    cb(null, uniqueName);
+  },
+});
+const upload = multer({ storage });
+
+//routing
+
+app.post(
+  "/upload-material",
+  checkAuthenticated,
+  (req, res, next) => {
+    if (req.user.role !== "teacher" && req.user.role !== "admin") {
+      return res.status(403).send("Only teachers and admins can upload materials.");
+    }
+    next();
+  },
+  upload.single("material"),
+  (req, res) => {
+    const { course_id } = req.body;
+    const file = req.file;
+
+    if (!course_id || !file) {
+      return res.status(400).send("Missing course_id or file.");
+    }
+
+    const insertQuery = `
+    INSERT INTO materials (course_id, file_name, file_path, mime_type)
+    VALUES (?, ?, ?, ?)
+  `;
+
+    const values = [
+      course_id,
+      file.originalname,
+      path.join("uploads", file.filename),
+      file.mimetype,
+    ];
+
+    sql.query(connectionString, insertQuery, values, (err) => {
+      if (err) {
+        console.error("Insert material error:", err);
+        return res.status(500).send("Database insert error");
+      }
+      console.log("Material uploaded successfully.");
+      res.send("File uploaded and saved to database.");
+    });
+  }
+);
 
 app.post(
   "/login",
@@ -124,6 +191,68 @@ const mapRole = {
   subject2: "teacher",
   subject3: "admin",
 };
+
+app.post("/notifications", checkAuthenticated, (req, res) => {
+  const { userId, message } = req.body;
+  const senderRole = req.user.role;
+
+  // Only allow staff to send notifications
+  if (senderRole !== "admin" && senderRole !== "teacher") {
+    return res.status(403).send("Only staff can send notifications.");
+  }
+
+  if (!userId || !message) {
+    return res.status(400).send("User ID and message are required.");
+  }
+
+  const insertQuery = `
+    INSERT INTO notifications (user_id, message)
+    VALUES (?, ?);
+  `;
+
+  sql.query(connectionString, insertQuery, [userId, message], (err) => {
+    if (err) {
+      console.error("Insert notification error:", err);
+      return res.status(500).send("Database insert error");
+    }
+
+    console.log("Notification sent to user ID:", userId);
+    res.status(201).send("Notification sent successfully!");
+  });
+});
+
+app.post("/courses", checkAuthenticated, (req, res) => {
+  const { course_name, description, start_date, end_date } = req.body;
+  const role = req.user.role;
+
+  // Only staff can add courses
+  if (role !== "admin" && role !== "teacher") {
+    return res.status(403).send("Unauthorized access");
+  }
+
+  if (!course_name || !start_date || !end_date) {
+    return res.status(400).send("Missing required fields");
+  }
+
+  const insertQuery = `
+    INSERT INTO courses (course_name, description, start_date, end_date)
+    VALUES (?, ?, ?, ?)
+  `;
+
+  sql.query(
+    connectionString,
+    insertQuery,
+    [course_name, description, start_date, end_date],
+    (err, result) => {
+      if (err) {
+        console.error("Insert course error:", err);
+        return res.status(500).send("Database error");
+      }
+      console.log("Course added:", result);
+      res.redirect("/courses"); // or res.send() if not using a view
+    }
+  );
+});
 
 app.post("/register", checkNotAuthenticated, async (req, res) => {
   try {
@@ -248,9 +377,7 @@ const valuesUser = [username, hashpassword, role];*/
     res.redirect("/register");
   }
 });
-app.set("view engine", "ejs");
 
-//routing
 app.get("/", (req, res) => {
   res.render("index.ejs", { user: req.user });
 });
@@ -259,6 +386,100 @@ app.get("/login", checkNotAuthenticated, (req, res) => {
 });
 app.get("/register", checkNotAuthenticated, (req, res) => {
   res.render("register.ejs");
+});
+app.get("/notifications", checkAuthenticated, (req, res) => {
+  res.render("notifications.ejs", { user: req.user });
+});
+app.get("/courses/new", checkAuthenticated, (req, res) => {
+  if (req.user.role !== "admin" && req.user.role !== "teacher") {
+    return res.status(403).send("Unauthorized access");
+  }
+  res.render("addCourse.ejs");
+});
+app.get("/courses", checkAuthenticated, (req, res) => {
+  const query = "SELECT * FROM courses ORDER BY start_date DESC";
+  sql.query(connectionString, query, (err, rows) => {
+    if (err) {
+      console.error("Fetch courses error:", err);
+      return res.status(500).send("Database error");
+    }
+    res.render("courses.ejs", { courses: rows, user: req.user });
+  });
+});
+
+app.get("/courses/:id/edit", checkAuthenticated, (req, res) => {
+  const courseId = req.params.id;
+  const query = "SELECT * FROM courses WHERE id = ?";
+  sql.query(connectionString, query, [courseId], (err, result) => {
+    if (err) {
+      console.error("Edit fetch error:", err);
+      return res.status(500).send("Database error");
+    }
+    if (result.length === 0) return res.status(404).send("Course not found");
+    res.render("editCourse", { course: result[0] });
+  });
+});
+app.post("/courses/:id", checkAuthenticated, (req, res) => {
+  const { course_name, description, start_date, end_date } = req.body;
+  const role = req.user.role;
+
+  // Check authorization first
+  if (role !== "admin" && role !== "teacher") {
+    return res.status(403).send("Unauthorized access");
+  }
+
+  // Validate input
+  if (!course_name || !start_date || !end_date) {
+    return res.status(400).send("Missing required fields");
+  }
+
+  const query = `
+    UPDATE courses 
+    SET course_name = ?, 
+        description = ?, 
+        start_date = ?, 
+        end_date = ?, 
+        updated_at = GETDATE()
+    WHERE id = ?
+  `;
+
+  const values = [
+    course_name,
+    description,
+    start_date,
+    end_date,
+    req.params.id,
+  ];
+
+  // Execute query with proper error handling
+  sql.query(connectionString, query, values, (err, result) => {
+    try {
+      if (err) {
+        console.error("Update error:", err);
+        return res.status(500).send("Update failed");
+      }
+      if (!result || result.rowsAffected === 0) {
+        return res.status(404).send("Course not found");
+      }
+      res.redirect("/courses");
+    } catch (error) {
+      // Ignore headers already sent error
+      if (error.code !== "ERR_HTTP_HEADERS_SENT") {
+        console.error("Unhandled error:", error);
+      }
+    }
+  });
+});
+
+app.delete("/courses/:id", checkAuthenticated, (req, res) => {
+  const query = "DELETE FROM courses WHERE id = ?";
+  sql.query(connectionString, query, [req.params.id], (err) => {
+    if (err) {
+      console.error("Delete error:", err);
+      return res.status(500).send("Delete failed");
+    }
+    res.redirect("/courses");
+  });
 });
 
 app.use(express.static(path.join(__dirname, "public")));
@@ -286,8 +507,40 @@ app.delete("/logout", (req, res) => {
   });
 });
 
+app.post(
+  "/upload-material",
+  checkAuthenticated,
+  upload.single("material"),
+  (req, res) => {
+    const { course_id } = req.body;
+    const file = req.file;
 
+    if (!course_id || !file) {
+      return res.status(400).send("Missing course_id or file.");
+    }
 
+    const insertQuery = `
+    INSERT INTO materials (course_id, file_name, file_path, mime_type)
+    VALUES (?, ?, ?, ?)
+  `;
+
+    const values = [
+      course_id,
+      file.originalname,
+      path.join("uploads", file.filename),
+      file.mimetype,
+    ];
+
+    sql.query(connectionString, insertQuery, values, (err) => {
+      if (err) {
+        console.error("Insert material error:", err);
+        return res.status(500).send("Database insert error");
+      }
+      console.log("Material uploaded successfully.");
+      res.send("File uploaded and saved to database.");
+    });
+  }
+);
 
 //you gonna need to redo this part
 app.get("/schedule", checkAuthenticated, (req, res) => {
@@ -374,8 +627,6 @@ app.get("/schedule", checkAuthenticated, (req, res) => {
       return res.status(500).send("Database error");
     }
 
-    
-
     const timeToPeriod = {
       "07:00:00": 0,
       "08:00:00": 1,
@@ -394,27 +645,25 @@ app.get("/schedule", checkAuthenticated, (req, res) => {
       "21:00:00": 14,
     };
 
+    const scheduleData = rows.map((r) => {
+      const isoDate = r.schedule_date.toISOString().slice(0, 10);
+      const dayObj = days.find((d) => d.iso === isoDate);
 
+      const timeStr = r.start_time.toTimeString().slice(0, 8); 
+      const periodIndex = timeToPeriod[timeStr]; 
 
-const scheduleData = rows.map((r) => {
-  const isoDate = r.schedule_date.toISOString().slice(0, 10);
-  const dayObj = days.find((d) => d.iso === isoDate);
+      return {
+        date: isoDate, 
+        periodIndex,
+        className: r.class_name,
+        teacher: r.teacher || "",
+      };
+    });
+    console.log("Schedule data:", scheduleData);
 
-  const timeStr = r.start_time.toTimeString().slice(0, 8); // ✅ CHỈNH Ở ĐÂY
-  const periodIndex = timeToPeriod[timeStr]; // ✅ ĐÃ MATCH
-
-  return {
-    date: isoDate, // ✅ Thêm dòng này
-    periodIndex,
-    className: r.class_name,
-    teacher: r.teacher || "",
-  };
-});
-console.log("Schedule data:", scheduleData);
-
-const maxPeriod = scheduleData.length
-  ? Math.max(...scheduleData.map((s) => s.periodIndex))
-  : 0;
+    const maxPeriod = scheduleData.length
+      ? Math.max(...scheduleData.map((s) => s.periodIndex))
+      : 0;
 
     // 4. Prev/Next week
     const prevWeekStart = new Date(monday);
@@ -423,17 +672,21 @@ const maxPeriod = scheduleData.length
     nextWeekStart.setDate(nextWeekStart.getDate() + 7);
 
     // 5. Render
-  res.render("schedule", {
-    user: req.user,
-    days,
-    periods,
-    scheduleData,
-    weekStart: monday.toISOString().slice(0, 10),
-    prevWeekStart: prevWeekStart.toISOString().slice(0, 10),
-    nextWeekStart: nextWeekStart.toISOString().slice(0, 10),
-    maxPeriod, 
+    res.render("schedule", {
+      user: req.user,
+      days,
+      periods,
+      scheduleData,
+      weekStart: monday.toISOString().slice(0, 10),
+      prevWeekStart: prevWeekStart.toISOString().slice(0, 10),
+      nextWeekStart: nextWeekStart.toISOString().slice(0, 10),
+      maxPeriod,
+    });
   });
-  });
+});
+
+app.get("/upload", checkAuthenticated, (req, res) => {
+  res.render("uploadMaterial.ejs");
 });
 
 //route end

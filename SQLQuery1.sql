@@ -61,10 +61,11 @@ CREATE TABLE courses (
 
 CREATE TABLE materials (
     id INT PRIMARY KEY IDENTITY,
-    course_id INT,
-    file_name NVARCHAR(255),
-    file_path NVARCHAR(500),
-    mime_type NVARCHAR(100),
+    course_id INT NOT NULL,
+    file_name NVARCHAR(255) NOT NULL,
+    file_path NVARCHAR(500) NOT NULL,
+    mime_type NVARCHAR(100) NOT NULL,
+    uploaded_at DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
 );
 
@@ -170,20 +171,20 @@ go
 
 
 -- Insert sample users
-INSERT INTO users (username, password, role)
-VALUES 
+--INSERT INTO users (username, password, role)
+--VALUES 
 --('student01', 'hashedpassword1', 'student'),
-('teacher01', 'hashedpassword2', 'teacher');
+--('teacher01', 'hashedpassword2', 'teacher');
 
 -- Insert students (link to user_id 1)
 --INSERT INTO students (user_id, full_name, email, phone_number, address, date_of_birth)
 --VALUES 
 --(1, 'Nguyen Van A', 'a@student.edu', '0123456789', '123 ABC Street', '2003-05-12');
 
--- Insert teachers (link to user_id 2)
-INSERT INTO teachers (user_id, full_name, email, phone_number, address, date_of_birth, salary)
-VALUES 
-(2, 'Tran Thi B', 'b@teacher.edu', '0987654321', '456 DEF Street', '1980-10-01', 25000000);
+---- Insert teachers (link to user_id 2)
+--INSERT INTO teachers (user_id, full_name, email, phone_number, address, date_of_birth, salary)
+--VALUES 
+--(2, 'Tran Thi B', 'b@teacher.edu', '0987654321', '456 DEF Street', '1980-10-01', 25000000);
 
 -- Insert courses
 INSERT INTO courses (course_name, description, start_date, end_date)

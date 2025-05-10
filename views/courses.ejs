@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Courses</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 12px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+    th {
+      background-color: #f4f4f4;
+    }
+    h1 {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>All Courses</h1>
+
+  <% if (courses.length === 0) { %>
+    <p>No courses found.</p>
+  <% } else { %>
+    <table>
+      <thead>
+        <tr>
+          <th>Course Name</th>
+          <th>Description</th>
+          <th>Start Date</th>
+          <th>End Date</th>
+          <th>Created At</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% courses.forEach(course => { %>
+          <tr>
+            <td><%= course.course_name %></td>
+            <td><%= course.description %></td>
+            <td><%= course.start_date.toISOString().slice(0, 10) %></td>
+            <td><%= course.end_date.toISOString().slice(0, 10) %></td>
+            <td><%= course.created_at.toISOString().slice(0, 10) %></td>
+          </tr>
+          <td>
+  <a href="/courses/<%= course.id %>/edit">Edit</a> |
+  <form action="/courses/<%= course.id %>?_method=DELETE" method="POST" style="display:inline;">
+    <button type="submit" onclick="return confirm('Are you sure?')">Delete</button>
+  </form>
+</td>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+
+  <% if (user && (user.role === 'admin' || user.role === 'teacher')) { %>
+    <a href="/courses/new">Add New Course</a>
+  <% } %>
+</body>
+</html>
