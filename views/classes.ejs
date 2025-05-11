@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Classes</title>
+</head>
+
+<body>
+    <h1>Class List</h1>
+    <a href="/">Back</a>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Class Name</th>
+                <th>Course</th>
+                <th>Teacher</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% classes.forEach(cls => { %>
+            <tr>
+                <td><%= cls.id %></td>
+                <td><%= cls.class_name %></td>
+                <td><%= cls.course_name %></td>
+                <td><%= cls.teacher_name %></td>
+                <td><%= cls.start_time %></td>
+                <td><%= cls.end_time %></td>
+                <td>
+                    <a href="/classes/<%= cls.id %>/edit">Edit</a>
+                    <form method="POST" action="/classes/<%= cls.id %>?_method=DELETE" style="display:inline;">
+                        <button type="submit"
+                            onclick="return confirm('Are you sure to delete this class?')">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            <% }) %>
+        </tbody>
+    </table>
+</body>
+
+</html>

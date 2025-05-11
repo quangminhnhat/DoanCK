@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>TKB Tuần</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="p-6 bg-gray-50">
+  <div class="max-w-6xl mx-auto bg-white shadow p-4">
+
+    <!-- Header -->
+    <div class="flex items-center mb-4">
+      <h1 class="text-2xl font-semibold">Thời khóa biểu</h1>
+      <div class="ml-auto flex gap-2">
+        <a href="/schedule" class="px-4 py-1 bg-blue-600 text-white rounded">Tuần hiện tại</a>
+        <a href="/schedule?weekStart=<%= prevWeekStart %>" class="px-2 bg-gray-200 rounded">&lt;</a>
+        <div class="px-4 py-1 border rounded">
+          Tuần: <%= days[0].date %> – <%= days[6].date %>
+        </div>
+        <a href="/schedule?weekStart=<%= nextWeekStart %>" class="px-2 bg-gray-200 rounded">&gt;</a>
+      </div>
+    </div>
+
+    <!-- Grid -->
+    <div class="grid grid-cols-8 border border-gray-300">
+      <!-- Top-left corner -->
+      <div class="bg-blue-700 text-white font-semibold p-2 text-center">&nbsp;</div>
+
+      <!-- Day headers -->
+      <% days.forEach(function(day) { %>
+        <div class="bg-blue-700 text-white font-semibold p-2 text-center">
+          <%= day.name %><br>
+            <span class="text-xs font-normal">
+              <%= day.date %>
+            </span>
+        </div>
+        <% }); %>
+
+          <!-- Period rows (1 through maxPeriod+1) -->
+          <% for (var i=1; i <=14; i++) { %>
+            <!-- Label column -->
+            <div class="bg-blue-600 text-white text-sm font-medium p-2 text-center">
+              Tiết <%= i %>
+            </div>
+
+            <!-- One cell per day -->
+            <% days.forEach(function(day) { var cell=scheduleData.find(function(s){ return s.date===day.iso &&
+              s.periodIndex===i; }); %>
+              <div class="border border-gray-200 p-2 text-xs text-center h-20 align-top
+                      <% if (cell) { %> bg-blue-50 border-l-4 border-blue-400 <% } %>">
+                <% if (cell) { %>
+                  <div class="font-semibold text-blue-800">
+                    <%= cell.className %>
+                  </div>
+                  <div class="text-gray-600 text-xs">
+                    <%= cell.teacher %>
+                  </div>
+                  <% } else { %>
+                    &nbsp;
+                    <% } %>
+              </div>
+              <% }); %>
+                <% } %>
+
+    </div>
+  </div>
+</body>
+
+</html>

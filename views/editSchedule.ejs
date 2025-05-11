@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Edit Schedule</title>
+</head>
+
+<body>
+    <h1>Edit Schedule</h1>
+    <form method="POST" action="/schedules/<%= schedule.id %>">
+        <label>Class:</label><br>
+        <select name="class_id">
+            <% classes.forEach(cls => { %>
+            <option value="<%= cls.id %>" <% if (cls.id === schedule.class_id) { %>selected<% } %>>
+                <%= cls.class_name %>
+            </option>
+            <% }) %>
+        </select><br><br>
+
+        <label>Day of Week:</label><br>
+        <input type="text" name="day_of_week" value="<%= schedule.day_of_week %>" required><br><br>
+
+        <label>Date:</label><br>
+        <input type="date" name="schedule_date" value="<%= schedule.schedule_date.toISOString().split('T')[0] %>"
+            required><br><br>
+
+        <label>Start Time:</label><br>
+        <input type="time" name="start_time" value="<%= schedule.start_time %>" required><br><br>
+
+        <label>End Time:</label><br>
+        <input type="time" name="end_time" value="<%= schedule.end_time %>" required><br><br>
+
+        <button type="submit">Update Schedule</button>
+    </form>
+    <a href="/schedules">Back</a>
+</body>
+
+</html>

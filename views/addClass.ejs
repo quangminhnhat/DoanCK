@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Class</title>
+</head>
+<body>
+    <form action="/classes" method="POST">
+        <label for="class_name">Class Name:</label>
+        <input type="text" id="class_name" name="class_name" required />
+
+        <label for="course_id">Course ID:</label>
+        <input type="number" id="course_id" name="course_id" required />
+
+        <label for="teacher_id">Teacher ID:</label>
+        <input type="number" id="teacher_id" name="teacher_id" required />
+
+        <label for="start_time">Start Time:</label>
+        <input type="time" id="start_time" name="start_time" required />
+
+        <label for="end_time">End Time:</label>
+        <input type="time" id="end_time" name="end_time" required />
+
+        <button type="submit">Create Class</button>
+    </form>
+</body>
+</html>
+  
