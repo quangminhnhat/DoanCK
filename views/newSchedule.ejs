@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>New Schedule</title>
+</head>
+
+<body>
+    <h1>Add New Schedule</h1>
+    <form method="POST" action="/schedules">
+        <label>Class:</label><br>
+        <select name="class_id">
+            <% classes.forEach(cls => { %>
+            <option value="<%= cls.id %>"><%= cls.class_name %></option>
+            <% }) %>
+        </select><br><br>
+
+        <label>Day of Week:</label><br>
+        <input type="text" name="day_of_week" required><br><br>
+
+        <label>Date:</label><br>
+        <input type="date" name="schedule_date" required><br><br>
+
+        <label>Start Time:</label><br>
+        <input type="time" name="start_time" required><br><br>
+
+        <label>End Time:</label><br>
+        <input type="time" name="end_time" required><br><br>
+
+        <button type="submit">Add Schedule</button>
+    </form>
+    <a href="/schedules">Back</a>
+</body>
+
+</html>

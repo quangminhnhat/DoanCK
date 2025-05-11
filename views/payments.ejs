@@ -1,13 +1,36 @@
-<form action="/payments" method="POST">
-    <label for="student_id">Student ID:</label>
-    <input type="number" id="student_id" name="student_id" required />
+<!DOCTYPE html>
+<html>
 
-    <label for="amount">Amount:</label>
-    <input type="number" id="amount" step="0.01" name="amount" required />
+<head>
+    <title>Payments</title>
+</head>
 
-    <label for="payment_date">Payment Date:</label>
-    <input type="date" id="payment_date" name="payment_date" required />
+<body>
+    <h1>Payment List</h1>
+    <a href="/">Back</a>
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Student</th>
+            <th>Amount</th>
+            <th>Date</th>
+            <th>Actions</th>
+        </tr>
+        <% payments.forEach(p => { %>
+        <tr>
+            <td><%= p.id %></td>
+            <td><%= p.student_name %></td>
+            <td><%= p.amount %></td>
+            <td><%= p.payment_date.toISOString().split('T')[0] %></td>
+            <td>
+                <a href="/payments/<%= p.id %>/edit">Edit</a>
+                <form method="POST" action="/payments/<%= p.id %>?_method=DELETE" style="display:inline;">
+                    <button type="submit" onclick="return confirm('Delete this payment?')">Delete</button>
+                </form>
+            </td>
+        </tr>
+        <% }) %>
+    </table>
+</body>
 
-    <button type="submit">Record Payment</button>
-</form>
-  
+</html>

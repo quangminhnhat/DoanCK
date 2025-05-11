@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Edit Payment</title>
+</head>
+
+<body>
+    <h1>Edit Payment</h1>
+    <form method="POST" action="/payments/<%= payment.id %>">
+        <label>Student:</label><br>
+        <select name="student_id" required>
+            <% students.forEach(s => { %>
+            <option value="<%= s.id %>" <% if (s.id === payment.student_id) { %>selected<% } %>>
+                <%= s.full_name %>
+            </option>
+            <% }) %>
+        </select><br><br>
+
+        <label>Amount:</label><br>
+        <input type="number" name="amount" step="0.01" value="<%= payment.amount %>" required><br><br>
+
+        <label>Payment Date:</label><br>
+        <input type="date" name="payment_date" value="<%= payment.payment_date.toISOString().split('T')[0] %>"
+            required><br><br>
+
+        <button type="submit">Update Payment</button>
+    </form>
+    <a href="/payments">Back</a>
+</body>
+
+</html>

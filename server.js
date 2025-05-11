@@ -19,7 +19,7 @@ const fs = require("fs");
 //require ("./schedular")
 
 app.use(express.json());
-//app.use("/materials", materialsRouter);
+app.use(methodOverride("_method"));
 
 app.use(express.urlencoded({ extended: false }));
 const connectionString =
@@ -33,6 +33,7 @@ app.use(
   })
 );
 const initalizePassport = require("./pass-config");
+const { time } = require("console");
 initalizePassport(
   passport,
   (email) => {
@@ -47,7 +48,7 @@ initalizePassport(
       sql.query(connectionString, query, [email, email], (err, rows) => {
         if (err) {
           console.error("SQL error:", err);
-          return reject(err);
+          return reject(new Error(err));
         }
         if (rows.length > 0) {
           resolve(rows[0]);
@@ -63,7 +64,7 @@ initalizePassport(
       sql.query(connectionString, query, [id], (err, rows) => {
         if (err) {
           console.error("SQL error:", err);
-          return reject(err);
+          return reject(new Error(err));
         }
         if (rows.length > 0) {
           resolve(rows[0]);
@@ -220,6 +221,77 @@ app.post("/notifications", checkAuthenticated, (req, res) => {
 
     console.log("Notification sent to user ID:", userId);
     res.status(201).send("Notification sent successfully!");
+  });
+});
+
+app.get("/materials", checkAuthenticated, (req, res) => {
+  const query = `SELECT * FROM materials ORDER BY uploaded_at DESC`;
+
+  sql.query(connectionString, query, (err, rows) => {
+    if (err) {
+      console.error("Fetch materials error:", err);
+      return res.status(500).send("Database error");
+    }
+    res.render("materials.ejs", { materials: rows, user: req.user });
+  });
+});
+
+app.get("/materials/:id/edit", checkAuthenticated, (req, res) => {
+  const materialId = req.params.id;
+  const query = `SELECT * FROM materials WHERE id = ?`;
+
+  sql.query(connectionString, query, [materialId], (err, result) => {
+    if (err) return res.status(500).send("Database error");
+    if (result.length === 0) return res.status(404).send("Material not found");
+
+    res.render("editMaterial.ejs", { material: result[0], user: req.user });
+  });
+});
+
+app.post("/materials/:id", checkAuthenticated, (req, res) => {
+  const { course_id, file_name } = req.body;
+  const query = `
+    UPDATE materials
+    SET course_id = ?, 
+        file_name = ?, 
+        uploaded_at = GETDATE()
+    WHERE id = ?
+  `;
+
+  sql.query(
+    connectionString,
+    query,
+    [course_id, file_name, req.params.id],
+    (err) => {
+      if (err) {
+        console.error("Update material error:", err);
+        return res.status(500).send("Database error");
+      }
+      res.redirect("/materials");
+    }
+  );
+});
+
+app.delete("/materials/:id", checkAuthenticated, (req, res) => {
+  const materialId = req.params.id;
+
+  const getFilePathQuery = "SELECT file_path FROM materials WHERE id = ?";
+  sql.query(connectionString, getFilePathQuery, [materialId], (err, result) => {
+    if (err || result.length === 0) return res.status(500).send("Not found");
+
+    const filePath = path.join(__dirname, result[0].file_path);
+
+    // Delete from DB
+    const deleteQuery = "DELETE FROM materials WHERE id = ?";
+    sql.query(connectionString, deleteQuery, [materialId], (err) => {
+      if (err) return res.status(500).send("Delete error");
+
+      // Remove file from disk
+      fs.unlink(filePath, (fsErr) => {
+        if (fsErr) console.error("File deletion error:", fsErr);
+        res.redirect("/materials");
+      });
+    });
   });
 });
 
@@ -651,10 +723,11 @@ app.get("/schedule", checkAuthenticated, (req, res) => {
       const isoDate = r.schedule_date.toISOString().slice(0, 10);
       const dayObj = days.find((d) => d.iso === isoDate);
 
-      const timeStr = r.start_time.toTimeString().slice(0, 8);
+      const timeStr = r.start_time.toISOString().slice(11, 19);
       const periodIndex = timeToPeriod[timeStr];
 
       return {
+        time: timeStr,
         date: isoDate,
         periodIndex,
         className: r.class_name,
@@ -684,6 +757,135 @@ app.get("/schedule", checkAuthenticated, (req, res) => {
       nextWeekStart: nextWeekStart.toISOString().slice(0, 10),
       maxPeriod,
     });
+  });
+});
+
+app.get("/schedule/new", checkAuthenticated, (req, res) => {
+  const classQuery = "SELECT id, class_name FROM classes";
+  sql.query(connectionString, classQuery, (err, result) => {
+    if (err) return res.status(500).send("Class fetch error");
+    res.render("newSchedule.ejs", { classes: result, user: req.user });
+  });
+});
+
+app.post("/schedules", checkAuthenticated, (req, res) => {
+  const { class_id, day_of_week, schedule_date, start_time, end_time } =
+    req.body;
+
+  const query = `
+    INSERT INTO schedules (class_id, day_of_week, schedule_date, start_time, end_time)
+    VALUES (?, ?, ?, ?, ?)
+  `;
+
+  const values = [class_id, day_of_week, schedule_date, start_time, end_time];
+
+  sql.query(connectionString, query, values, (err) => {
+    if (err) {
+      console.error("Insert schedule error:", err);
+      return res.status(500).send("Insert failed");
+    }
+    res.redirect("/schedule");
+  });
+});
+
+app.get("/schedules", checkAuthenticated, (req, res) => {
+  const query = `
+    SELECT s.*, c.class_name
+    FROM schedules s
+    JOIN classes c ON s.class_id = c.id
+    ORDER BY s.schedule_date DESC
+  `;
+
+  sql.query(connectionString, query, (err, rows) => {
+    if (err) {
+      console.error("Fetch schedules error:", err);
+      return res.status(500).send("Database error");
+    }
+    res.render("schedules.ejs", { schedules: rows, user: req.user });
+  });
+});
+
+app.get("/schedules/:id/edit", checkAuthenticated, (req, res) => {
+  const scheduleId = req.params.id;
+
+  const scheduleQuery = `SELECT * FROM schedules WHERE id = ?`;
+  const classQuery = `SELECT id, class_name FROM classes`;
+
+  sql.query(
+    connectionString,
+    scheduleQuery,
+    [scheduleId],
+    (err, scheduleResult) => {
+      if (err || scheduleResult.length === 0)
+        return res.status(500).send("Schedule not found");
+
+      sql.query(connectionString, classQuery, (err, classList) => {
+        if (err) return res.status(500).send("Class fetch error");
+
+        res.render("editSchedule.ejs", {
+          schedule: scheduleResult[0],
+          classes: classList,
+          user: req.user,
+        });
+      });
+    }
+  );
+});
+
+app.post("/schedules/:id", checkAuthenticated, (req, res) => {
+  const { class_id, day_of_week, schedule_date, start_time, end_time } =
+    req.body;
+  const query = `
+    UPDATE schedules
+    SET class_id = ?, day_of_week = ?, schedule_date = ?, start_time = ?, end_time = ?
+    WHERE id = ?
+  `;
+
+  const values = [
+    class_id,
+    day_of_week,
+    schedule_date,
+    start_time,
+    end_time,
+    req.params.id,
+  ];
+  sql.query(connectionString, query, values, (err) => {
+    if (err) {
+      console.error("Update schedule error:", err);
+      return res.status(500).send("Update failed");
+    }
+    res.redirect("/schedules");
+  });
+});
+
+app.delete("/schedules/:id", checkAuthenticated, (req, res) => {
+  const query = `DELETE FROM schedules WHERE id = ?`;
+  sql.query(connectionString, query, [req.params.id], (err) => {
+    if (err) {
+      console.error("Delete schedule error:", err);
+      return res.status(500).send("Delete failed");
+    }
+    res.redirect("/schedules");
+  });
+});
+
+app.post("/schedules", checkAuthenticated, (req, res) => {
+  const { class_id, day_of_week, schedule_date, start_time, end_time } =
+    req.body;
+
+  const query = `
+    INSERT INTO schedules (class_id, day_of_week, schedule_date, start_time, end_time)
+    VALUES (?, ?, ?, ?, ?)
+  `;
+
+  const values = [class_id, day_of_week, schedule_date, start_time, end_time];
+
+  sql.query(connectionString, query, values, (err) => {
+    if (err) {
+      console.error("Insert schedule error:", err);
+      return res.status(500).send("Insert failed");
+    }
+    res.redirect("/schedules");
   });
 });
 
@@ -718,7 +920,101 @@ app.post("/classes", checkAuthenticated, (req, res) => {
   );
 });
 
-app.post("/enrollments", checkAuthenticated, (req, res) => {
+app.get("/classes", checkAuthenticated, (req, res) => {
+  const query = `
+    SELECT c.*, co.course_name, t.full_name AS teacher_name
+    FROM classes c
+    JOIN courses co ON c.course_id = co.id
+    JOIN teachers t ON c.teacher_id = t.id
+    ORDER BY c.created_at DESC
+  `;
+  sql.query(connectionString, query, (err, rows) => {
+    if (err) {
+      console.error("Fetch classes error:", err);
+      return res.status(500).send("Database error");
+    }
+    res.render("classes.ejs", { classes: rows, user: req.user });
+  });
+});
+
+app.get("/classes/:id/edit", checkAuthenticated, (req, res) => {
+  const classId = req.params.id;
+
+  const classQuery = "SELECT * FROM classes WHERE id = ?";
+  const courseQuery = "SELECT id, course_name FROM courses";
+  const teacherQuery = "SELECT id, full_name FROM teachers";
+
+  sql.query(connectionString, classQuery, [classId], (err, classResult) => {
+    if (err || classResult.length === 0)
+      return res.status(500).send("Class not found");
+
+    sql.query(connectionString, courseQuery, (err, courses) => {
+      if (err) return res.status(500).send("Course fetch error");
+
+      sql.query(connectionString, teacherQuery, (err, teachers) => {
+        if (err) return res.status(500).send("Teacher fetch error");
+
+        res.render("editClass.ejs", {
+          classItem: classResult[0],
+          courses,
+          teachers,
+          user: req.user,
+        });
+      });
+    });
+  });
+});
+
+app.post("/classes/:id", checkAuthenticated, (req, res) => {
+  const { class_name, course_id, teacher_id, start_time, end_time } = req.body;
+
+  const query = `
+    UPDATE classes
+    SET class_name = ?, course_id = ?, teacher_id = ?, 
+        start_time = ?, end_time = ?, updated_at = GETDATE()
+    WHERE id = ?
+  `;
+
+  const values = [
+    class_name,
+    course_id,
+    teacher_id,
+    start_time,
+    end_time,
+    req.params.id,
+  ];
+  sql.query(connectionString, query, values, (err) => {
+    try {
+      if (err) {
+        console.error("Update class error:", err);
+        return res.status(500).send("Update failed");
+      }
+      res.redirect("/classes");
+    } catch (error) {
+      // Ignore headers already sent error
+      if (error.code !== "ERR_HTTP_HEADERS_SENT") {
+        console.error("Unhandled error:", error);
+      }
+    }
+  });
+});
+
+app.delete("/classes/:id", checkAuthenticated, (req, res) => {
+  const classId = req.params.id;
+
+  const deleteQuery = "DELETE FROM classes WHERE id = ?";
+  sql.query(connectionString, deleteQuery, [classId], (err) => {
+    if (err) {
+      console.error("Delete class error:", err);
+      return res
+        .status(500)
+        .send("Delete failed.xóa hết học viên trong lớp nếu chưa xóa");
+    }
+    res.redirect("/classes");
+  });
+});
+
+app.post("/enrollments/new", checkAuthenticated, (req, res) => {
   const { student_id, class_id, enrollment_date } = req.body;
 
   if (req.user.role !== "admin" && req.user.role !== "teacher") {
@@ -748,10 +1044,90 @@ app.post("/enrollments", checkAuthenticated, (req, res) => {
   );
 });
 
-app.post("/payments", checkAuthenticated, (req, res) => {
+app.get("/enrollments", checkAuthenticated, (req, res) => {
+  const query = `
+    SELECT e.id, s.full_name AS student_name, c.class_name, e.enrollment_date
+    FROM enrollments e
+    JOIN students s ON e.student_id = s.id
+    JOIN classes c ON e.class_id = c.id
+    ORDER BY e.enrollment_date DESC
+  `;
+
+  sql.query(connectionString, query, (err, rows) => {
+    if (err) {
+      console.error("Fetch enrollments error:", err);
+      return res.status(500).send("Database error");
+    }
+    res.render("enrollments.ejs", { enrollments: rows, user: req.user });
+  });
+});
+
+app.get("/enrollments/:id/edit", checkAuthenticated, (req, res) => {
+  const id = req.params.id;
+
+  const enrollmentQuery = "SELECT * FROM enrollments WHERE id = ?";
+  const studentQuery = "SELECT id, full_name FROM students";
+  const classQuery = "SELECT id, class_name FROM classes";
+
+  sql.query(connectionString, enrollmentQuery, [id], (err, result) => {
+    if (err || result.length === 0)
+      return res.status(404).send("Enrollment not found");
+
+    const enrollment = result[0];
+    sql.query(connectionString, studentQuery, (err, students) => {
+      if (err) return res.status(500).send("Students fetch error");
+
+      sql.query(connectionString, classQuery, (err, classes) => {
+        if (err) return res.status(500).send("Classes fetch error");
+
+        res.render("editEnrollment.ejs", {
+          enrollment,
+          students,
+          classes,
+          user: req.user,
+        });
+      });
+    });
+  });
+});
+
+app.post("/enrollments/:id", checkAuthenticated, (req, res) => {
+  const { student_id, class_id, enrollment_date } = req.body;
+  const query = `
+    UPDATE enrollments
+    SET student_id = ?, class_id = ?, enrollment_date = ?
+    WHERE id = ?
+  `;
+
+  sql.query(
+    connectionString,
+    query,
+    [student_id, class_id, enrollment_date, req.params.id],
+    (err) => {
+      if (err) {
+        console.error("Update enrollment error:", err);
+        return res.status(500).send("Update failed");
+      }
+      res.redirect("/enrollments");
+    }
+  );
+});
+
+app.delete("/enrollments/:id", checkAuthenticated, (req, res) => {
+  const query = "DELETE FROM enrollments WHERE id = ?";
+  sql.query(connectionString, query, [req.params.id], (err) => {
+    if (err) {
+      console.error("Delete enrollment error:", err);
+      return res.status(500).send("Delete failed");
+    }
+    res.redirect("/enrollments");
+  });
+});
+
+app.post("/payments/new", checkAuthenticated, (req, res) => {
   const { student_id, amount, payment_date } = req.body;
 
-  if (req.user.role !== "admin" && req.user.role !== "teacher") { 
+  if (req.user.role !== "admin" && req.user.role !== "teacher") {
     return res.status(403).send("Only admins can record payments");
   }
 
@@ -779,11 +1155,85 @@ app.post("/payments", checkAuthenticated, (req, res) => {
 });
 
 app.get("/payments", checkAuthenticated, (req, res) => {
-  res.render("payments.ejs", { user: req.user });
+  const query = `
+    SELECT p.id, s.full_name AS student_name, p.amount, p.payment_date
+    FROM payments p
+    JOIN students s ON p.student_id = s.id
+    ORDER BY p.payment_date DESC
+  `;
+
+  sql.query(connectionString, query, (err, rows) => {
+    if (err) {
+      console.error("Fetch payments error:", err);
+      return res.status(500).send("Database error");
+    }
+    res.render("payments.ejs", { payments: rows, user: req.user });
+  });
 });
 
-app.get("/enrollments", checkAuthenticated, (req, res) => {
-  res.render("enrollments.ejs", { user: req.user });
+app.get("/payments/:id/edit", checkAuthenticated, (req, res) => {
+  const paymentId = req.params.id;
+
+  const paymentQuery = "SELECT * FROM payments WHERE id = ?";
+  const studentQuery = "SELECT id, full_name FROM students";
+
+  sql.query(connectionString, paymentQuery, [paymentId], (err, result) => {
+    if (err || result.length === 0)
+      return res.status(404).send("Payment not found");
+
+    const payment = result[0];
+
+    sql.query(connectionString, studentQuery, (err, students) => {
+      if (err) return res.status(500).send("Student fetch error");
+
+      res.render("editPayment.ejs", {
+        payment,
+        students,
+        user: req.user,
+      });
+    });
+  });
+});
+
+app.post("/payments/:id", checkAuthenticated, (req, res) => {
+  const { student_id, amount, payment_date } = req.body;
+  const query = `
+    UPDATE payments
+    SET student_id = ?, amount = ?, payment_date = ?
+    WHERE id = ?
+  `;
+
+  sql.query(
+    connectionString,
+    query,
+    [student_id, amount, payment_date, req.params.id],
+    (err) => {
+      if (err) {
+        console.error("Update payment error:", err);
+        return res.status(500).send("Update failed");
+      }
+      res.redirect("/payments");
+    }
+  );
+});
+
+app.delete("/payments/:id", checkAuthenticated, (req, res) => {
+  const query = "DELETE FROM payments WHERE id = ?";
+  sql.query(connectionString, query, [req.params.id], (err) => {
+    if (err) {
+      console.error("Delete payment error:", err);
+      return res.status(500).send("Delete failed");
+    }
+    res.redirect("/payments");
+  });
+});
+
+app.get("/payments/new", checkAuthenticated, (req, res) => {
+  res.render("Newpayments.ejs", { user: req.user });
+});
+
+app.get("/enrollments/new", checkAuthenticated, (req, res) => {
+  res.render("Addenrollments.ejs", { user: req.user });
 });
 
 app.get("/upload", checkAuthenticated, (req, res) => {
