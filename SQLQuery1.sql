@@ -64,7 +64,6 @@ CREATE TABLE materials (
     course_id INT NOT NULL,
     file_name NVARCHAR(255) NOT NULL,
     file_path NVARCHAR(500) NOT NULL,
-    mime_type NVARCHAR(100) NOT NULL,
     uploaded_at DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
 );
@@ -253,3 +252,10 @@ DELETE FROM users;
       JOIN classes c       ON e.class_id = c.id
       JOIN schedules s     ON c.id = s.class_id
       JOIN teachers t      ON c.teacher_id = t.id
+
+
+
+
+
+
+	  SELECT * FROM materials ORDER BY uploaded_at DESC
