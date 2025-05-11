@@ -721,7 +721,6 @@ app.get("/schedule", checkAuthenticated, (req, res) => {
 
     const scheduleData = rows.map((r) => {
       const isoDate = r.schedule_date.toISOString().slice(0, 10);
-      const dayObj = days.find((d) => d.iso === isoDate);
 
       const timeStr = r.start_time.toISOString().slice(11, 19);
       const periodIndex = timeToPeriod[timeStr];
