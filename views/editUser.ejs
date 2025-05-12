@@ -1,0 +1,14 @@
+<h2>Edit User</h2>
+<form action="/users/<%= user.id %>?_method=POST" method="POST">
+    <label>Username:</label>
+    <input type="text" name="username" value="<%= user.username %>" required /><br />
+
+    <label>Role:</label>
+    <select name="role">
+        <option value="student" <%= user.role === 'student' ? 'selected' : '' %>>Student</option>
+        <option value="teacher" <%= user.role === 'teacher' ? 'selected' : '' %>>Teacher</option>
+        <option value="admin" <%= user.role === 'admin' ? 'selected' : '' %>>Admin</option>
+    </select><br />
+
+    <button type="submit">Save Changes</button>
+</form>

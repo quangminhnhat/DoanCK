@@ -37,15 +37,17 @@ const { time } = require("console");
 initalizePassport(
   passport,
   (email) => {
-    // Replace with your user retrieval logic
-    const query = ` SELECT u.*
+    // Query modified to include admin emails
+    const query = ` 
+      SELECT u.*
       FROM users u
       LEFT JOIN students s ON u.id = s.user_id
       LEFT JOIN teachers t ON u.id = t.user_id
-      WHERE s.email = ? OR t.email = ?
+      LEFT JOIN admins a ON u.id = a.user_id
+      WHERE s.email = ? OR t.email = ? OR a.email = ?
     `;
     return new Promise((resolve, reject) => {
-      sql.query(connectionString, query, [email, email], (err, rows) => {
+      sql.query(connectionString, query, [email, email, email], (err, rows) => {
         if (err) {
           console.error("SQL error:", err);
           return reject(new Error(err));
@@ -433,24 +435,117 @@ const valuesUser = [username, hashpassword, role];*/
           return res.status(500).send("Database insert error");
         }
       });
-    } else {
-      const insertQuery = `INSERT INTO users (username, password, role, created_at, updated_at) VALUES (?, ?, ?, GETDATE(), GETDATE());`;
-      const values = [username, hashpassword, role];
+    } else if (role === "admin") {
+      const insertQuery = `
+        INSERT INTO users (username, password, role, created_at, updated_at) VALUES (?, ?, ?, GETDATE(), GETDATE());
+        INSERT INTO admins (user_id, full_name, email, phone_number, created_at, updated_at)
+          SELECT id, ?, ?, ?, GETDATE(), GETDATE()
+          FROM users
+          WHERE username = ?;
+      `;
+      const values = [
+        username,
+        hashpassword,
+        role,
+        username,
+        email,
+        phone,
+        username,
+      ];
+
       sql.query(connectionString, insertQuery, values, (err, result) => {
-        if (err) {
-          console.error("Insert error:", err);
-          res.status(500).send("Database insert error");
-        } else {
-          console.log("User registered:", result);
+        try {
+          if (err) {
+            console.error("Insert error:", err);
+            return res.status(500).send("Database insert error");
+          }
+          console.log("Admin registered:", result);
+          res.redirect("/login");
+        } catch (error) {
+          // Ignore headers already sent error
+          if (error.code !== "ERR_HTTP_HEADERS_SENT") {
+            console.error("Unhandled error:", error);
+          }
         }
       });
     }
-    res.redirect("/login");
   } catch (error) {
     console.error("Error during registration:", error);
     res.redirect("/register");
   }
 });
+
+app.get("/users", checkAuthenticated, (req, res) => {
+  if (req.user.role !== "admin") return res.status(403).send("Unauthorized");
+
+  const query = `
+    	SELECT u.id, u.username, u.role, u.created_at, u.updated_at,
+       COALESCE(s.full_name, t.full_name, a.full_name) AS full_name,
+       COALESCE(s.email, t.email, a.email) AS email,
+       COALESCE(s.phone_number, t.phone_number, a.phone_number) AS phone
+FROM users u
+LEFT JOIN students s ON u.id = s.user_id
+LEFT JOIN teachers t ON u.id = t.user_id
+LEFT JOIN admins a   ON u.id = a.user_id
+ORDER BY u.created_at DESC;
+  `;
+
+  sql.query(connectionString, query, (err, rows) => {
+    if (err) return res.status(500).send("Database error");
+    res.render("userList", { users: rows });
+  });
+});
+
+
+app.get("/users/:id/edit", checkAuthenticated, (req, res) => {
+  if (req.user.role !== "admin") return res.status(403).send("Unauthorized");
+
+  const userId = req.params.id;
+  const query = "SELECT * FROM users WHERE id = ?";
+
+  sql.query(connectionString, query, [userId], (err, rows) => {
+    if (err || rows.length === 0) return res.status(500).send("User not found");
+    res.render("editUser", { user: rows[0] });
+  });
+});
+
+app.post("/users/:id", checkAuthenticated, (req, res) => {
+  if (req.user.role !== "admin") return res.status(403).send("Unauthorized");
+
+  const { username, role } = req.body;
+  const query = `
+    UPDATE users SET username = ?, role = ?, updated_at = GETDATE()
+    WHERE id = ?
+  `;
+
+  sql.query(connectionString, query, [username, role, req.params.id], (err) => {
+    try {
+      if (err) {
+        console.error("Update error:", err);
+        return res.status(500).send("Update error");
+      }
+      res.redirect("/users");
+    } catch (error) {
+      // Ignore headers already sent error
+      if (error.code !== 'ERR_HTTP_HEADERS_SENT') {
+        console.error('Unhandled error:', error);
+      }
+    }
+  });
+});
+
+app.delete("/users/:id", checkAuthenticated, (req, res) => {
+  if (req.user.role !== "admin") return res.status(403).send("Unauthorized");
+
+  const query = "DELETE FROM users WHERE id = ?";
+  sql.query(connectionString, query, [req.params.id], (err) => {
+    if (err) return res.status(500).send("Delete failed");
+    res.redirect("/users");
+  });
+});
+
+
+
 
 app.get("/", (req, res) => {
   res.render("index.ejs", { user: req.user });
@@ -528,14 +623,20 @@ app.post("/courses/:id", checkAuthenticated, (req, res) => {
   // Execute query with proper error handling
   sql.query(connectionString, query, values, (err, result) => {
     try {
-      if (err) {
-        console.error("Update error:", err);
-        return res.status(500).send("Update failed");
+      try {
+        if (err) {
+          console.error("Update error:", err);
+          return res.status(500).send("Update failed");
+        }
+        if (!result || result.rowsAffected === 0) {
+          return res.status(404).send("Course not found");
+        }
+        res.redirect("/courses");
+      } catch (error) {
+        if (error.code !== "ERR_HTTP_HEADERS_SENT") {
+          console.error("Unhandled error:", error);
+        }
       }
-      if (!result || result.rowsAffected === 0) {
-        return res.status(404).send("Course not found");
-      }
-      res.redirect("/courses");
     } catch (error) {
       // Ignore headers already sent error
       if (error.code !== "ERR_HTTP_HEADERS_SENT") {

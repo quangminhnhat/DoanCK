@@ -41,6 +41,17 @@ CREATE TABLE teachers (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+CREATE TABLE admins (
+    id INT PRIMARY KEY IDENTITY,
+    user_id INT NOT NULL,
+    full_name NVARCHAR(100),
+    email NVARCHAR(100),
+    phone_number NVARCHAR(20),
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 CREATE TABLE notifications (
     id INT PRIMARY KEY IDENTITY,
     user_id INT,
@@ -113,6 +124,7 @@ CREATE TABLE payments (
 -- Indexes for better performance
 CREATE INDEX idx_students_user_id ON students(user_id);
 CREATE INDEX idx_teachers_user_id ON teachers(user_id);
+CREATE INDEX idx_admins_user_id ON admins(user_id);
 CREATE INDEX idx_materials_course_id ON materials(course_id);
 CREATE INDEX idx_classes_course_id ON classes(course_id);
 CREATE INDEX idx_classes_teacher_id ON classes(teacher_id);
@@ -259,3 +271,16 @@ DELETE FROM users;
 
 
 	  SELECT * FROM materials ORDER BY uploaded_at DESC
+
+
+
+
+	SELECT u.id, u.username, u.role, u.created_at, u.updated_at,
+       COALESCE(s.full_name, t.full_name, a.full_name) AS full_name,
+       COALESCE(s.email, t.email, a.email) AS email,
+       COALESCE(s.phone_number, t.phone_number, a.phone_number) AS phone
+FROM users u
+LEFT JOIN students s ON u.id = s.user_id
+LEFT JOIN teachers t ON u.id = t.user_id
+LEFT JOIN admins a   ON u.id = a.user_id
+ORDER BY u.created_at DESC;
