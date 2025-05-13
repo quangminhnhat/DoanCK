@@ -107,7 +107,6 @@ app.post(
   checkAuthenticated,
   authenticateRole(["admin", "teacher"]),
   (req, res, next) => {
-   
     next();
   },
   upload.single("material"),
@@ -260,6 +259,543 @@ app.get(
 
       res.render("editMaterial.ejs", { material: result[0], user: req.user });
     });
+  }
+);
+
+app.get("/users", checkAuthenticated, authenticateRole("admin"), (req, res) => {
+  const query = `
+    	SELECT u.id, u.username, u.role, u.created_at, u.updated_at,
+       COALESCE(s.full_name, t.full_name, a.full_name) AS full_name,
+       COALESCE(s.email, t.email, a.email) AS email,
+       COALESCE(s.phone_number, t.phone_number, a.phone_number) AS phone
+FROM users u
+LEFT JOIN students s ON u.id = s.user_id
+LEFT JOIN teachers t ON u.id = t.user_id
+LEFT JOIN admins a   ON u.id = a.user_id
+ORDER BY u.created_at DESC;
+  `;
+
+  sql.query(connectionString, query, (err, rows) => {
+    if (err) return res.status(500).send("Database error");
+    res.render("userList", { users: rows });
+  });
+});
+
+app.get(
+  "/users/:id/edit",
+  checkAuthenticated,
+  authenticateRole("admin"),
+  (req, res) => {
+    const userId = req.params.id;
+    const query = "SELECT * FROM users WHERE id = ?";
+
+    sql.query(connectionString, query, [userId], (err, rows) => {
+      if (err || rows.length === 0)
+        return res.status(500).send("User not found");
+      res.render("editUser", { user: rows[0] });
+    });
+  }
+);
+
+app.get("/", (req, res) => {
+  res.render("index.ejs", { user: req.user });
+});
+
+app.get("/login", checkNotAuthenticated, (req, res) => {
+  res.render("login.ejs");
+});
+app.get(
+  "/register",
+  checkAuthenticated,
+  authenticateRole("admin"),
+  (req, res) => {
+    res.render("register.ejs");
+  }
+);
+
+app.get("/notifications", checkAuthenticated, (req, res) => {
+  res.render("notifications.ejs", { user: req.user });
+});
+app.get(
+  "/courses/new",
+  checkAuthenticated,
+  authenticateRole("admin"),
+  (req, res) => {
+    res.render("addCourse.ejs");
+  }
+);
+app.get(
+  "/courses",
+  checkAuthenticated,
+  authenticateRole("admin"),
+  (req, res) => {
+    const query = "SELECT * FROM courses ORDER BY start_date DESC";
+    sql.query(connectionString, query, (err, rows) => {
+      if (err) {
+        console.error("Fetch courses error:", err);
+        return res.status(500).send("Database error");
+      }
+      res.render("courses.ejs", { courses: rows, user: req.user });
+    });
+  }
+);
+
+app.get(
+  "/courses/:id/edit",
+  checkAuthenticated,
+  authenticateRole("admin"),
+  (req, res) => {
+    const courseId = req.params.id;
+    const query = "SELECT * FROM courses WHERE id = ?";
+    sql.query(connectionString, query, [courseId], (err, result) => {
+      if (err) {
+        console.error("Edit fetch error:", err);
+        return res.status(500).send("Database error");
+      }
+      if (result.length === 0) return res.status(404).send("Course not found");
+      res.render("editCourse", { course: result[0] });
+    });
+  }
+);
+
+//you gonna need to redo this part
+app.get("/schedule", checkAuthenticated, (req, res) => {
+  // 1. Determine the Monday of the week
+  let monday;
+  if (req.query.weekStart) {
+    monday = new Date(req.query.weekStart);
+  } else {
+    const today = new Date();
+    const offset = (today.getDay() + 6) % 7; // Mon = 0
+    monday = new Date(today);
+    monday.setDate(today.getDate() - offset);
+  }
+
+  // 2. Build days and periods
+  const fmt = (d) =>
+    d.toLocaleDateString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+
+  const names = [
+    "Thứ 2",
+    "Thứ 3",
+    "Thứ 4",
+    "Thứ 5",
+    "Thứ 6",
+    "Thứ 7",
+    "Chủ nhật",
+  ];
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const dt = new Date(monday);
+    dt.setDate(monday.getDate() + i);
+    return {
+      name: names[i],
+      date: fmt(dt),
+      iso: dt.toISOString().slice(0, 10),
+    };
+  });
+  const periods = Array.from({ length: 15 }, (_, i) => `Tiết ${i + 1}`);
+
+  // 3. SQL query for schedule in week
+  const userId = req.user.id;
+  const role = req.user.role;
+  const startOfWeek = days[0].iso;
+  const endOfWeek = days[6].iso;
+
+  let query, params;
+  if (role === "student") {
+    query = `
+      SELECT s.schedule_date, s.start_time,
+             c.class_name, t.full_name AS teacher
+      FROM students st
+      JOIN enrollments e ON st.id = e.student_id
+      JOIN classes c     ON e.class_id = c.id
+      JOIN schedules s   ON c.id = s.class_id
+      JOIN teachers t    ON c.teacher_id = t.id
+      WHERE st.user_id = ?
+        AND s.schedule_date BETWEEN ? AND ?
+    `;
+    params = [userId, startOfWeek, endOfWeek];
+  } else if (role === "teacher") {
+    query = `
+      SELECT s.schedule_date, s.start_time,
+             c.class_name, NULL AS teacher
+      FROM teachers t
+      JOIN classes c    ON t.id = c.teacher_id
+      JOIN schedules s  ON c.id = s.class_id
+      WHERE t.user_id = ?
+        AND s.schedule_date BETWEEN ? AND ?
+    `;
+    params = [userId, startOfWeek, endOfWeek];
+  } else {
+    return res.status(403).send("Unauthorized role");
+  }
+
+  console.log("Role:", role, "UserId:", userId);
+  console.log("Date Range:", startOfWeek, "→", endOfWeek);
+
+  sql.query(connectionString, query, params, (err, rows) => {
+    if (err) {
+      console.error("SQL Error:", err);
+      return res.status(500).send("Database error");
+    }
+
+    const timeToPeriod = {
+      "07:00:00": 0,
+      "08:00:00": 1,
+      "09:00:00": 2,
+      "10:00:00": 3,
+      "11:00:00": 4,
+      "12:00:00": 5,
+      "13:00:00": 6,
+      "14:00:00": 7,
+      "15:00:00": 8,
+      "16:00:00": 9,
+      "17:00:00": 10,
+      "18:00:00": 11,
+      "19:00:00": 12,
+      "20:00:00": 13,
+      "21:00:00": 14,
+    };
+
+    const scheduleData = rows.map((r) => {
+      const isoDate = r.schedule_date.toISOString().slice(0, 10);
+
+      const timeStr = r.start_time.toISOString().slice(11, 19);
+      const periodIndex = timeToPeriod[timeStr];
+
+      return {
+        time: timeStr,
+        date: isoDate,
+        periodIndex,
+        className: r.class_name,
+        teacher: r.teacher || "",
+      };
+    });
+    console.log("Schedule data:", scheduleData);
+
+    const maxPeriod = scheduleData.length
+      ? Math.max(...scheduleData.map((s) => s.periodIndex))
+      : 0;
+
+    // 4. Prev/Next week
+    const prevWeekStart = new Date(monday);
+    prevWeekStart.setDate(prevWeekStart.getDate() - 7);
+    const nextWeekStart = new Date(monday);
+    nextWeekStart.setDate(nextWeekStart.getDate() + 7);
+
+    // 5. Render
+    res.render("schedule", {
+      user: req.user,
+      days,
+      periods,
+      scheduleData,
+      weekStart: monday.toISOString().slice(0, 10),
+      prevWeekStart: prevWeekStart.toISOString().slice(0, 10),
+      nextWeekStart: nextWeekStart.toISOString().slice(0, 10),
+      maxPeriod,
+    });
+  });
+});
+
+app.get(
+  "/schedule/new",
+  checkAuthenticated,
+  authenticateRole("admin"),
+  (req, res) => {
+    const classQuery = "SELECT id, class_name FROM classes";
+    sql.query(connectionString, classQuery, (err, result) => {
+      if (err) return res.status(500).send("Class fetch error");
+      res.render("newSchedule.ejs", { classes: result, user: req.user });
+    });
+  }
+);
+
+app.get(
+  "/schedules",
+  checkAuthenticated,
+  authenticateRole("admin"),
+  (req, res) => {
+    const query = `
+    SELECT s.*, c.class_name
+    FROM schedules s
+    JOIN classes c ON s.class_id = c.id
+    ORDER BY s.schedule_date DESC
+  `;
+
+    sql.query(connectionString, query, (err, rows) => {
+      if (err) {
+        console.error("Fetch schedules error:", err);
+        return res.status(500).send("Database error");
+      }
+      res.render("schedules.ejs", { schedules: rows, user: req.user });
+    });
+  }
+);
+
+app.get(
+  "/schedules/:id/edit",
+  checkAuthenticated,
+  authenticateRole("admin"),
+  (req, res) => {
+    const scheduleId = req.params.id;
+
+    const scheduleQuery = `SELECT * FROM schedules WHERE id = ?`;
+    const classQuery = `SELECT id, class_name FROM classes`;
+
+    sql.query(
+      connectionString,
+      scheduleQuery,
+      [scheduleId],
+      (err, scheduleResult) => {
+        if (err || scheduleResult.length === 0)
+          return res.status(500).send("Schedule not found");
+
+        sql.query(connectionString, classQuery, (err, classList) => {
+          if (err) return res.status(500).send("Class fetch error");
+
+          res.render("editSchedule.ejs", {
+            schedule: scheduleResult[0],
+            classes: classList,
+            user: req.user,
+          });
+        });
+      }
+    );
+  }
+);
+
+app.post(
+  "/classes",
+  checkAuthenticated,
+  authenticateRole(["admin", "teacher"]),
+  (req, res) => {
+    const { class_name, course_id, teacher_id, start_time, end_time } =
+      req.body;
+
+    if (!class_name || !course_id || !teacher_id || !start_time || !end_time) {
+      return res.status(400).send("Missing required fields");
+    }
+
+    const query = `
+    INSERT INTO classes (class_name, course_id, teacher_id, start_time, end_time)
+    VALUES (?, ?, ?, ?, ?);
+  `;
+
+    sql.query(
+      connectionString,
+      query,
+      [class_name, course_id, teacher_id, start_time, end_time],
+      (err) => {
+        if (err) {
+          console.error("Insert class error:", err);
+          return res.status(500).send("Database error");
+        }
+        res.redirect("/classes"); // or render a success page
+      }
+    );
+  }
+);
+
+app.get(
+  "/classes",
+  checkAuthenticated,
+  authenticateRole(["admin", "teacher"]),
+  (req, res) => {
+    const query = `
+    SELECT c.*, co.course_name, t.full_name AS teacher_name
+    FROM classes c
+    JOIN courses co ON c.course_id = co.id
+    JOIN teachers t ON c.teacher_id = t.id
+    ORDER BY c.created_at DESC
+  `;
+    sql.query(connectionString, query, (err, rows) => {
+      if (err) {
+        console.error("Fetch classes error:", err);
+        return res.status(500).send("Database error");
+      }
+      res.render("classes.ejs", { classes: rows, user: req.user });
+    });
+  }
+);
+
+app.get(
+  "/classes/:id/edit",
+  checkAuthenticated,
+  authenticateRole(["admin", "teacher"]),
+  (req, res) => {
+    const classId = req.params.id;
+
+    const classQuery = "SELECT * FROM classes WHERE id = ?";
+    const courseQuery = "SELECT id, course_name FROM courses";
+    const teacherQuery = "SELECT id, full_name FROM teachers";
+
+    sql.query(connectionString, classQuery, [classId], (err, classResult) => {
+      if (err || classResult.length === 0)
+        return res.status(500).send("Class not found");
+
+      sql.query(connectionString, courseQuery, (err, courses) => {
+        if (err) return res.status(500).send("Course fetch error");
+
+        sql.query(connectionString, teacherQuery, (err, teachers) => {
+          if (err) return res.status(500).send("Teacher fetch error");
+
+          res.render("editClass.ejs", {
+            classItem: classResult[0],
+            courses,
+            teachers,
+            user: req.user,
+          });
+        });
+      });
+    });
+  }
+);
+
+app.get(
+  "/enrollments",
+  checkAuthenticated,
+  authenticateRole("admin"),
+  (req, res) => {
+    const query = `
+    SELECT e.id, s.full_name AS student_name, c.class_name, e.enrollment_date
+    FROM enrollments e
+    JOIN students s ON e.student_id = s.id
+    JOIN classes c ON e.class_id = c.id
+    ORDER BY e.enrollment_date DESC
+  `;
+
+    sql.query(connectionString, query, (err, rows) => {
+      if (err) {
+        console.error("Fetch enrollments error:", err);
+        return res.status(500).send("Database error");
+      }
+      res.render("enrollments.ejs", { enrollments: rows, user: req.user });
+    });
+  }
+);
+
+app.get(
+  "/enrollments/:id/edit",
+  checkAuthenticated,
+  authenticateRole("admin"),
+  (req, res) => {
+    const id = req.params.id;
+
+    const enrollmentQuery = "SELECT * FROM enrollments WHERE id = ?";
+    const studentQuery = "SELECT id, full_name FROM students";
+    const classQuery = "SELECT id, class_name FROM classes";
+
+    sql.query(connectionString, enrollmentQuery, [id], (err, result) => {
+      if (err || result.length === 0)
+        return res.status(404).send("Enrollment not found");
+
+      const enrollment = result[0];
+      sql.query(connectionString, studentQuery, (err, students) => {
+        if (err) return res.status(500).send("Students fetch error");
+
+        sql.query(connectionString, classQuery, (err, classes) => {
+          if (err) return res.status(500).send("Classes fetch error");
+
+          res.render("editEnrollment.ejs", {
+            enrollment,
+            students,
+            classes,
+            user: req.user,
+          });
+        });
+      });
+    });
+  }
+);
+
+app.get(
+  "/payments",
+  checkAuthenticated,
+  authenticateRole("admin"),
+  (req, res) => {
+    const query = `
+    SELECT p.id, s.full_name AS student_name, p.amount, p.payment_date
+    FROM payments p
+    JOIN students s ON p.student_id = s.id
+    ORDER BY p.payment_date DESC
+  `;
+
+    sql.query(connectionString, query, (err, rows) => {
+      if (err) {
+        console.error("Fetch payments error:", err);
+        return res.status(500).send("Database error");
+      }
+      res.render("payments.ejs", { payments: rows, user: req.user });
+    });
+  }
+);
+
+app.get(
+  "/payments/:id/edit",
+  checkAuthenticated,
+  authenticateRole("admin"),
+  (req, res) => {
+    const paymentId = req.params.id;
+
+    const paymentQuery = "SELECT * FROM payments WHERE id = ?";
+    const studentQuery = "SELECT id, full_name FROM students";
+
+    sql.query(connectionString, paymentQuery, [paymentId], (err, result) => {
+      if (err || result.length === 0)
+        return res.status(404).send("Payment not found");
+
+      const payment = result[0];
+
+      sql.query(connectionString, studentQuery, (err, students) => {
+        if (err) return res.status(500).send("Student fetch error");
+
+        res.render("editPayment.ejs", {
+          payment,
+          students,
+          user: req.user,
+        });
+      });
+    });
+  }
+);
+
+app.get(
+  "/payments/new",
+  checkAuthenticated,
+  authenticateRole("admin"),
+  (req, res) => {
+    res.render("Newpayments.ejs", { user: req.user });
+  }
+);
+
+app.get(
+  "/enrollments/new",
+  checkAuthenticated,
+  authenticateRole("admin"),
+  (req, res) => {
+    res.render("Addenrollments.ejs", { user: req.user });
+  }
+);
+
+app.get(
+  "/upload",
+  authenticateRole(["admin", "teacher"]),
+  checkAuthenticated,
+  (req, res) => {
+    res.render("uploadMaterial.ejs");
+  }
+);
+
+app.get(
+  "/classes",
+  checkAuthenticated,
+  authenticateRole(["admin", "teacher"]),
+  (req, res) => {
+    res.render("addClass.ejs", { user: req.user });
   }
 );
 
@@ -514,50 +1050,11 @@ const valuesUser = [username, hashpassword, role];*/
   }
 );
 
-app.get("/users", checkAuthenticated, authenticateRole("admin"), (req, res) => {
-  
-  const query = `
-    	SELECT u.id, u.username, u.role, u.created_at, u.updated_at,
-       COALESCE(s.full_name, t.full_name, a.full_name) AS full_name,
-       COALESCE(s.email, t.email, a.email) AS email,
-       COALESCE(s.phone_number, t.phone_number, a.phone_number) AS phone
-FROM users u
-LEFT JOIN students s ON u.id = s.user_id
-LEFT JOIN teachers t ON u.id = t.user_id
-LEFT JOIN admins a   ON u.id = a.user_id
-ORDER BY u.created_at DESC;
-  `;
-
-  sql.query(connectionString, query, (err, rows) => {
-    if (err) return res.status(500).send("Database error");
-    res.render("userList", { users: rows });
-  });
-});
-
-app.get(
-  "/users/:id/edit",
-  checkAuthenticated,
-  authenticateRole("admin"),
-  (req, res) => {
-   
-    const userId = req.params.id;
-    const query = "SELECT * FROM users WHERE id = ?";
-
-    sql.query(connectionString, query, [userId], (err, rows) => {
-      if (err || rows.length === 0)
-        return res.status(500).send("User not found");
-      res.render("editUser", { user: rows[0] });
-    });
-  }
-);
-
 app.post(
   "/users/:id",
   checkAuthenticated,
   authenticateRole("admin"),
   (req, res) => {
-  
-
     const { username, role } = req.body;
     const query = `
     UPDATE users SET username = ?, role = ?, updated_at = GETDATE()
@@ -591,8 +1088,6 @@ app.delete(
   checkAuthenticated,
   authenticateRole("admin"),
   (req, res) => {
-   
-
     const query = "DELETE FROM users WHERE id = ?";
     sql.query(connectionString, query, [req.params.id], (err) => {
       if (err) return res.status(500).send("Delete failed");
@@ -601,64 +1096,6 @@ app.delete(
   }
 );
 
-app.get("/", (req, res) => {
-  res.render("index.ejs", { user: req.user });
-});
-app.get("/login", checkNotAuthenticated, (req, res) => {
-  res.render("login.ejs");
-});
-app.get(
-  "/register",
-  checkAuthenticated,
-  authenticateRole("admin"),
-  (req, res) => {
-    res.render("register.ejs");
-  }
-);
-app.get("/notifications", checkAuthenticated, (req, res) => {
-  res.render("notifications.ejs", { user: req.user });
-});
-app.get(
-  "/courses/new",
-  checkAuthenticated,
-  authenticateRole("admin"),
-  (req, res) => {
-    res.render("addCourse.ejs");
-  }
-);
-app.get(
-  "/courses",
-  checkAuthenticated,
-  authenticateRole("admin"),
-  (req, res) => {
-    const query = "SELECT * FROM courses ORDER BY start_date DESC";
-    sql.query(connectionString, query, (err, rows) => {
-      if (err) {
-        console.error("Fetch courses error:", err);
-        return res.status(500).send("Database error");
-      }
-      res.render("courses.ejs", { courses: rows, user: req.user });
-    });
-  }
-);
-
-app.get(
-  "/courses/:id/edit",
-  checkAuthenticated,
-  authenticateRole("admin"),
-  (req, res) => {
-    const courseId = req.params.id;
-    const query = "SELECT * FROM courses WHERE id = ?";
-    sql.query(connectionString, query, [courseId], (err, result) => {
-      if (err) {
-        console.error("Edit fetch error:", err);
-        return res.status(500).send("Database error");
-      }
-      if (result.length === 0) return res.status(404).send("Course not found");
-      res.render("editCourse", { course: result[0] });
-    });
-  }
-);
 app.post(
   "/courses/:id",
   checkAuthenticated,
@@ -799,162 +1236,6 @@ app.post(
   }
 );
 
-//you gonna need to redo this part
-app.get("/schedule", checkAuthenticated, (req, res) => {
-  // 1. Determine the Monday of the week
-  let monday;
-  if (req.query.weekStart) {
-    monday = new Date(req.query.weekStart);
-  } else {
-    const today = new Date();
-    const offset = (today.getDay() + 6) % 7; // Mon = 0
-    monday = new Date(today);
-    monday.setDate(today.getDate() - offset);
-  }
-
-  // 2. Build days and periods
-  const fmt = (d) =>
-    d.toLocaleDateString("vi-VN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
-
-  const names = [
-    "Thứ 2",
-    "Thứ 3",
-    "Thứ 4",
-    "Thứ 5",
-    "Thứ 6",
-    "Thứ 7",
-    "Chủ nhật",
-  ];
-  const days = Array.from({ length: 7 }, (_, i) => {
-    const dt = new Date(monday);
-    dt.setDate(monday.getDate() + i);
-    return {
-      name: names[i],
-      date: fmt(dt),
-      iso: dt.toISOString().slice(0, 10),
-    };
-  });
-  const periods = Array.from({ length: 15 }, (_, i) => `Tiết ${i + 1}`);
-
-  // 3. SQL query for schedule in week
-  const userId = req.user.id;
-  const role = req.user.role;
-  const startOfWeek = days[0].iso;
-  const endOfWeek = days[6].iso;
-
-  let query, params;
-  if (role === "student") {
-    query = `
-      SELECT s.schedule_date, s.start_time,
-             c.class_name, t.full_name AS teacher
-      FROM students st
-      JOIN enrollments e ON st.id = e.student_id
-      JOIN classes c     ON e.class_id = c.id
-      JOIN schedules s   ON c.id = s.class_id
-      JOIN teachers t    ON c.teacher_id = t.id
-      WHERE st.user_id = ?
-        AND s.schedule_date BETWEEN ? AND ?
-    `;
-    params = [userId, startOfWeek, endOfWeek];
-  } else if (role === "teacher") {
-    query = `
-      SELECT s.schedule_date, s.start_time,
-             c.class_name, NULL AS teacher
-      FROM teachers t
-      JOIN classes c    ON t.id = c.teacher_id
-      JOIN schedules s  ON c.id = s.class_id
-      WHERE t.user_id = ?
-        AND s.schedule_date BETWEEN ? AND ?
-    `;
-    params = [userId, startOfWeek, endOfWeek];
-  } else {
-    return res.status(403).send("Unauthorized role");
-  }
-
-  console.log("Role:", role, "UserId:", userId);
-  console.log("Date Range:", startOfWeek, "→", endOfWeek);
-
-  sql.query(connectionString, query, params, (err, rows) => {
-    if (err) {
-      console.error("SQL Error:", err);
-      return res.status(500).send("Database error");
-    }
-
-    const timeToPeriod = {
-      "07:00:00": 0,
-      "08:00:00": 1,
-      "09:00:00": 2,
-      "10:00:00": 3,
-      "11:00:00": 4,
-      "12:00:00": 5,
-      "13:00:00": 6,
-      "14:00:00": 7,
-      "15:00:00": 8,
-      "16:00:00": 9,
-      "17:00:00": 10,
-      "18:00:00": 11,
-      "19:00:00": 12,
-      "20:00:00": 13,
-      "21:00:00": 14,
-    };
-
-    const scheduleData = rows.map((r) => {
-      const isoDate = r.schedule_date.toISOString().slice(0, 10);
-
-      const timeStr = r.start_time.toISOString().slice(11, 19);
-      const periodIndex = timeToPeriod[timeStr];
-
-      return {
-        time: timeStr,
-        date: isoDate,
-        periodIndex,
-        className: r.class_name,
-        teacher: r.teacher || "",
-      };
-    });
-    console.log("Schedule data:", scheduleData);
-
-    const maxPeriod = scheduleData.length
-      ? Math.max(...scheduleData.map((s) => s.periodIndex))
-      : 0;
-
-    // 4. Prev/Next week
-    const prevWeekStart = new Date(monday);
-    prevWeekStart.setDate(prevWeekStart.getDate() - 7);
-    const nextWeekStart = new Date(monday);
-    nextWeekStart.setDate(nextWeekStart.getDate() + 7);
-
-    // 5. Render
-    res.render("schedule", {
-      user: req.user,
-      days,
-      periods,
-      scheduleData,
-      weekStart: monday.toISOString().slice(0, 10),
-      prevWeekStart: prevWeekStart.toISOString().slice(0, 10),
-      nextWeekStart: nextWeekStart.toISOString().slice(0, 10),
-      maxPeriod,
-    });
-  });
-});
-
-app.get(
-  "/schedule/new",
-  checkAuthenticated,
-  authenticateRole("admin"),
-  (req, res) => {
-    const classQuery = "SELECT id, class_name FROM classes";
-    sql.query(connectionString, classQuery, (err, result) => {
-      if (err) return res.status(500).send("Class fetch error");
-      res.render("newSchedule.ejs", { classes: result, user: req.user });
-    });
-  }
-);
-
 app.post(
   "/schedules",
   checkAuthenticated,
@@ -977,60 +1258,6 @@ app.post(
       }
       res.redirect("/schedule");
     });
-  }
-);
-
-app.get(
-  "/schedules",
-  checkAuthenticated,
-  authenticateRole("admin"),
-  (req, res) => {
-    const query = `
-    SELECT s.*, c.class_name
-    FROM schedules s
-    JOIN classes c ON s.class_id = c.id
-    ORDER BY s.schedule_date DESC
-  `;
-
-    sql.query(connectionString, query, (err, rows) => {
-      if (err) {
-        console.error("Fetch schedules error:", err);
-        return res.status(500).send("Database error");
-      }
-      res.render("schedules.ejs", { schedules: rows, user: req.user });
-    });
-  }
-);
-
-app.get(
-  "/schedules/:id/edit",
-  checkAuthenticated,
-  authenticateRole("admin"),
-  (req, res) => {
-    const scheduleId = req.params.id;
-
-    const scheduleQuery = `SELECT * FROM schedules WHERE id = ?`;
-    const classQuery = `SELECT id, class_name FROM classes`;
-
-    sql.query(
-      connectionString,
-      scheduleQuery,
-      [scheduleId],
-      (err, scheduleResult) => {
-        if (err || scheduleResult.length === 0)
-          return res.status(500).send("Schedule not found");
-
-        sql.query(connectionString, classQuery, (err, classList) => {
-          if (err) return res.status(500).send("Class fetch error");
-
-          res.render("editSchedule.ejs", {
-            schedule: scheduleResult[0],
-            classes: classList,
-            user: req.user,
-          });
-        });
-      }
-    );
   }
 );
 
@@ -1102,93 +1329,6 @@ app.post(
         return res.status(500).send("Insert failed");
       }
       res.redirect("/schedules");
-    });
-  }
-);
-
-app.post(
-  "/classes",
-  checkAuthenticated,
-  authenticateRole(["admin", "teacher"]),
-  (req, res) => {
-    const { class_name, course_id, teacher_id, start_time, end_time } =
-      req.body;
-
-    if (!class_name || !course_id || !teacher_id || !start_time || !end_time) {
-      return res.status(400).send("Missing required fields");
-    }
-
-    const query = `
-    INSERT INTO classes (class_name, course_id, teacher_id, start_time, end_time)
-    VALUES (?, ?, ?, ?, ?);
-  `;
-
-    sql.query(
-      connectionString,
-      query,
-      [class_name, course_id, teacher_id, start_time, end_time],
-      (err) => {
-        if (err) {
-          console.error("Insert class error:", err);
-          return res.status(500).send("Database error");
-        }
-        res.redirect("/classes"); // or render a success page
-      }
-    );
-  }
-);
-
-app.get(
-  "/classes",
-  checkAuthenticated,
-  authenticateRole(["admin", "teacher"]),
-  (req, res) => {
-    const query = `
-    SELECT c.*, co.course_name, t.full_name AS teacher_name
-    FROM classes c
-    JOIN courses co ON c.course_id = co.id
-    JOIN teachers t ON c.teacher_id = t.id
-    ORDER BY c.created_at DESC
-  `;
-    sql.query(connectionString, query, (err, rows) => {
-      if (err) {
-        console.error("Fetch classes error:", err);
-        return res.status(500).send("Database error");
-      }
-      res.render("classes.ejs", { classes: rows, user: req.user });
-    });
-  }
-);
-
-app.get(
-  "/classes/:id/edit",
-  checkAuthenticated,
-  authenticateRole(["admin", "teacher"]),
-  (req, res) => {
-    const classId = req.params.id;
-
-    const classQuery = "SELECT * FROM classes WHERE id = ?";
-    const courseQuery = "SELECT id, course_name FROM courses";
-    const teacherQuery = "SELECT id, full_name FROM teachers";
-
-    sql.query(connectionString, classQuery, [classId], (err, classResult) => {
-      if (err || classResult.length === 0)
-        return res.status(500).send("Class not found");
-
-      sql.query(connectionString, courseQuery, (err, courses) => {
-        if (err) return res.status(500).send("Course fetch error");
-
-        sql.query(connectionString, teacherQuery, (err, teachers) => {
-          if (err) return res.status(500).send("Teacher fetch error");
-
-          res.render("editClass.ejs", {
-            classItem: classResult[0],
-            courses,
-            teachers,
-            user: req.user,
-          });
-        });
-      });
     });
   }
 );
@@ -1284,63 +1424,6 @@ app.post(
   }
 );
 
-app.get(
-  "/enrollments",
-  checkAuthenticated,
-  authenticateRole("admin"),
-  (req, res) => {
-    const query = `
-    SELECT e.id, s.full_name AS student_name, c.class_name, e.enrollment_date
-    FROM enrollments e
-    JOIN students s ON e.student_id = s.id
-    JOIN classes c ON e.class_id = c.id
-    ORDER BY e.enrollment_date DESC
-  `;
-
-    sql.query(connectionString, query, (err, rows) => {
-      if (err) {
-        console.error("Fetch enrollments error:", err);
-        return res.status(500).send("Database error");
-      }
-      res.render("enrollments.ejs", { enrollments: rows, user: req.user });
-    });
-  }
-);
-
-app.get(
-  "/enrollments/:id/edit",
-  checkAuthenticated,
-  authenticateRole("admin"),
-  (req, res) => {
-    const id = req.params.id;
-
-    const enrollmentQuery = "SELECT * FROM enrollments WHERE id = ?";
-    const studentQuery = "SELECT id, full_name FROM students";
-    const classQuery = "SELECT id, class_name FROM classes";
-
-    sql.query(connectionString, enrollmentQuery, [id], (err, result) => {
-      if (err || result.length === 0)
-        return res.status(404).send("Enrollment not found");
-
-      const enrollment = result[0];
-      sql.query(connectionString, studentQuery, (err, students) => {
-        if (err) return res.status(500).send("Students fetch error");
-
-        sql.query(connectionString, classQuery, (err, classes) => {
-          if (err) return res.status(500).send("Classes fetch error");
-
-          res.render("editEnrollment.ejs", {
-            enrollment,
-            students,
-            classes,
-            user: req.user,
-          });
-        });
-      });
-    });
-  }
-);
-
 app.post(
   "/enrollments/:id",
   checkAuthenticated,
@@ -1415,57 +1498,6 @@ app.post(
   }
 );
 
-app.get(
-  "/payments",
-  checkAuthenticated,
-  authenticateRole("admin"),
-  (req, res) => {
-    const query = `
-    SELECT p.id, s.full_name AS student_name, p.amount, p.payment_date
-    FROM payments p
-    JOIN students s ON p.student_id = s.id
-    ORDER BY p.payment_date DESC
-  `;
-
-    sql.query(connectionString, query, (err, rows) => {
-      if (err) {
-        console.error("Fetch payments error:", err);
-        return res.status(500).send("Database error");
-      }
-      res.render("payments.ejs", { payments: rows, user: req.user });
-    });
-  }
-);
-
-app.get(
-  "/payments/:id/edit",
-  checkAuthenticated,
-  authenticateRole("admin"),
-  (req, res) => {
-    const paymentId = req.params.id;
-
-    const paymentQuery = "SELECT * FROM payments WHERE id = ?";
-    const studentQuery = "SELECT id, full_name FROM students";
-
-    sql.query(connectionString, paymentQuery, [paymentId], (err, result) => {
-      if (err || result.length === 0)
-        return res.status(404).send("Payment not found");
-
-      const payment = result[0];
-
-      sql.query(connectionString, studentQuery, (err, students) => {
-        if (err) return res.status(500).send("Student fetch error");
-
-        res.render("editPayment.ejs", {
-          payment,
-          students,
-          user: req.user,
-        });
-      });
-    });
-  }
-);
-
 app.post(
   "/payments/:id",
   checkAuthenticated,
@@ -1509,41 +1541,6 @@ app.delete(
   }
 );
 
-app.get(
-  "/payments/new",
-  checkAuthenticated,
-  authenticateRole("admin"),
-  (req, res) => {
-    res.render("Newpayments.ejs", { user: req.user });
-  }
-);
-
-app.get(
-  "/enrollments/new",
-  checkAuthenticated,
-  authenticateRole("admin"),
-  (req, res) => {
-    res.render("Addenrollments.ejs", { user: req.user });
-  }
-);
-
-app.get(
-  "/upload",
-  authenticateRole(["admin", "teacher"]),
-  checkAuthenticated,
-  (req, res) => {
-    res.render("uploadMaterial.ejs");
-  }
-);
-
-app.get(
-  "/classes",
-  checkAuthenticated,
-  authenticateRole(["admin", "teacher"]),
-  (req, res) => {
-    res.render("addClass.ejs", { user: req.user });
-  }
-);
 //route end
 
 function checkAuthenticated(req, res, next) {
