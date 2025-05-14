@@ -301,6 +301,14 @@ app.get("/", (req, res) => {
   res.render("index.ejs", { user: req.user });
 });
 
+app.get("/school", checkAuthenticated, (req, res) => {
+  res.render("school.ejs", { user: req.user });
+});
+
+app.get("/news", checkAuthenticated, (req, res) => {
+  res.render("news.ejs", { user: req.user });
+});
+
 app.get("/login", checkNotAuthenticated, (req, res) => {
   res.render("login.ejs");
 });

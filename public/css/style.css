@@ -5,6 +5,7 @@ body {
 }
 
 nav {
+  z-index: 1000;
   position: absolute;
   top: 15px;
   left: 50%;
@@ -13,10 +14,19 @@ nav {
   border: 2px solid #EBECF1;
   border-radius: 30px;
   animation: slide-in 1s ease-out;
+  gap : 30px;
+}
+
+.header-container {
+display: flex;
+justify-content: space-around;
+align-items: center;
+background-color: #f8f9fa;
+padding: 10px 0;
+ justify-content: space-between;
 }
 
 .header-container ul {
-  z-index: 1000;
   position: relative;
   display: flex;
   flex: 1 1 auto;
@@ -131,7 +141,7 @@ nav {
     width: 100%;
     height: 100%;
     filter: grayscale(20%);
-    background-image: url("/images/1.jpg");
+    background-image: url("/images/4.jpg");
     background-size: cover;
     background-position: center;
 }
@@ -142,10 +152,10 @@ nav {
     background-image: url("/images/3.jpg");
 }
 .slider-wrapper .slider-item:nth-child(4):before {
-    background-image: url("/images/4.jpg");
+    background-image: url("/images/1.jpg");
 }
 .slider-wrapper .slider-item:nth-child(5):before {
-background-image: url("/images/5.jpg");
+    background-image: url("/images/5.jpg");
 }
 .slider-wrapper .slider-item .slide-content {
     color: #fff;
@@ -206,12 +216,7 @@ background-image: url("/images/5.jpg");
     list-style: none;
     justify-content: space-between;
 }
-.slider-pagination .slider-indicator {
-  position: absolute;
-  bottom: 0;
-  width: 300px;
-  border-bottom: 2px solid #fff;
-}
+
 .slider-pagination .slider-tab {
   color: #ffffff;
   text-align: center;
@@ -221,158 +226,465 @@ background-image: url("/images/5.jpg");
   border-bottom: 1px solid rgba(255,255,255,0.5);
 }
 
- /* Made with love by Mutiullah Samim*/
+/* newwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww*/
+/* Reset một số CSS mặc định */
 
-@import url('https://fonts.googleapis.com/css?family=Numans');
 
-html,body{
-background-image: url('https://images.pexels.com/photos/618833/pexels-photo-618833.jpeg?cs=srgb&dl=pexels-sagui-andrea-200115-618833.jpg&fm=jpg');
-background-size: cover;
-background-repeat: no-repeat;
-height: 100%;
-font-family: 'Numans', sans-serif;
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
 }
 
-.container{
-height: 100%;
-align-content: center;
+h1 {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
 }
 
-.card{
-height: 370px;
-margin-top: auto;
-margin-bottom: auto;
-width: 400px;
-background-color: rgba(0,0,0,0.5) !important;
+.main-content {
+    display: flex;
+    gap: 20px;
 }
 
-.social_icon span{
-font-size: 60px;
-margin-left: 10px;
-color: #FFC312;
+.news-section {
+    flex: 3;
 }
 
-.social_icon span:hover{
-color: white;
-cursor: pointer;
+.news-item {
+    display: flex;
+    background: #fff;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    overflow: hidden;
 }
 
-.card-header h3{
-color: white;
+.news-item img {
+    max-width: 200px;
+    object-fit: cover;
 }
 
-.social_icon{
-position: absolute;
-right: 20px;
-top: -45px;
+.news-content {
+    padding: 15px;
+    flex: 1;
 }
 
-.input-group-prepend span{
-width: 50px;
-background-color: #FFC312;
-color: black;
-border:0 !important;
+.news-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #333;
 }
 
-input:focus{
-outline: 0 0 0 0  !important;
-box-shadow: 0 0 0 0 !important;
-
+.news-title a {
+    text-decoration: none;
+    color: inherit;
 }
 
-.remember{
-color: white;
+.news-title a:hover {
+    color: #0073e6;
 }
 
-.remember input
-{
-width: 20px;
-height: 20px;
-margin-left: 15px;
-margin-right: 5px;
+.news-description {
+    font-size: 14px;
+    color: #666;
 }
 
-.login_btn{
-color: black;
-background-color: #FFC312;
-width: 100px;
-}
-
-.login_btn:hover{
-color: black;
-background-color: white;
-}
-
-.links{
-color: white;
-}
-
-.links a{
-margin-left: 4px;
-}
-
-
-
-/* The sidebar menu */
 .sidebar {
-  height: 100%; /* 100% Full-height */
-  width: 0; /* 0 width - change this with JavaScript */
-  position: fixed; /* Stay in place */
-  z-index: 1; /* Stay on top */
-  top: 0;
-  right: 0;
-  background-color: #111; /* Black*/
-  overflow-x: hidden; /* Disable horizontal scroll */
-  padding-top: 60px; /* Place content 60px from the top */
-  transition: 0.5s; /* 0.5 second transition effect to slide in the sidebar */
+    flex: 1;
 }
 
-/* The sidebar links */
-.sidebar a {
-  padding: 8px 8px 8px 32px;
-  text-decoration: none;
-  font-size: 25px;
-  color: #818181;
-  display: block;
-  transition: 0.3s;
+.popular-section h2,
+.photo-section h2 {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #333;
 }
 
-/* When you mouse over the navigation links, change their color */
-.sidebar a:hover {
-  color: #f1f1f1;
+.popular-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
-/* Position and style the close button (top right corner) */
-.sidebar .closebtn {
-  position: absolute;
-  top: 0;
-  right: 25px;
-  font-size: 36px;
-  margin-right: 50px;
+.popular-section ul li {
+    font-size: 14px;
+    margin-bottom: 10px;
 }
 
-/* The button used to open the sidebar */
-.openbtn {
-  font-size: 20px;
-  cursor: pointer;
-  background-color: #111;
-  color: white;
-  padding: 10px 15px;
-  border: none;
+.popular-section ul li a {
+    text-decoration: none;
+    color: #0073e6;
 }
 
-.openbtn:hover {
-  background-color: #444;
+.popular-section ul li span {
+    font-size: 12px;
+    color: #999;
+    margin-left: 5px;
 }
 
-/* Style page content - use this if you want to push the page content to the right when you open the side navigation */
-#main {
-  transition: margin-right .5s; /* If you want a transition effect */
+.photo-section img {
+    width: 100%;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.photo-section p {
+    font-size: 14px;
+}
+
+.photo-section a {
+    text-decoration: none;
+    color: #0073e6;
+}
+
+.popular-section {
+    margin-bottom: 30px;
+    padding: 15px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.popular-section h2 {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #333;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 5px;
+}
+
+.popular-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.popular-section ul li {
+    font-size: 14px;
+    margin-bottom: 10px;
+    line-height: 1.4;
+    color: #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.popular-section ul li a {
+    text-decoration: none;
+    color: #0073e6;
+    flex: 1;
+    margin-right: 10px;
+}
+
+.popular-section ul li a:hover {
+    text-decoration: underline;
+}
+
+.popular-section ul li span {
+    font-size: 12px;
+    color: #999;
+    white-space: nowrap;
+}
+
+/* mappppppp*/
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.container-map {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   padding: 20px;
 }
 
-/* On smaller screens, where height is less than 450px, change the style of the sidenav (less padding and a smaller font size) */
-@media screen and (max-height: 450px) {
-  .sidebar {padding-top: 15px;}
-  .sidebar a {font-size: 18px;}
+.location-box {
+  width: 300px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  text-align: center;
+  background-color: #f9f9f9;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s;
+}
+
+.location-box:hover {
+  background-color: #e8f4ff;
+}
+
+#map {
+  width: 100%;
+  height: 400px;
+  margin-top: 20px;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #fff9e6;
+}
+
+.container-gth {
+  width: 90%;
+  margin: 0 auto;
+  padding: 20px 0;
+}
+
+/* Row styling */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.image-section, .vision-section, .mission-section {
+  flex: 1;
+  padding: 10px;
+}
+
+.image-section img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.vision-section, .mission-section {
+  background-color: #fef4d1;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.vision-section h2, .mission-section h2 {
+  color: #0056b3;
+  margin-bottom: 10px;
+}
+
+.vision-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.vision-section ul li {
+  margin-bottom: 10px;
+  line-height: 1.6;
+}
+
+.mission-section p {
+  line-height: 1.6;
+  text-align: justify;
+}
+
+
+/* thu ngo and about  */
+.container-letter {
+  width: 90%;
+  margin: 0 auto;
+  padding: 20px 0;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px;
+}
+
+.image-section {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.image-wrapper {
+  width: 100%;
+  max-width: 350px;
+  background-color: #e3f2ff;
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.image-wrapper img {
+  width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.content-section {
+  flex: 2;
+  padding: 10px;
+}
+
+.content-section h2 {
+  color: #0056b3;
+  margin-bottom: 20px;
+  font-size: 28px;
+}
+
+.content-section p {
+  line-height: 1.8;
+  margin-bottom: 16px;
+  text-align: justify;
+}
+
+.content-section strong {
+  color: #0056b3;
+}
+
+.container-letter {
+  width: 90%;
+  margin: 0 auto;
+  padding: 20px 0;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px;
+}
+
+.image-section {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.image-wrapper {
+  width: 100%;
+  max-width: 350px;
+  background-color: #e3f2ff;
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.image-wrapper img {
+  width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.content-section {
+  flex: 2;
+  padding: 10px;
+}
+
+.content-section h2 {
+  color: #0056b3;
+  margin-bottom: 20px;
+  font-size: 28px;
+}
+
+.content-section p {
+  line-height: 1.8;
+  margin-bottom: 16px;
+  text-align: justify;
+}
+
+.content-section strong {
+  color: #0056b3;
+}
+
+/*doi ngu giao vien*/
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+.slide-container{
+  max-width: 1800px;
+  width: 100%;
+  background-color: gray;
+  padding: 40px 0;
+}
+
+.slide-content{
+  margin: 0 40px;
+}
+
+.card{
+  width: 300px;
+  border-radius: 25px;
+  background-color: #fff;
+}
+.image-content,
+.card-content{
+display: flex;
+flex-direction: column;
+align-items: center;
+padding: 10px 14px; 
+}
+
+.image-content{
+  row-gap: 5px;
+  position: relative;
+ 
+}
+
+overlay{
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  background-color: #4070F4;
+  Left: 0;
+  top: 0;
+   border-radius: 25px 25px 0 25px;
+}
+
+
+.card-image {
+  position: relative;
+  height: 150px;
+  width: 150px;
+}
+
+.card-image .card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+
+}
+
+.name{
+  font-size: 18px;
+  font-weight: 500;
+  color: #333;
+}
+
+.description{
+  font-size: 14px;
+  color: #707070;
+  text-align: center;
+}
+
+.button{
+  border: none;
+  font-size: 16px;
+  color: #fff;
+  padding: 8px 16px;
+  background-color:  #4070F4;
+  border-radius: 6px;
+  margin: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
