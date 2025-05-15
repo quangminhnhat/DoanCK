@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Edit Enrollment</title>
+</head>
+
+<body>
+    <h1>Edit Enrollment</h1>
+    <form method="POST" action="/enrollments/<%= enrollment.id %>">
+        <label>Student:</label><br>
+        <select name="student_id" required>
+            <% students.forEach(s => { %>
+            <option value="<%= s.id %>" <% if (s.id === enrollment.student_id) { %>selected<% } %>>
+                <%= s.full_name %>
+            </option>
+            <% }) %>
+        </select><br><br>
+
+        <label>Class:</label><br>
+        <select name="class_id" required>
+            <% classes.forEach(c => { %>
+            <option value="<%= c.id %>" <% if (c.id === enrollment.class_id) { %>selected<% } %>>
+                <%= c.class_name %>
+            </option>
+            <% }) %>
+        </select><br><br>
+
+        <label>Enrollment Date:</label><br>
+        <input type="date" name="enrollment_date" value="<%= enrollment.enrollment_date.toISOString().split('T')[0] %>"
+            required><br><br>
+
+        <button type="submit">Save Changes</button>
+    </form>
+    <a href="/enrollments">Back</a>
+</body>
+
+</html>

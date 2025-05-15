@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Edit Class</title>
+</head>
+
+<body>
+    <h1>Edit Class</h1>
+    <form method="POST" action="/classes/<%= classItem.id %>">
+        <label>Class Name:</label><br>
+        <input type="text" name="class_name" value="<%= classItem.class_name %>" required><br><br>
+
+        <label>Course:</label><br>
+        <select name="course_id" required>
+            <% courses.forEach(course => { %>
+            <option value="<%= course.id %>" <% if (course.id === classItem.course_id) { %>selected<% } %>>
+                <%= course.course_name %>
+            </option>
+            <% }) %>
+        </select><br><br>
+
+        <label>Teacher:</label><br>
+        <select name="teacher_id" required>
+            <% teachers.forEach(teacher => { %>
+            <option value="<%= teacher.id %>" <% if (teacher.id === classItem.teacher_id) { %>selected<% } %>>
+                <%= teacher.full_name %>
+            </option>
+            <% }) %>
+        </select><br><br>
+
+        <label>Start Time:</label><br>
+        <input type="time" name="start_time" value="<%= classItem.start_time %>" required><br><br>
+
+        <label>End Time:</label><br>
+        <input type="time" name="end_time" value="<%= classItem.end_time %>" required><br><br>
+
+        <button type="submit">Update Class</button>
+    </form>
+    <a href="/classes">Back to class list</a>
+</body>
+
+</html>

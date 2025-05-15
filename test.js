@@ -2,7 +2,7 @@ const sql = require("msnodesqlv8");
 
 
 const connectionString =
-  "Driver={ODBC Driver 17 for SQL Server};Server=DESKTOP-ILINDAV\\SQLEXPRESS;Database=DOANCS;Trusted_Connection=Yes;";
+  "Driver={ODBC Driver 17 for SQL Server};Server=LAPTOP-ND7KAD0J;Database=DOANCS;Trusted_Connection=Yes;";
 
 const query = `
 SELECT 

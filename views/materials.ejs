@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Materials</title>
+</head>
+
+<body>
+    <h1>Uploaded Materials</h1>
+    <a href="/">Back</a>
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Course ID</th>
+            <th>File Name</th>
+            <th>Uploaded At</th>
+            <th>Actions</th>
+        </tr>
+        <% materials.forEach(material => { %>
+        <tr>
+            <td><%= material.id %></td>
+            <td><%= material.course_id %></td>
+            <td><a href="/<%= material.file_path %>" target="_blank"><%= material.file_name %></a></td>
+            <td><%= material.uploaded_at.toISOString().slice(0, 19).replace("T", " ") %></td>
+            <td>
+                <a href="/materials/<%= material.id %>/edit">Edit</a>
+                <form method="POST" action="/materials/<%= material.id %>?_method=DELETE" style="display:inline;">
+                    <button type="submit"
+                        onclick="return confirm('Are you sure you want to delete this file?');">Delete</button>
+                </form>
+            </td>
+        </tr>
+        <% }) %>
+    </table>
+</body>
+
+</html>

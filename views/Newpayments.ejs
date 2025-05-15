@@ -1,0 +1,13 @@
+<form action="/payments" method="POST">
+    <label for="student_id">Student ID:</label>
+    <input type="number" id="student_id" name="student_id" required />
+
+    <label for="amount">Amount:</label>
+    <input type="number" id="amount" step="0.01" name="amount" required />
+
+    <label for="payment_date">Payment Date:</label>
+    <input type="date" id="payment_date" name="payment_date" required />
+
+    <button type="submit">Record Payment</button>
+</form>
+  

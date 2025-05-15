@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Upload Material</title>
+</head>
+
+<body>
+    <h1>Upload Course Material</h1>
+
+    <form action="/upload-material" method="POST" enctype="multipart/form-data">
+        <label for="course_id">Course ID:</label>
+        <input type="number" name="course_id" required /><br><br>
+
+        <label for="material">Select File:</label>
+        <input type="file" name="material" required /><br><br>
+
+        <button type="submit">Upload</button>
+    </form>
+
+    <p><a href="/">Back to home</a></p>
+</body>
+
+</html>

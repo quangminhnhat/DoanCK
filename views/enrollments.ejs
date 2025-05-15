@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Enrollments</title>
+</head>
+
+<body>
+  <h1>Enrollment List</h1>
+  <a href="/">Back</a>
+  <table border="1">
+    <tr>
+      <th>ID</th>
+      <th>Student</th>
+      <th>Class</th>
+      <th>Date</th>
+      <th>Actions</th>
+    </tr>
+    <% enrollments.forEach(e => { %>
+    <tr>
+      <td><%= e.id %></td>
+      <td><%= e.student_name %></td>
+      <td><%= e.class_name %></td>
+      <td><%= e.enrollment_date.toISOString().split('T')[0] %></td>
+      <td>
+        <a href="/enrollments/<%= e.id %>/edit">Edit</a>
+        <form method="POST" action="/enrollments/<%= e.id %>?_method=DELETE" style="display:inline;">
+          <button type="submit" onclick="return confirm('Delete this enrollment?')">Delete</button>
+        </form>
+      </td>
+    </tr>
+    <% }) %>
+  </table>
+</body>
+
+</html>
