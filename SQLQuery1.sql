@@ -181,21 +181,28 @@ go
 
 
 
--- Insert sample users
---INSERT INTO users (username, password, role)
---VALUES 
---('student01', 'hashedpassword1', 'student'),
---('teacher01', 'hashedpassword2', 'teacher');
+-- Insert users
+INSERT INTO users (username, password, role, created_at, updated_at)
+VALUES 
+('aaaaaaaaa', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', '2025-05-11 17:23:17.473', '2025-05-11 17:23:17.473'),
+('bbbbbbbbbb', '$2b$10$TPE79JXdRYc3c9EnKLLTPe4iSkP.SB3D79RMIIhxmh/tQkS7ezQ.C', 'teacher', '2025-05-11 17:23:32.367', '2025-05-11 17:23:32.367'),
+('cccccccccc', '$2b$10$yppnS1aDECiNoIOp76Z4B.2FnkvgAS96liJXsYfemQTpGoISHFVey', 'admin', '2025-05-12 09:37:00.560', '2025-05-12 09:50:10.277');
 
--- Insert students (link to user_id 1)
---INSERT INTO students (user_id, full_name, email, phone_number, address, date_of_birth)
---VALUES 
---(1, 'Nguyen Van A', 'a@student.edu', '0123456789', '123 ABC Street', '2003-05-12');
+-- Insert student (assumes user_id = 1)
+INSERT INTO students (user_id, full_name, email, phone_number, address, date_of_birth)
+VALUES 
+(1, 'aaaaaaaaa', 'test@gmail.com', '5646456363', 'djtkjtrfnrt', '2025-05-16');
 
----- Insert teachers (link to user_id 2)
---INSERT INTO teachers (user_id, full_name, email, phone_number, address, date_of_birth, salary)
---VALUES 
---(2, 'Tran Thi B', 'b@teacher.edu', '0987654321', '456 DEF Street', '1980-10-01', 25000000);
+-- Insert teacher (assumes user_id = 2)
+INSERT INTO teachers (user_id, full_name, email, phone_number, address, date_of_birth, salary)
+VALUES 
+(2, 'bbbbbbbbbb', 'test2@gmail.com', '5646456363', 'djtkjtrfnrt', '2025-05-16', 10000000000000.00);
+
+-- Insert admin info (if you have a table for admins; otherwise skip or create table)
+-- Example for a generic profile table if you store additional info:
+ INSERT INTO admins (user_id, full_name, email, phone_number, created_at)
+ VALUES 
+ (3, 'vvvvvvvvvv', 'test3@gmail.com', '5646456363', '2025-05-12 09:37:00.567');
 
 -- Insert courses
 INSERT INTO courses (course_name, description, start_date, end_date)
