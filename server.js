@@ -284,7 +284,7 @@ ORDER BY u.created_at DESC;
 app.get(
   "/users/:id/edit",
   checkAuthenticated,
-  authenticateRole("admin"),
+  /*authenticateRole("admin"),*/
   (req, res) => {
     const userId = req.params.id;
     const query = "SELECT * FROM users WHERE id = ?";
@@ -301,11 +301,11 @@ app.get("/", (req, res) => {
   res.render("index.ejs", { user: req.user });
 });
 
-app.get("/school", checkAuthenticated, (req, res) => {
+app.get("/school", (req, res) => {
   res.render("school.ejs", { user: req.user });
 });
 
-app.get("/news", checkAuthenticated, (req, res) => {
+app.get("/news", (req, res) => {
   res.render("news.ejs", { user: req.user });
 });
 
@@ -807,6 +807,45 @@ app.get(
   }
 );
 
+app.get("/profile", checkAuthenticated, (req, res) => {
+  const userId = req.user.id;
+  const role = req.user.role;
+
+  let query = "";
+  if (role === "student") {
+    query = `
+      SELECT full_name, email, phone_number
+      FROM students
+      WHERE user_id = ?
+    `;
+  } else if (role === "teacher") {
+    query = `
+      SELECT full_name, email, phone_number
+      FROM teachers
+      WHERE user_id = ?
+    `;
+  } else if (role === "admin") {
+    query = `
+      SELECT full_name, email, phone_number
+      FROM admins
+      WHERE user_id = ?
+    `;
+  } else {
+    return res.render("profile", { user: req.user, details: null });
+  }
+
+  sql.query(connectionString, query, [userId], (err, result) => {
+    if (err || result.length === 0) {
+      console.error("Profile fetch error:", err);
+      return res.status(500).send("Error fetching profile");
+    }
+    res.render("profile.ejs", {
+      user: req.user,
+      details: result[0],
+    });
+  });
+});
+
 app.post(
   "/materials/:id",
   checkAuthenticated,
@@ -1196,7 +1235,7 @@ app.get("link ở đây", (req, res) => {
 link role
 app.get("/admin", checkAuthenticated, authenticateRole("admin"), (req, res) => {
   res.render("admin.ejs", { user: req.user });
-});
+}); 
 */
 app.delete("/logout", (req, res) => {
   req.logOut((err) => {

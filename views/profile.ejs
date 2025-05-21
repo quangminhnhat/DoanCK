@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>User Profile</title>
+</head>
+
+<body>
+    <h1>Welcome, <%= user.username %>!</h1>
+    <p><strong>Role:</strong> <%= user.role %></p>
+    <p><strong>Created At:</strong> <%= user.created_at %></p>
+    <p><strong>Updated At:</strong> <%= user.updated_at %></p>
+
+    <% if (details) { %>
+    <h2>Personal Information</h2>
+    <p><strong>Full Name:</strong> <%= details.full_name %></p>
+    <p><strong>Email:</strong> <%= details.email %></p>
+    <p><strong>Phone:</strong> <%= details.phone_number %></p>
+    <% } %>
+    <a href="/users/<%= user.id %>/edit">Edit</a> 
+</body>
+
+</html>
