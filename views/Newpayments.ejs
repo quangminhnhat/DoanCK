@@ -68,7 +68,7 @@
                     <!-- Common options for all authenticated users -->
                     <a href="/schedule" class="nav-button"><i class="fas fa-calendar"></i><span>My Schedule</span></a>
                     <a href="/notifications" class="nav-button"><i class="fas fa-bell"></i><span>Notifications</span></a>
-            
+                    <a href="/profile" class="nav-button"><i class="fas fa-user"></i><span>Profile</span></a>
                     <!-- Teacher & Admin only options -->
                     <% if (user.role === 'admin' || user.role === 'teacher') { %>
                     <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
