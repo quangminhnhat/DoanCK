@@ -317,7 +317,7 @@ app.get(
   checkAuthenticated,
   authenticateRole("admin"),
   (req, res) => {
-    res.render("register.ejs");
+    res.render("register.ejs", { materials: rows, user: req.user });
   }
 );
 
