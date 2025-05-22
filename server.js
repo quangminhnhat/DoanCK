@@ -23,7 +23,7 @@ app.use(methodOverride("_method"));
 
 app.use(express.urlencoded({ extended: false }));
 const connectionString =
-  "Driver={ODBC Driver 17 for SQL Server};Server=DESKTOP-M7HENCK;Database=DOANCS;Trusted_Connection=Yes;";
+  "Driver={ODBC Driver 17 for SQL Server};Server=LAPTOP-ND7KAD0J;Database=DOANCS;Trusted_Connection=Yes;";
 app.use(flash());
 app.use(
   session({
@@ -31,7 +31,7 @@ app.use(
     resave: false,
     saveUninitialized: false,
   })
-);
+); 
 const initalizePassport = require("./pass-config");
 const { time } = require("console");
 initalizePassport(

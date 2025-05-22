@@ -1,3 +1,75 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang Chủ</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://demos.creative-tim.com/notus-js/assets/styles/tailwind.css">
+    <!-- link swiper-->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <link rel="stylesheet"
+        href="https://demos.creative-tim.com/notus-js/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css">
+</head>
+
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <img src="images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png" alt="Logo"
+                    width="90" height="90">
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="/">Trang Chủ</a></li>
+                    <li><a href="/school">Trung Tâm</a></li>
+                    <li>
+                        <a href="#0">Thư Viện</a>
+                        <ul>
+                            <li><a href="https://drive.google.com/drive/folders/1j_lNKViTx_UUyZNXRlkhRd-w9ghDxAYB">Sách
+                                    Giáo Khoa</a>
+                            </li>
+                            <li><a href="#0">Tài Liệu Tham Khảo</a></li>
+                            <li><a href="#0">Tài Liệu Tiếng Anh</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="/news">Tin Tức - Sự Kiện</a>
+                    </li>
+                </ul>
+            </nav>
+
+            <% if (!user) { %>
+            <a href="/login" class="login-btn">
+                <i class="fa-solid fa-user"></i> Login
+            </a>
+            <% } else { %>
+            <div class="user-slidebar">
+                <button class="user-btn">
+                    <i class="fa-solid fa-user"></i> <%= user.username || 'User' %> <i
+                        class="fa-solid fa-caret-down"></i>
+                </button>
+                <ul class="user-dropdown">
+                    <li><a href="/profile">Thông tin cá nhân</a></li>
+                    <li>
+                        <form action="/logout?_method=DELETE" method="POST" style="margin:0;">
+                            <button type="submit"
+                                style="background:none;border:none;padding:0;color:inherit;cursor:pointer;">
+                                Đăng xuất
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+            <% } %>
+
+
+
+        </div>
+
+        </header>
+
+
 <h2>All Users</h2>
 <table border="1">
     <tr>
@@ -20,9 +92,76 @@
         <td>
             <a href="/users/<%= user.id %>/edit">Edit</a> |
             <form action="/users/<%= user.id %>?_method=DELETE" method="POST" style="display:inline;">
-                <button onclick="return confirm('Are you sure?')">Delete</button>
+                <button type="submit" onclick="return confirm('Are you sure?')">Delete</button>
             </form>
         </td>
     </tr>
     <% }) %>
 </table>
+<footer class="relative bg-blueGray-200 pt-8 pb-6">
+    <div class="container mx-auto px-4">
+        <div class="flex flex-wrap text-left lg:text-left">
+            <div class="w-full lg:w-6/12 px-4">
+                <h4 class="text-3xl fonat-semibold text-blueGray-700">Liên hệ với chúng tôi!</h4>
+                <h5 class="text-lg mt-0 mb-2 text-blueGray-600">
+                    Tìm kiếm chúng tôi trên bất kỳ mạng xã hội nào và gửi cho chúng tôi một tin nhắn! Chúng tôi sẽ trả
+                    lời bạn
+                    ngay khi có thể.
+                </h5>
+                <div class="mt-6 lg:mb-0 mb-6">
+                    <button
+                        class="bg-white text-lightBlue-400 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
+                        type="button">
+                        <i class="fab fa-twitter"></i></button><button
+                        class="bg-white text-lightBlue-600 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
+                        type="button">
+                        <i class="fab fa-facebook-square"></i></button><button
+                        class="bg-white text-pink-400 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
+                        type="button">
+                        <i class="fab fa-dribbble"></i></button><button
+                        class="bg-white text-blueGray-800 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
+                        type="button">
+                        <i class="fab fa-github"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="w-full lg:w-6/12 px-4">
+                <div class="flex flex-wrap items-top mb-6">
+                    <div class="w-full lg:w-4/12 px-4 ml-auto">
+                        <span class="block uppercase text-blueGray-500 text-sm font-semibold mb-2">Bạn Đang Tìm
+                            Kiếm</span>
+                        <ul class="list-unstyled">
+                            <li>
+                                <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm"
+                                    href="">Liên
+                                    Hệ</a>
+                            </li>
+                            <li>
+                                <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm"
+                                    href="">Thông
+                                    Tin Mới</a>
+                            </li>
+                            <li>
+                                <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm"
+                                    href="">Tuyển
+                                    Dụng</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr class="my-6 border-blueGray-300">
+        <div class="flex flex-wrap items-center md:justify-between justify-center">
+            <div class="w-full md:w-4/12 px-4 mx-auto text-center">
+                <div class="text-sm text-blueGray-500 font-semibold py-1">
+                    Copyright © <span id="get-current-year">2025</span><a href="https://www.facebook.com/ttgdvpttnht"
+                        class="text-blueGray-500 hover:text-gray-800" target="_blank"> Talent Education</a>. Made by
+                    <a href="https://github.com/Rin-0808" class="text-blueGray-500 hover:text-blueGray-800">Rin</a>.
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+</body>
