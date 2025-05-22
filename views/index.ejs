@@ -58,16 +58,29 @@
     <hr>
   </div>
   <div id="nav-content">
-    <div  href="/" class="nav-button"><i class="fas fa-house"></i><span>Home</span></div>
-    <div class="nav-button"><i class="fas fa-user"></i><span>Profile</span></div>
-    <div class="nav-button"><i class="fas fa-bell"></i><span>Notifik</span></div>
-    <div class="nav-button"><i class="fas fa-gear"></i><span>Settings</span></div>
-    <div class="nav-button"><i class="fas fa-gear"></i><span>Settings</span></div>
-    <div class="nav-button"><form action="/logout?_method=DELETE" method="POST">
-      <button type="submit" class="nav-button">
-        <i class="fas fa-right-from-bracket"></i><span>Logout</span>
-      </button>
-    </form>
+    <a href="/" class="nav-button"><i class="fas fa-house"></i><span>Home</span></a>
+    <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
+    <a href="/courses" class="nav-button"><i class="fas fa-book"></i><span>Courses</span></a>
+    <a href="/enrollments" class="nav-button"><i class="fas fa-user-plus"></i><span>Enrollments</span></a>
+    <a href="/materials" class="nav-button"><i class="fas fa-file"></i><span>Materials</span></a>
+    <a href="/payments" class="nav-button"><i class="fas fa-money-bill"></i><span>Payments</span></a>
+    <a href="/schedules" class="nav-button"><i class="fas fa-calendar-alt"></i><span>Schedules</span></a>
+    <a href="/schedule" class="nav-button"><i class="fas fa-calendar"></i><span>My Schedule</span></a>
+    <a href="/notifications" class="nav-button"><i class="fas fa-bell"></i><span>Notifications</span></a>
+    <a href="/users" class="nav-button"><i class="fas fa-user-cog"></i><span>User List</span></a>
+    <a href="/register" class="nav-button"><i class="fas fa-user-plus"></i><span>Register User</span></a>
+    <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload Material</span></a>
+    <a href="/courses/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Course</span></a>
+    <a href="/classes" class="nav-button"><i class="fas fa-plus"></i><span>Add Class</span></a>
+    <a href="/enrollments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Enrollment</span></a>
+    <a href="/payments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Payment</span></a>
+    <a href="/schedule/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Schedule</span></a>
+    <div class="nav-button">
+      <form action="/logout?_method=DELETE" method="POST">
+        <button type="submit" class="nav-button">
+          <i class="fas fa-right-from-bracket"></i><span>Logout</span>
+        </button>
+      </form>
     </div>
     <div id="nav-content-highlight"></div>
   </div>
