@@ -8,23 +8,23 @@
     "net9.0": []
   },
   "packageFolders": {
-    "C:\\Users\\LENOVO LEGION\\.nuget\\packages\\": {},
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+    "C:\\Users\\nhat\\.nuget\\packages\\": {},
+    "A:\\Visual_Studio_2022_ShareComponent\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\LENOVO LEGION\\source\\repos\\DoAnCS\\DoAnCS.csproj",
+      "projectUniqueName": "A:\\program test\\Node.js\\DoAnCS\\DoAnCS.csproj",
       "projectName": "DoAnCS",
-      "projectPath": "C:\\Users\\LENOVO LEGION\\source\\repos\\DoAnCS\\DoAnCS.csproj",
-      "packagesPath": "C:\\Users\\LENOVO LEGION\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\LENOVO LEGION\\source\\repos\\DoAnCS\\obj\\",
+      "projectPath": "A:\\program test\\Node.js\\DoAnCS\\DoAnCS.csproj",
+      "packagesPath": "C:\\Users\\nhat\\.nuget\\packages\\",
+      "outputPath": "A:\\program test\\Node.js\\DoAnCS\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        "A:\\Visual_Studio_2022_ShareComponent\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\LENOVO LEGION\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\nhat\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -33,6 +33,7 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "C:\\Program Files\\dotnet\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -51,7 +52,7 @@
         "auditLevel": "low",
         "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "9.0.200"
+      "SdkAnalysisLevel": "9.0.300"
     },
     "frameworks": {
       "net9.0": {
@@ -75,7 +76,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.201/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.300/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

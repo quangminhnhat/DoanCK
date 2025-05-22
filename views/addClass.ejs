@@ -1,29 +1,166 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Class</title>
+    <title>Trang Chủ</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://demos.creative-tim.com/notus-js/assets/styles/tailwind.css">
+    <!-- link swiper-->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <link rel="stylesheet"
+        href="https://demos.creative-tim.com/notus-js/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css">
 </head>
+
 <body>
-    <form action="/classes" method="POST">
-        <label for="class_name">Class Name:</label>
-        <input type="text" id="class_name" name="class_name" required />
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <img src="images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png" alt="Logo"
+                    width="90" height="90">
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="/">Trang Chủ</a></li>
+                    <li><a href="/school">Trung Tâm</a></li>
+                    <li>
+                        <a href="#0">Thư Viện</a>
+                        <ul>
+                            <li><a href="https://drive.google.com/drive/folders/1j_lNKViTx_UUyZNXRlkhRd-w9ghDxAYB">Sách
+                                    Giáo Khoa</a>
+                            </li>
+                            <li><a href="#0">Tài Liệu Tham Khảo</a></li>
+                            <li><a href="#0">Tài Liệu Tiếng Anh</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="/news">Tin Tức - Sự Kiện</a>
+                    </li>
+                </ul>
+            </nav>
 
-        <label for="course_id">Course ID:</label>
-        <input type="number" id="course_id" name="course_id" required />
+            <% if (!user) { %>
+            <a href="/login" class="login-btn">
+                <i class="fa-solid fa-user"></i> Login
+            </a>
+            <% } else { %>
+            <div class="user-slidebar">
+                <button class="user-btn">
+                    <i class="fa-solid fa-user"></i> <%= user.username || 'User' %> <i
+                        class="fa-solid fa-caret-down"></i>
+                </button>
+                <ul class="user-dropdown">
+                    <li><a href="/profile">Thông tin cá nhân</a></li>
+                    <li>
+                        <form action="/logout?_method=DELETE" method="POST" style="margin:0;">
+                            <button type="submit"
+                                style="background:none;border:none;padding:0;color:inherit;cursor:pointer;">
+                                Đăng xuất
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+            <% } %>
 
-        <label for="teacher_id">Teacher ID:</label>
-        <input type="number" id="teacher_id" name="teacher_id" required />
 
-        <label for="start_time">Start Time:</label>
-        <input type="time" id="start_time" name="start_time" required />
 
-        <label for="end_time">End Time:</label>
-        <input type="time" id="end_time" name="end_time" required />
+        </div>
 
-        <button type="submit">Create Class</button>
-    </form>
-</body>
+    </header>
+
+    
+        <form action="/classes" method="POST">
+            <label for="class_name">Class Name:</label>
+            <input type="text" id="class_name" name="class_name" required />
+
+            <label for="course_id">Course ID:</label>
+            <input type="number" id="course_id" name="course_id" required />
+
+            <label for="teacher_id">Teacher ID:</label>
+            <input type="number" id="teacher_id" name="teacher_id" required />
+
+            <label for="start_time">Start Time:</label>
+            <input type="time" id="start_time" name="start_time" required />
+
+            <label for="end_time">End Time:</label>
+            <input type="time" id="end_time" name="end_time" required />
+
+            <button type="submit">Create Class</button>
+        </form>
+
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Trang Chủ</title>
+            <link rel="stylesheet" href="css/style.css">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+            <link rel="stylesheet" href="https://demos.creative-tim.com/notus-js/assets/styles/tailwind.css">
+            <!-- link swiper-->
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+            <link rel="stylesheet"
+                href="https://demos.creative-tim.com/notus-js/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css">
+        </head>
+
+         
+            <header>
+                <div class="header-container">
+                    <div class="logo">
+                        <img src="images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png"
+                            alt="Logo" width="90" height="90">
+                    </div>
+                    <nav>
+                        <ul>
+                            <li><a href="/">Trang Chủ</a></li>
+                            <li><a href="/school">Trung Tâm</a></li>
+                            <li>
+                                <a href="#0">Thư Viện</a>
+                                <ul>
+                                    <li><a
+                                            href="https://drive.google.com/drive/folders/1j_lNKViTx_UUyZNXRlkhRd-w9ghDxAYB">Sách
+                                            Giáo Khoa</a>
+                                    </li>
+                                    <li><a href="#0">Tài Liệu Tham Khảo</a></li>
+                                    <li><a href="#0">Tài Liệu Tiếng Anh</a></li>
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="/news">Tin Tức - Sự Kiện</a>
+                            </li>
+                        </ul>
+                    </nav>
+
+                    <% if (!user) { %>
+                    <a href="/login" class="login-btn">
+                        <i class="fa-solid fa-user"></i> Login
+                    </a>
+                    <% } else { %>
+                    <div class="user-slidebar">
+                        <button class="user-btn">
+                            <i class="fa-solid fa-user"></i> <%= user.username || 'User' %> <i
+                                class="fa-solid fa-caret-down"></i>
+                        </button>
+                        <ul class="user-dropdown">
+                            <li><a href="/profile">Thông tin cá nhân</a></li>
+                            <li>
+                                <form action="/logout?_method=DELETE" method="POST" style="margin:0;">
+                                    <button type="submit"
+                                        style="background:none;border:none;padding:0;color:inherit;cursor:pointer;">
+                                        Đăng xuất
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                    <% } %>
+
+
+
+                </div>
+
+            </header>
+        </body>
+
 </html>
-  
