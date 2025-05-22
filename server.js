@@ -15,7 +15,7 @@ const methodOverride = require("method-override");
 const { authenticateRole } = require("./roleAuth");
 const multer = require("multer");
 const fs = require("fs");
-
+app.use(express.static(path.join(__dirname, "public")));
 //require ("./schedular")
 
 app.use(express.json());
@@ -277,7 +277,7 @@ ORDER BY u.created_at DESC;
 
   sql.query(connectionString, query, (err, rows) => {
     if (err) return res.status(500).send("Database error");
-    res.render("userList", { users: rows });
+    res.render("userList", { users: rows , user: req.user });
   });
 });
 
@@ -329,7 +329,7 @@ app.get(
   checkAuthenticated,
   authenticateRole("admin"),
   (req, res) => {
-    res.render("addCourse.ejs");
+    res.render("addCourse.ejs", { user: req.user });
   }
 );
 app.get(
@@ -361,7 +361,7 @@ app.get(
         return res.status(500).send("Database error");
       }
       if (result.length === 0) return res.status(404).send("Course not found");
-      res.render("editCourse", { course: result[0] });
+      res.render("editCourse", { course: result[0], user: req.user });
     });
   }
 );
@@ -794,12 +794,12 @@ app.get(
   authenticateRole(["admin", "teacher"]),
   checkAuthenticated,
   (req, res) => {
-    res.render("uploadMaterial.ejs");
+    res.render("uploadMaterial.ejs" , { user: req.user });
   }
 );
 
 app.get(
-  "/classes",
+  "/classes/new",
   checkAuthenticated,
   authenticateRole(["admin", "teacher"]),
   (req, res) => {
@@ -1222,7 +1222,7 @@ app.delete(
   }
 );
 
-app.use(express.static(path.join(__dirname, "public")));
+
 
 /*
 link bình thường

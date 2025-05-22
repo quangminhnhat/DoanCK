@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trang Chủ</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://demos.creative-tim.com/notus-js/assets/styles/tailwind.css">
     <!-- link swiper-->
@@ -13,12 +13,12 @@
     <link rel="stylesheet"
         href="https://demos.creative-tim.com/notus-js/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css">
 </head>
-
+  
 <body>
     <header>
         <div class="header-container">
             <div class="logo">
-                <img src="images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png" alt="Logo"
+                <img src="/images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png" alt="Logo"
                     width="90" height="90">
             </div>
             <nav>
@@ -28,8 +28,8 @@
                     <li>
                         <a href="#0">Thư Viện</a>
                         <ul>
-                            <li><a href="https://drive.google.com/drive/folders/1j_lNKViTx_UUyZNXRlkhRd-w9ghDxAYB">Sách
-                                    Giáo Khoa</a>
+                            <li><a href="https://drive.google.com/drive/folders/1j_lNKViTx_UUyZNXRlkhRd-w9ghDxAYB">Sách Giáo
+                                    Khoa</a>
                             </li>
                             <li><a href="#0">Tài Liệu Tham Khảo</a></li>
                             <li><a href="#0">Tài Liệu Tiếng Anh</a></li>
@@ -40,7 +40,7 @@
                     </li>
                 </ul>
             </nav>
-
+    
             <% if (!user) { %>
             <a href="/login" class="login-btn">
                 <i class="fa-solid fa-user"></i> Login
@@ -49,8 +49,9 @@
             <div id="nav-bar">
                 <input type="checkbox" id="nav-toggle" />
                 <div id="nav-header">
-                    <a id="nav-title" href="https://codepen.io" target="_blank" style="display:flex;align-items:center;gap:12px;">
-                        <img class="logo" src="images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png"
+                    <a id="nav-title" href="https://codepen.io" target="_blank"
+                        style="display:flex;align-items:center;gap:12px;">
+                        <img class="logo" src="/images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png"
                             alt="Logo" style="width:40px;height:40px;object-fit:contain;">
                         <span class="logo-text">HOW TO<br>DEV</span>
                     </a>
@@ -61,7 +62,7 @@
                 </div>
                 <div id="nav-content">
                     <a href="/" class="nav-button"><i class="fas fa-house"></i><span>Home</span></a>
-            
+    
                     <!-- Common options for all authenticated users -->
                     <a href="/schedule" class="nav-button"><i class="fas fa-calendar"></i><span>My Schedule</span></a>
                     <a href="/notifications" class="nav-button"><i class="fas fa-bell"></i><span>Notifications</span></a>
@@ -73,7 +74,7 @@
                     <a href="/materials" class="nav-button"><i class="fas fa-file"></i><span>Materials</span></a>
                     <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload Material</span></a>
                     <% } %>
-            
+    
                     <!-- Admin only options -->
                     <% if (user.role === 'admin') { %>
                     <a href="/users" class="nav-button"><i class="fas fa-user-cog"></i><span>User List</span></a>
@@ -87,7 +88,7 @@
                     <a href="/payments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Payment</span></a>
                     <a href="/schedule/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Schedule</span></a>
                     <% } %>
-            
+    
                     <!-- Logout button for all authenticated users -->
                     <div class="nav-button">
                         <form action="/logout?_method=DELETE" method="POST">
@@ -96,17 +97,17 @@
                             </button>
                         </form>
                     </div>
-            
+    
                     <div id="nav-content-highlight"></div>
                 </div>
-            
-            
-            
+    
+    
+    
                 <input type="checkbox" id="nav-footer-toggle" />
                 <div id="nav-footer">
                     <div id="nav-footer-heading">
                         <div id="nav-footer-avatar">
-                            <img src="images/gv1.png" />
+                            <img src="/images/gv1.png" />
                         </div>
                         <div id="nav-footer-titlebox">
                             <a id="nav-footer-title" href="https://codepen.io/uahnbu/pens/public" target="_blank">User</a>
@@ -117,14 +118,17 @@
                         </label>
                     </div>
                     <div id="nav-footer-content">
-            
+    
                     </div>
                 </div>
-            </div>       <% } %>
-
-
+            </div>
+    
+            <% } %>
+    
+    
+    
         </div>
-
+    
         </header>
     <h1>Schedule List</h1>
     <a href="/schedules/new">Add New Schedule</a> | <a href="/">Back</a>

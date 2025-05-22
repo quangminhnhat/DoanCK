@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trang Chủ</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://demos.creative-tim.com/notus-js/assets/styles/tailwind.css">
     <!-- link swiper-->
@@ -18,7 +18,7 @@
     <header>
         <div class="header-container">
             <div class="logo">
-                <img src="images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png" alt="Logo"
+                <img src="/images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png" alt="Logo"
                     width="90" height="90">
             </div>
             <nav>
@@ -50,7 +50,7 @@
                 <input type="checkbox" id="nav-toggle" />
                 <div id="nav-header">
                     <a id="nav-title" href="https://codepen.io" target="_blank" style="display:flex;align-items:center;gap:12px;">
-                        <img class="logo" src="images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png"
+                        <img class="logo" src="/images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png"
                             alt="Logo" style="width:40px;height:40px;object-fit:contain;">
                         <span class="logo-text">HOW TO<br>DEV</span>
                     </a>
@@ -106,7 +106,7 @@
                 <div id="nav-footer">
                     <div id="nav-footer-heading">
                         <div id="nav-footer-avatar">
-                            <img src="images/gv1.png" />
+                            <img src="/images/gv1.png" />
                         </div>
                         <div id="nav-footer-titlebox">
                             <a id="nav-footer-title" href="https://codepen.io/uahnbu/pens/public" target="_blank">User</a>
@@ -129,33 +129,71 @@
         </header>
 
  
-    <h1>Edit Schedule</h1>
-    <form method="POST" action="/schedules/<%= schedule.id %>">
-        <label>Class:</label><br>
-        <select name="class_id">
-            <% classes.forEach(cls => { %>
-            <option value="<%= cls.id %>" <% if (cls.id === schedule.class_id) { %>selected<% } %>>
-                <%= cls.class_name %>
-            </option>
-            <% }) %>
-        </select><br><br>
+    <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl m-4 p-6">
+        <h1 class="text-2xl font-bold mb-4 text-center">Edit Schedule</h1>
+        <form method="POST" action="/schedules/<%= schedule.id %>" class="space-y-4">
+            <div class="flex flex-col">
+                <label class="text-gray-700 font-medium mb-1">Class:</label>
+                <select name="class_id" 
+                        required
+                        class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <% classes.forEach(cls => { %>
+                    <option value="<%= cls.id %>" <% if (cls.id === schedule.class_id) { %>selected<% } %>>
+                        <%= cls.class_name %>
+                    </option>
+                    <% }) %>
+                </select>
+            </div>
 
-        <label>Day of Week:</label><br>
-        <input type="text" name="day_of_week" value="<%= schedule.day_of_week %>" required><br><br>
+            <div class="flex flex-col">
+                <label class="text-gray-700 font-medium mb-1">Day of Week:</label>
+                <input type="text" 
+                       name="day_of_week" 
+                       value="<%= schedule.day_of_week %>" 
+                       required
+                       class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
 
-        <label>Date:</label><br>
-        <input type="date" name="schedule_date" value="<%= schedule.schedule_date.toISOString().split('T')[0] %>"
-            required><br><br>
+            <div class="flex flex-col">
+                <label class="text-gray-700 font-medium mb-1">Date:</label>
+                <input type="date" 
+                       name="schedule_date" 
+                       value="<%= schedule.schedule_date.toISOString().split('T')[0] %>" 
+                       required
+                       class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
 
-        <label>Start Time:</label><br>
-        <input type="time" name="start_time" value="<%= schedule.start_time %>" required><br><br>
+            <div class="flex flex-col">
+                <label class="text-gray-700 font-medium mb-1">Start Time:</label>
+                <input type="time" 
+                       name="start_time" 
+                       value="<%= schedule.start_time %>" 
+                       required
+                       class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
 
-        <label>End Time:</label><br>
-        <input type="time" name="end_time" value="<%= schedule.end_time %>" required><br><br>
+            <div class="flex flex-col">
+                <label class="text-gray-700 font-medium mb-1">End Time:</label>
+                <input type="time" 
+                       name="end_time" 
+                       value="<%= schedule.end_time %>" 
+                       required
+                       class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
 
-        <button type="submit">Update Schedule</button>
-    </form>
-    <a href="/schedules">Back</a>
+            <div class="flex justify-between items-center mt-6">
+                <a href="/schedules" 
+                   class="text-blue-500 hover:text-blue-700 font-medium">
+                    Back to schedules
+                </a>
+                <button type="submit" 
+                        class="bg-blue-500 text-black px-4 py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    Update Schedule
+                </button>
+            </div>
+        </form>
+    </div>
+
     <footer class="relative bg-blueGray-200 pt-8 pb-6">
         <div class="container mx-auto px-4">
             <div class="flex flex-wrap text-left lg:text-left">
