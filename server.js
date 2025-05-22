@@ -15,7 +15,7 @@ const methodOverride = require("method-override");
 const { authenticateRole } = require("./roleAuth");
 const multer = require("multer");
 const fs = require("fs");
-
+app.use(express.static(path.join(__dirname, "public")));
 //require ("./schedular")
 
 app.use(express.json());
@@ -23,7 +23,7 @@ app.use(methodOverride("_method"));
 
 app.use(express.urlencoded({ extended: false }));
 const connectionString =
-  "Driver={ODBC Driver 17 for SQL Server};Server=DESKTOP-M7HENCK;Database=DOANCS;Trusted_Connection=Yes;";
+  "Driver={ODBC Driver 17 for SQL Server};Server=LAPTOP-ND7KAD0J;Database=DOANCS;Trusted_Connection=Yes;";
 app.use(flash());
 app.use(
   session({
@@ -277,14 +277,14 @@ ORDER BY u.created_at DESC;
 
   sql.query(connectionString, query, (err, rows) => {
     if (err) return res.status(500).send("Database error");
-    res.render("userList", { users: rows });
+    res.render("userList", { users: rows , user: req.user });
   });
 });
 
 app.get(
   "/users/:id/edit",
   checkAuthenticated,
-  authenticateRole("admin"),
+  /*authenticateRole("admin"),*/
   (req, res) => {
     const userId = req.params.id;
     const query = "SELECT * FROM users WHERE id = ?";
@@ -329,7 +329,7 @@ app.get(
   checkAuthenticated,
   authenticateRole("admin"),
   (req, res) => {
-    res.render("addCourse.ejs");
+    res.render("addCourse.ejs", { user: req.user });
   }
 );
 app.get(
@@ -361,7 +361,7 @@ app.get(
         return res.status(500).send("Database error");
       }
       if (result.length === 0) return res.status(404).send("Course not found");
-      res.render("editCourse", { course: result[0] });
+      res.render("editCourse", { course: result[0], user: req.user });
     });
   }
 );
@@ -794,18 +794,57 @@ app.get(
   authenticateRole(["admin", "teacher"]),
   checkAuthenticated,
   (req, res) => {
-    res.render("uploadMaterial.ejs");
+    res.render("uploadMaterial.ejs" , { user: req.user });
   }
 );
 
 app.get(
-  "/classes",
+  "/classes/new",
   checkAuthenticated,
   authenticateRole(["admin", "teacher"]),
   (req, res) => {
     res.render("addClass.ejs", { user: req.user });
   }
 );
+
+app.get("/profile", checkAuthenticated, (req, res) => {
+  const userId = req.user.id;
+  const role = req.user.role;
+
+  let query = "";
+  if (role === "student") {
+    query = `
+      SELECT full_name, email, phone_number
+      FROM students
+      WHERE user_id = ?
+    `;
+  } else if (role === "teacher") {
+    query = `
+      SELECT full_name, email, phone_number
+      FROM teachers
+      WHERE user_id = ?
+    `;
+  } else if (role === "admin") {
+    query = `
+      SELECT full_name, email, phone_number
+      FROM admins
+      WHERE user_id = ?
+    `;
+  } else {
+    return res.render("profile", { user: req.user, details: null });
+  }
+
+  sql.query(connectionString, query, [userId], (err, result) => {
+    if (err || result.length === 0) {
+      console.error("Profile fetch error:", err);
+      return res.status(500).send("Error fetching profile");
+    }
+    res.render("profile.ejs", {
+      user: req.user,
+      details: result[0],
+    });
+  });
+});
 
 app.post(
   "/materials/:id",
@@ -1183,7 +1222,7 @@ app.delete(
   }
 );
 
-app.use(express.static(path.join(__dirname, "public")));
+
 
 /*
 link bình thường
@@ -1196,7 +1235,7 @@ app.get("link ở đây", (req, res) => {
 link role
 app.get("/admin", checkAuthenticated, authenticateRole("admin"), (req, res) => {
   res.render("admin.ejs", { user: req.user });
-});
+}); 
 */
 app.delete("/logout", (req, res) => {
   req.logOut((err) => {

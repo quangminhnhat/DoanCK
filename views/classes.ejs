@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trang Chủ</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://demos.creative-tim.com/notus-js/assets/styles/tailwind.css">
     <!-- link swiper-->
@@ -17,7 +17,7 @@
     <header>
         <div class="header-container">
             <div class="logo">
-                <img src="images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png" alt="Logo"
+                <img src="/images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png" alt="Logo"
                     width="90" height="90">
             </div>
             <nav>
@@ -45,24 +45,81 @@
                 <i class="fa-solid fa-user"></i> Login
             </a>
             <% } else { %>
-            <div class="user-slidebar">
-                <button class="user-btn">
-                    <i class="fa-solid fa-user"></i> <%= user.username || 'User' %> <i
-                        class="fa-solid fa-caret-down"></i>
-                </button>
-                <ul class="user-dropdown">
-                    <li><a href="/profile">Thông tin cá nhân</a></li>
-                    <li>
-                        <form action="/logout?_method=DELETE" method="POST" style="margin:0;">
-                            <button type="submit"
-                                style="background:none;border:none;padding:0;color:inherit;cursor:pointer;">
-                                Đăng xuất
+            <div id="nav-bar">
+                <input type="checkbox" id="nav-toggle" />
+                <div id="nav-header">
+                    <a id="nav-title" href="https://codepen.io" target="_blank" style="display:flex;align-items:center;gap:12px;">
+                        <img class="logo" src="/images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png"
+                            alt="Logo" style="width:40px;height:40px;object-fit:contain;">
+                        <span class="logo-text">HOW TO<br>DEV</span>
+                    </a>
+                    <label for="nav-toggle">
+                        <span id="nav-toggle-burger"></span>
+                    </label>
+                    <hr>
+                </div>
+                <div id="nav-content">
+                    <a href="/" class="nav-button"><i class="fas fa-house"></i><span>Home</span></a>
+            
+                    <!-- Common options for all authenticated users -->
+                    <a href="/schedule" class="nav-button"><i class="fas fa-calendar"></i><span>My Schedule</span></a>
+                    <a href="/notifications" class="nav-button"><i class="fas fa-bell"></i><span>Notifications</span></a>
+                    <a href="/profile" class="nav-button"><i class="fas fa-user"></i><span>Profile</span></a>
+                    <!-- Teacher & Admin only options -->
+                    <% if (user.role === 'admin' || user.role === 'teacher') { %>
+                    <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
+                    <a href="/courses" class="nav-button"><i class="fas fa-book"></i><span>Courses</span></a>
+                    <a href="/materials" class="nav-button"><i class="fas fa-file"></i><span>Materials</span></a>
+                    <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload Material</span></a>
+                    <% } %>
+            
+                    <!-- Admin only options -->
+                    <% if (user.role === 'admin') { %>
+                    <a href="/users" class="nav-button"><i class="fas fa-user-cog"></i><span>User List</span></a>
+                    <a href="/register" class="nav-button"><i class="fas fa-user-plus"></i><span>Register User</span></a>
+                    <a href="/enrollments" class="nav-button"><i class="fas fa-user-plus"></i><span>Enrollments</span></a>
+                    <a href="/payments" class="nav-button"><i class="fas fa-money-bill"></i><span>Payments</span></a>
+                    <a href="/schedules" class="nav-button"><i class="fas fa-calendar-alt"></i><span>Schedules</span></a>
+                    <a href="/courses/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Course</span></a>
+                    <a href="/classes/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Class</span></a>
+                    <a href="/enrollments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Enrollment</span></a>
+                    <a href="/payments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Payment</span></a>
+                    <a href="/schedule/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Schedule</span></a>
+                    <% } %>
+            
+                    <!-- Logout button for all authenticated users -->
+                    <div class="nav-button">
+                        <form action="/logout?_method=DELETE" method="POST">
+                            <button type="submit" class="nav-button">
+                                <i class="fas fa-right-from-bracket"></i><span>Logout</span>
                             </button>
                         </form>
-                    </li>
-                </ul>
-            </div>
-            <% } %>
+                    </div>
+            
+                    <div id="nav-content-highlight"></div>
+                </div>
+            
+            
+            
+                <input type="checkbox" id="nav-footer-toggle" />
+                <div id="nav-footer">
+                    <div id="nav-footer-heading">
+                        <div id="nav-footer-avatar">
+                            <img src="/images/gv1.png" />
+                        </div>
+                        <div id="nav-footer-titlebox">
+                            <a id="nav-footer-title" href="https://codepen.io/uahnbu/pens/public" target="_blank">User</a>
+                            <span id="nav-footer-subtitle">Role</span>
+                        </div>
+                        <label for="nav-footer-toggle">
+                            <i class="fas fa-caret-up"></i>
+                        </label>
+                    </div>
+                    <div id="nav-footer-content">
+            
+                    </div>
+                </div>
+            </div>       <% } %>
 
 
 
@@ -70,41 +127,57 @@
 
         </header>
 
- 
-    <h1>Class List</h1>
-    <a href="/">Back</a>
-    <table border="1">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Class Name</th>
-                <th>Course</th>
-                <th>Teacher</th>
-                <th>Start Time</th>
-                <th>End Time</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <% classes.forEach(cls => { %>
-            <tr>
-                <td><%= cls.id %></td>
-                <td><%= cls.class_name %></td>
-                <td><%= cls.course_name %></td>
-                <td><%= cls.teacher_name %></td>
-                <td><%= cls.start_time %></td>
-                <td><%= cls.end_time %></td>
-                <td>
-                    <a href="/classes/<%= cls.id %>/edit">Edit</a>
-                    <form method="POST" action="/classes/<%= cls.id %>?_method=DELETE" style="display:inline;">
-                        <button type="submit"
-                            onclick="return confirm('Are you sure to delete this class?')">Delete</button>
-                    </form>
-                </td>
-            </tr>
-            <% }) %>
-        </tbody>
-    </table>
+<main class="container mx-auto px-4 py-6">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">Class List</h1>
+        <a href="/classes/new" class="bg-blue-600 text-black px-3 py-1 rounded shadow hover:bg-blue-700 transition text-sm">+
+            Add New Class</a>
+    </div>
+
+    <!-- Card Container -->
+    <div class="bg-white rounded-lg shadow-lg border border-gray-200 max-w-4xl mx-auto p-4">
+        <!-- Search/Filter Options could go here -->
+        <div class="overflow-x-auto">
+            <table class="w-full divide-y divide-gray-200">
+                <thead class="bg-blue-600 text-black">
+                    <tr>
+                        <th class="px-2 py-2 text-left text-xs font-semibold uppercase tracking-wider w-8">ID</th>
+                        <th class="px-2 py-2 text-left text-xs font-semibold uppercase tracking-wider w-20">Name</th>
+                        <th class="px-2 py-2 text-left text-xs font-semibold uppercase tracking-wider w-20">Course</th>
+                        <th class="px-2 py-2 text-left text-xs font-semibold uppercase tracking-wider w-20">Teacher</th>
+                        <th class="px-2 py-2 text-left text-xs font-semibold uppercase tracking-wider w-16">Start</th>
+                        <th class="px-2 py-2 text-left text-xs font-semibold uppercase tracking-wider w-16">End</th>
+                        <th class="px-2 py-2 text-left text-xs font-semibold uppercase tracking-wider w-12">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <% classes.forEach(cls => { %>
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="px-2 py-2 whitespace-nowrap text-xs text-gray-900"><%= cls.id %></td>
+                        <td class="px-2 py-2 whitespace-nowrap text-xs text-gray-900"><%= cls.class_name %></td>
+                        <td class="px-2 py-2 whitespace-nowrap text-xs text-gray-900"><%= cls.course_name %></td>
+                        <td class="px-2 py-2 whitespace-nowrap text-xs text-gray-900"><%= cls.teacher_name %></td>
+                        <td class="px-2 py-2 whitespace-nowrap text-xs text-gray-900"><%= cls.start_time %></td>
+                        <td class="px-2 py-2 whitespace-nowrap text-xs text-gray-900"><%= cls.end_time %></td>
+                        <td class="px-2 py-2 whitespace-nowrap space-x-1 text-xs">
+                            <a href="/classes/<%= cls.id %>/edit" class="text-blue-600 hover:text-blue-900 hover:underline">Edit</a>
+                            <form method="POST" action="/classes/<%= cls.id %>?_method=DELETE" class="inline">
+                                <button type="submit" onclick="return confirm('Are you sure to delete this class?')"
+                                    class="text-red-600 hover:text-red-900 hover:underline ml-1">
+                                    Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <a href="/" class="inline-block mt-6 text-blue-600 hover:underline">&larr; Back</a>
+</main>
+        
     <footer class="relative bg-blueGray-200 pt-8 pb-6">
         <div class="container mx-auto px-4">
             <div class="flex flex-wrap text-left lg:text-left">

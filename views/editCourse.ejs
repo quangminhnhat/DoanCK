@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trang Chủ</title>
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="https://demos.creative-tim.com/notus-js/assets/styles/tailwind.css">
   <!-- link swiper-->
@@ -17,7 +17,7 @@
   <header>
     <div class="header-container">
       <div class="logo">
-        <img src="images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png" alt="Logo" width="90"
+        <img src="/images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png" alt="Logo" width="90"
           height="90">
       </div>
       <nav>
@@ -44,45 +44,139 @@
         <i class="fa-solid fa-user"></i> Login
       </a>
       <% } else { %>
-      <div class="user-slidebar">
-        <button class="user-btn">
-          <i class="fa-solid fa-user"></i> <%= user.username || 'User' %> <i class="fa-solid fa-caret-down"></i>
-        </button>
-        <ul class="user-dropdown">
-          <li><a href="/profile">Thông tin cá nhân</a></li>
-          <li>
-            <form action="/logout?_method=DELETE" method="POST" style="margin:0;">
-              <button type="submit" style="background:none;border:none;padding:0;color:inherit;cursor:pointer;">
-                Đăng xuất
+      <div id="nav-bar">
+        <input type="checkbox" id="nav-toggle" />
+        <div id="nav-header">
+          <a id="nav-title" href="https://codepen.io" target="_blank" style="display:flex;align-items:center;gap:12px;">
+            <img class="logo" src="/images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png" alt="Logo"
+              style="width:40px;height:40px;object-fit:contain;">
+            <span class="logo-text">HOW TO<br>DEV</span>
+          </a>
+          <label for="nav-toggle">
+            <span id="nav-toggle-burger"></span>
+          </label>
+          <hr>
+        </div>
+        <div id="nav-content">
+          <a href="/" class="nav-button"><i class="fas fa-house"></i><span>Home</span></a>
+      
+          <!-- Common options for all authenticated users -->
+          <a href="/schedule" class="nav-button"><i class="fas fa-calendar"></i><span>My Schedule</span></a>
+          <a href="/notifications" class="nav-button"><i class="fas fa-bell"></i><span>Notifications</span></a>
+          <a href="/profile" class="nav-button"><i class="fas fa-user"></i><span>Profile</span></a>
+          <!-- Teacher & Admin only options -->
+          <% if (user.role === 'admin' || user.role === 'teacher') { %>
+          <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
+          <a href="/courses" class="nav-button"><i class="fas fa-book"></i><span>Courses</span></a>
+          <a href="/materials" class="nav-button"><i class="fas fa-file"></i><span>Materials</span></a>
+          <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload Material</span></a>
+          <% } %>
+      
+          <!-- Admin only options -->
+          <% if (user.role === 'admin') { %>
+          <a href="/users" class="nav-button"><i class="fas fa-user-cog"></i><span>User List</span></a>
+          <a href="/register" class="nav-button"><i class="fas fa-user-plus"></i><span>Register User</span></a>
+          <a href="/enrollments" class="nav-button"><i class="fas fa-user-plus"></i><span>Enrollments</span></a>
+          <a href="/payments" class="nav-button"><i class="fas fa-money-bill"></i><span>Payments</span></a>
+          <a href="/schedules" class="nav-button"><i class="fas fa-calendar-alt"></i><span>Schedules</span></a>
+          <a href="/courses/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Course</span></a>
+          <a href="/classes/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Class</span></a>
+          <a href="/enrollments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Enrollment</span></a>
+          <a href="/payments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Payment</span></a>
+          <a href="/schedule/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Schedule</span></a>
+          <% } %>
+      
+          <!-- Logout button for all authenticated users -->
+          <div class="nav-button">
+            <form action="/logout?_method=DELETE" method="POST">
+              <button type="submit" class="nav-button">
+                <i class="fas fa-right-from-bracket"></i><span>Logout</span>
               </button>
             </form>
-          </li>
-        </ul>
+          </div>
+      
+          <div id="nav-content-highlight"></div>
+        </div>
+      
+      
+      
+        <input type="checkbox" id="nav-footer-toggle" />
+        <div id="nav-footer">
+          <div id="nav-footer-heading">
+            <div id="nav-footer-avatar">
+              <img src="/images/gv1.png" />
+            </div>
+            <div id="nav-footer-titlebox">
+              <a id="nav-footer-title" href="https://codepen.io/uahnbu/pens/public" target="_blank">User</a>
+              <span id="nav-footer-subtitle">Role</span>
+            </div>
+            <label for="nav-footer-toggle">
+              <i class="fas fa-caret-up"></i>
+            </label>
+          </div>
+          <div id="nav-footer-content">
+      
+          </div>
+        </div>
       </div>
+      
       <% } %>
-
 
 
     </div>
 
   </header>
  
-  <h1>Edit Course</h1>
-  <form action="/courses/<%= course.id %>" method="POST">
-    <label>Course Name:</label><br>
-    <input type="text" name="course_name" value="<%= course.course_name %>" required><br><br>
+  <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl m-4 p-6">
+    <h1 class="text-2xl font-bold mb-4 text-center">Edit Course</h1>
+    <form action="/courses/<%= course.id %>" method="POST" class="space-y-4">
+        <div class="flex flex-col">
+            <label class="text-gray-700 font-medium mb-1">Course Name:</label>
+            <input type="text" 
+                   name="course_name" 
+                   value="<%= course.course_name %>" 
+                   required
+                   class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
 
-    <label>Description:</label><br>
-    <textarea name="description" rows="5" cols="50"><%= course.description %></textarea><br><br>
+        <div class="flex flex-col">
+            <label class="text-gray-700 font-medium mb-1">Description:</label>
+            <textarea name="description" 
+                      rows="5" 
+                      class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"><%= course.description %></textarea>
+        </div>
 
-    <label>Start Date:</label><br>
-    <input type="date" name="start_date" value="<%= course.start_date.toISOString().slice(0, 10) %>" required><br><br>
+        <div class="flex flex-col">
+            <label class="text-gray-700 font-medium mb-1">Start Date:</label>
+            <input type="date" 
+                   name="start_date" 
+                   value="<%= course.start_date.toISOString().slice(0, 10) %>" 
+                   required
+                   class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
 
-    <label>End Date:</label><br>
-    <input type="date" name="end_date" value="<%= course.end_date.toISOString().slice(0, 10) %>" required><br><br>
+        <div class="flex flex-col">
+            <label class="text-gray-700 font-medium mb-1">End Date:</label>
+            <input type="date" 
+                   name="end_date" 
+                   value="<%= course.end_date.toISOString().slice(0, 10) %>" 
+                   required
+                   class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
 
-    <button type="submit">Update</button>
-  </form>
+        <div class="flex justify-between items-center mt-6">
+            <a href="/courses" 
+               class="text-blue-500 hover:text-blue-700 font-medium">
+                Back to courses
+            </a>
+            <button type="submit" 
+                    class="bg-blue-500 text-black px-4 py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                Update Course
+            </button>
+        </div>
+    </form>
+  </div>
+
   <footer class="relative bg-blueGray-200 pt-8 pb-6">
     <div class="container mx-auto px-4">
       <div class="flex flex-wrap text-left lg:text-left">

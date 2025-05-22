@@ -1,25 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Trang Chủ</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://demos.creative-tim.com/notus-js/assets/styles/tailwind.css">
-    <!-- link swiper-->
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://demos.creative-tim.com/notus-js/assets/styles/tailwind.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-    <link rel="stylesheet"
-        href="https://demos.creative-tim.com/notus-js/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet"  href="https://demos.creative-tim.com/notus-js/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css" />
+<style>
+    .form-group {
+        position: relative;
+        transition: all 0.3s ease;
+    }
+    
+    .form-group:hover {
+        transform: translateY(-2px);
+    }
+    
+    input:not(:placeholder-shown):valid {
+        border-color: #10B981;
+    }
+    
+    input:not(:placeholder-shown):invalid {
+        border-color: #EF4444;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    form {
+        animation: fadeIn 0.5s ease-out;
+    }
+</style>
 </head>
 
 <body>
     <header>
         <div class="header-container">
             <div class="logo">
-                <img src="images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png" alt="Logo"
-                    width="90" height="90">
+                <img src="/images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png" alt="Logo"
+                    width="90" height="90" />
             </div>
+
             <nav>
                 <ul>
                     <li><a href="/">Trang Chủ</a></li>
@@ -28,123 +57,201 @@
                         <a href="#0">Thư Viện</a>
                         <ul>
                             <li><a href="https://drive.google.com/drive/folders/1j_lNKViTx_UUyZNXRlkhRd-w9ghDxAYB">Sách
-                                    Giáo Khoa</a>
-                            </li>
+                                    Giáo Khoa</a></li>
                             <li><a href="#0">Tài Liệu Tham Khảo</a></li>
                             <li><a href="#0">Tài Liệu Tiếng Anh</a></li>
                         </ul>
                     </li>
-                    <li>
-                        <a href="/news">Tin Tức - Sự Kiện</a>
-                    </li>
+                    <li><a href="/news">Tin Tức - Sự Kiện</a></li>
                 </ul>
             </nav>
 
             <% if (!user) { %>
-            <a href="/login" class="login-btn">
-                <i class="fa-solid fa-user"></i> Login
-            </a>
+            <a href="/login" class="login-btn"><i class="fa-solid fa-user"></i> Login</a>
             <% } else { %>
-            <div class="user-slidebar">
-                <button class="user-btn">
-                    <i class="fa-solid fa-user"></i> <%= user.username || 'User' %> <i
-                        class="fa-solid fa-caret-down"></i>
-                </button>
-                <ul class="user-dropdown">
-                    <li><a href="/profile">Thông tin cá nhân</a></li>
-                    <li>
-                        <form action="/logout?_method=DELETE" method="POST" style="margin:0;">
-                            <button type="submit"
-                                style="background:none;border:none;padding:0;color:inherit;cursor:pointer;">
-                                Đăng xuất
+            <div id="nav-bar">
+                <input type="checkbox" id="nav-toggle" />
+
+                <div id="nav-header">
+                    <a id="nav-title" href="https://codepen.io" target="_blank" class="flex items-center gap-3">
+                        <img class="logo"
+                            src="/images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png"
+                            alt="Logo" style="width:40px; height:40px; object-fit:contain;" />
+                        <span class="logo-text">HOW TO<br />DEV</span>
+                    </a>
+                    <label for="nav-toggle"><span id="nav-toggle-burger"></span></label>
+                    <hr />
+                </div>
+
+                <div id="nav-content">
+                    <a href="/" class="nav-button"><i class="fas fa-house"></i><span>Home</span></a>
+                    <a href="/schedule" class="nav-button"><i class="fas fa-calendar"></i><span>My Schedule</span></a>
+                    <a href="/notifications" class="nav-button"><i
+                            class="fas fa-bell"></i><span>Notifications</span></a>
+                    <a href="/profile" class="nav-button"><i class="fas fa-user"></i><span>Profile</span></a>
+
+                    <% if (user.role === 'admin' || user.role === 'teacher') { %>
+                    <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
+                    <a href="/courses" class="nav-button"><i class="fas fa-book"></i><span>Courses</span></a>
+                    <a href="/materials" class="nav-button"><i class="fas fa-file"></i><span>Materials</span></a>
+                    <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload Material</span></a>
+                    <% } %>
+
+                    <% if (user.role === 'admin') { %>
+                    <a href="/users" class="nav-button"><i class="fas fa-user-cog"></i><span>User List</span></a>
+                    <a href="/register" class="nav-button"><i class="fas fa-user-plus"></i><span>Register
+                            User</span></a>
+                    <a href="/enrollments" class="nav-button"><i
+                            class="fas fa-user-plus"></i><span>Enrollments</span></a>
+                    <a href="/payments" class="nav-button"><i class="fas fa-money-bill"></i><span>Payments</span></a>
+                    <a href="/schedules" class="nav-button"><i
+                            class="fas fa-calendar-alt"></i><span>Schedules</span></a>
+                    <a href="/courses/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Course</span></a>
+                    <a href="/classes/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Class</span></a>
+                    <a href="/enrollments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add
+                            Enrollment</span></a>
+                    <a href="/payments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Payment</span></a>
+                    <a href="/schedule/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Schedule</span></a>
+                    <% } %>
+
+                    <div class="nav-button">
+                        <form action="/logout?_method=DELETE" method="POST">
+                            <button type="submit" class="nav-button">
+                                <i class="fas fa-right-from-bracket"></i><span>Logout</span>
                             </button>
                         </form>
-                    </li>
-                </ul>
+                    </div>
+
+                    <div id="nav-content-highlight"></div>
+                </div>
+
+                <input type="checkbox" id="nav-footer-toggle" />
+                <div id="nav-footer">
+                    <div id="nav-footer-heading">
+                        <div id="nav-footer-avatar">
+                            <img src="/images/gv1.png" alt="Avatar" />
+                        </div>
+                        <div id="nav-footer-titlebox">
+                            <a id="nav-footer-title" href="https://codepen.io/uahnbu/pens/public"
+                                target="_blank">User</a>
+                            <span id="nav-footer-subtitle">Role</span>
+                        </div>
+                        <label for="nav-footer-toggle"><i class="fas fa-caret-up"></i></label>
+                    </div>
+                    <div id="nav-footer-content"></div>
+                </div>
             </div>
             <% } %>
-
-
-
         </div>
+    </header>
 
-        </header>
+    <main>
+        <form action="/enrollments" method="POST" class="max-w-xl mx-auto mt-10 p-8 bg-white shadow-lg rounded-xl border border-gray-100">
+            <fieldset>
+                <legend class="text-3xl font-bold mb-8 text-center text-blue-600">
+                    <i class="fas fa-user-plus mr-2"></i>
+                    Student Enrollment
+                </legend>
 
-    <form action="/enrollments" method="POST">
-        <fieldset>
-            <legend>Enrollment Form</legend>
+                <div class="space-y-6">
+                    <div class="form-group">
+                        <label for="student_id" class="block text-gray-700 font-semibold mb-2">
+                            <i class="fas fa-id-card mr-2"></i>Student ID
+                        </label>
+                        <input type="number" 
+                            id="student_id" 
+                            name="student_id" 
+                            required
+                            placeholder="Enter student ID"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200" />
+                    </div>
 
-            <label>Student ID:</label>
-            <input type="number" name="student_id" required />
+                    <div class="form-group">
+                        <label for="class_id" class="block text-gray-700 font-semibold mb-2">
+                            <i class="fas fa-chalkboard mr-2"></i>Class ID
+                        </label>
+                        <input type="number" 
+                            id="class_id" 
+                            name="class_id" 
+                            required
+                            placeholder="Enter class ID"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200" />
+                    </div>
 
-            <label>Class ID:</label>
-            <input type="number" name="class_id" required />
+                    <div class="form-group">
+                        <label for="enrollment_date" class="block text-gray-700 font-semibold mb-2">
+                            <i class="fas fa-calendar-alt mr-2"></i>Enrollment Date
+                        </label>
+                        <input type="date" 
+                            id="enrollment_date" 
+                            name="enrollment_date" 
+                            required
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200" />
+                    </div>
 
-            <label>Enrollment Date:</label>
-            <input type="date" name="enrollment_date" required />
+                    <div class="text-center pt-4">
+                        <button type="submit"
+                            class="w-full bg-blue-500 hover:bg-blue-600 text-black font-bold py-3 px-8 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            Complete Enrollment
+                        </button>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+          
+    </main>
 
-            <button type="submit">Enroll Student</button>
-        </fieldset>
-    </form>
     <footer class="relative bg-blueGray-200 pt-8 pb-6">
         <div class="container mx-auto px-4">
             <div class="flex flex-wrap text-left lg:text-left">
                 <div class="w-full lg:w-6/12 px-4">
-                    <h4 class="text-3xl fonat-semibold text-blueGray-700">Liên hệ với chúng tôi!</h4>
+                    <h4 class="text-3xl font-semibold text-blueGray-700">Liên hệ với chúng tôi!</h4>
                     <h5 class="text-lg mt-0 mb-2 text-blueGray-600">
-                        Tìm kiếm chúng tôi trên bất kỳ mạng xã hội nào và gửi cho chúng tôi một tin nhắn! Chúng tôi sẽ trả
-                        lời bạn
-                        ngay khi có thể.
+                        Tìm kiếm chúng tôi trên bất kỳ mạng xã hội nào và gửi cho chúng tôi một tin nhắn! Chúng tôi sẽ
+                        trả lời bạn ngay khi có thể.
                     </h5>
-                    <div class="mt-6 lg:mb-0 mb-6">
+                    <div class="mt-6 lg:mb-0 mb-6 flex space-x-2">
                         <button
-                            class="bg-white text-lightBlue-400 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
-                            type="button">
-                            <i class="fab fa-twitter"></i></button><button
-                            class="bg-white text-lightBlue-600 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
-                            type="button">
-                            <i class="fab fa-facebook-square"></i></button><button
-                            class="bg-white text-pink-400 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
-                            type="button">
-                            <i class="fab fa-dribbble"></i></button><button
-                            class="bg-white text-blueGray-800 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
-                            type="button">
-                            <i class="fab fa-github"></i>
-                        </button>
+                            class="bg-white text-lightBlue-400 shadow-lg h-10 w-10 rounded-full focus:outline-none"><i
+                                class="fab fa-twitter"></i></button>
+                        <button
+                            class="bg-white text-lightBlue-600 shadow-lg h-10 w-10 rounded-full focus:outline-none"><i
+                                class="fab fa-facebook-square"></i></button>
+                        <button class="bg-white text-pink-400 shadow-lg h-10 w-10 rounded-full focus:outline-none"><i
+                                class="fab fa-dribbble"></i></button>
+                        <button
+                            class="bg-white text-blueGray-800 shadow-lg h-10 w-10 rounded-full focus:outline-none"><i
+                                class="fab fa-github"></i></button>
                     </div>
                 </div>
+
                 <div class="w-full lg:w-6/12 px-4">
                     <div class="flex flex-wrap items-top mb-6">
                         <div class="w-full lg:w-4/12 px-4 ml-auto">
                             <span class="block uppercase text-blueGray-500 text-sm font-semibold mb-2">Bạn Đang Tìm
                                 Kiếm</span>
                             <ul class="list-unstyled">
-                                <li>
-                                    <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm"
-                                        href="">Liên
-                                        Hệ</a>
-                                </li>
-                                <li>
-                                    <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm"
-                                        href="">Thông
-                                        Tin Mới</a>
-                                </li>
-                                <li>
-                                    <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm"
-                                        href="">Tuyển
-                                        Dụng</a>
-                                </li>
+                                <li><a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm"
+                                        href="#">Liên Hệ</a></li>
+                                <li><a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm"
+                                        href="#">Thông Tin Mới</a></li>
+                                <li><a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm"
+                                        href="#">Tuyển Dụng</a></li>
                             </ul>
                         </div>
                     </div>
                 </div>
             </div>
-            <hr class="my-6 border-blueGray-300">
+
+            <hr class="my-6 border-blueGray-300" />
+
             <div class="flex flex-wrap items-center md:justify-between justify-center">
                 <div class="w-full md:w-4/12 px-4 mx-auto text-center">
                     <div class="text-sm text-blueGray-500 font-semibold py-1">
-                        Copyright © <span id="get-current-year">2025</span><a href="https://www.facebook.com/ttgdvpttnht"
-                            class="text-blueGray-500 hover:text-gray-800" target="_blank"> Talent Education</a>. Made by
+                        Copyright © <span id="get-current-year">2025</span>
+                        <a href="https://www.facebook.com/ttgdvpttnht" class="text-blueGray-500 hover:text-gray-800"
+                            target="_blank"> Talent Education</a>. Made by
                         <a href="https://github.com/Rin-0808" class="text-blueGray-500 hover:text-blueGray-800">Rin</a>.
                     </div>
                 </div>
@@ -152,5 +259,5 @@
         </div>
     </footer>
 </body>
+
 </html>
-  

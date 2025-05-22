@@ -8,7 +8,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trang Chủ</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://demos.creative-tim.com/notus-js/assets/styles/tailwind.css">
     <!-- link swiper-->
@@ -21,7 +21,7 @@
     <header>
         <div class="header-container">
             <div class="logo">
-                <img src="images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png" alt="Logo"
+                <img src="/images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png" alt="Logo"
                     width="90" height="90">
             </div>
             <nav>
@@ -49,42 +49,145 @@
                 <i class="fa-solid fa-user"></i> Login
             </a>
             <% } else { %>
-            <div class="user-slidebar">
-                <button class="user-btn">
-                    <i class="fa-solid fa-user"></i> <%= user.username || 'User' %> <i
-                        class="fa-solid fa-caret-down"></i>
-                </button>
-                <ul class="user-dropdown">
-                    <li><a href="/profile">Thông tin cá nhân</a></li>
-                    <li>
-                        <form action="/logout?_method=DELETE" method="POST" style="margin:0;">
-                            <button type="submit"
-                                style="background:none;border:none;padding:0;color:inherit;cursor:pointer;">
-                                Đăng xuất
+            <div id="nav-bar">
+                <input type="checkbox" id="nav-toggle" />
+                <div id="nav-header">
+                    <a id="nav-title" href="https://codepen.io" target="_blank" style="display:flex;align-items:center;gap:12px;">
+                        <img class="logo" src="/images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png"
+                            alt="Logo" style="width:40px;height:40px;object-fit:contain;">
+                        <span class="logo-text">HOW TO<br>DEV</span>
+                    </a>
+                    <label for="nav-toggle">
+                        <span id="nav-toggle-burger"></span>
+                    </label>
+                    <hr>
+                </div>
+                <div id="nav-content">
+                    <a href="/" class="nav-button"><i class="fas fa-house"></i><span>Home</span></a>
+            
+                    <!-- Common options for all authenticated users -->
+                    <a href="/schedule" class="nav-button"><i class="fas fa-calendar"></i><span>My Schedule</span></a>
+                    <a href="/notifications" class="nav-button"><i class="fas fa-bell"></i><span>Notifications</span></a>
+                    <a href="/profile" class="nav-button"><i class="fas fa-user"></i><span>Profile</span></a>
+                    <!-- Teacher & Admin only options -->
+                    <% if (user.role === 'admin' || user.role === 'teacher') { %>
+                    <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
+                    <a href="/courses" class="nav-button"><i class="fas fa-book"></i><span>Courses</span></a>
+                    <a href="/materials" class="nav-button"><i class="fas fa-file"></i><span>Materials</span></a>
+                    <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload Material</span></a>
+                    <% } %>
+            
+                    <!-- Admin only options -->
+                    <% if (user.role === 'admin') { %>
+                    <a href="/users" class="nav-button"><i class="fas fa-user-cog"></i><span>User List</span></a>
+                    <a href="/register" class="nav-button"><i class="fas fa-user-plus"></i><span>Register User</span></a>
+                    <a href="/enrollments" class="nav-button"><i class="fas fa-user-plus"></i><span>Enrollments</span></a>
+                    <a href="/payments" class="nav-button"><i class="fas fa-money-bill"></i><span>Payments</span></a>
+                    <a href="/schedules" class="nav-button"><i class="fas fa-calendar-alt"></i><span>Schedules</span></a>
+                    <a href="/courses/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Course</span></a>
+                    <a href="/classes/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Class</span></a>
+                    <a href="/enrollments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Enrollment</span></a>
+                    <a href="/payments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Payment</span></a>
+                    <a href="/schedule/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Schedule</span></a>
+                    <% } %>
+            
+                    <!-- Logout button for all authenticated users -->
+                    <div class="nav-button">
+                        <form action="/logout?_method=DELETE" method="POST">
+                            <button type="submit" class="nav-button">
+                                <i class="fas fa-right-from-bracket"></i><span>Logout</span>
                             </button>
                         </form>
-                    </li>
-                </ul>
-            </div>
-            <% } %>
-
+                    </div>
+            
+                    <div id="nav-content-highlight"></div>
+                </div>
+            
+            
+            
+                <input type="checkbox" id="nav-footer-toggle" />
+                <div id="nav-footer">
+                    <div id="nav-footer-heading">
+                        <div id="nav-footer-avatar">
+                            <img src="/images/gv1.png" />
+                        </div>
+                        <div id="nav-footer-titlebox">
+                            <a id="nav-footer-title" href="https://codepen.io/uahnbu/pens/public" target="_blank">User</a>
+                            <span id="nav-footer-subtitle">Role</span>
+                        </div>
+                        <label for="nav-footer-toggle">
+                            <i class="fas fa-caret-up"></i>
+                        </label>
+                    </div>
+                    <div id="nav-footer-content">
+            
+                    </div>
+                </div>
+            </div>       <% } %>
 
 
         </div>
 
         </header>
-    <form action="/payments" method="POST">
-        <label for="student_id">Student ID:</label>
-        <input type="number" id="student_id" name="student_id" required />
 
-        <label for="amount">Amount:</label>
-        <input type="number" id="amount" step="0.01" name="amount" required />
+    <div class="container mx-auto px-4 sm:px-8 py-8">
+        <div class="max-w-md mx-auto bg-white rounded-lg shadow-md">
+            <div class="p-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Record New Payment</h2>
+                
+                <form action="/payments" method="POST" class="space-y-6">
+                    <div class="flex flex-col">
+                        <label for="student_id" 
+                               class="text-gray-700 font-medium mb-1">
+                            Student ID
+                        </label>
+                        <input type="number" 
+                               id="student_id" 
+                               name="student_id" 
+                               required
+                               class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
 
-        <label for="payment_date">Payment Date:</label>
-        <input type="date" id="payment_date" name="payment_date" required />
+                    <div class="flex flex-col">
+                        <label for="amount" 
+                               class="text-gray-700 font-medium mb-1">
+                            Amount
+                        </label>
+                        <input type="number" 
+                               id="amount" 
+                               name="amount" 
+                               step="0.01" 
+                               required
+                               class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
 
-        <button type="submit">Record Payment</button>
-    </form>
+                    <div class="flex flex-col">
+                        <label for="payment_date" 
+                               class="text-gray-700 font-medium mb-1">
+                            Payment Date
+                        </label>
+                        <input type="date" 
+                               id="payment_date" 
+                               name="payment_date" 
+                               required
+                               class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div class="flex justify-between items-center pt-4">
+                        <a href="/payments" 
+                           class="text-blue-500 hover:text-blue-700 font-medium">
+                            Back to payments
+                        </a>
+                        <button type="submit" 
+                                class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            Record Payment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <footer class="relative bg-blueGray-200 pt-8 pb-6">
         <div class="container mx-auto px-4">
             <div class="flex flex-wrap text-left lg:text-left">
@@ -152,4 +255,3 @@
     </footer>
 </body>
 </html>
-  
