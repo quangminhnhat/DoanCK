@@ -39,9 +39,30 @@
           </li>
         </ul>
       </nav>
-      <div class="other">
-        <i class="fas fa-user"></i>
-      </div>
+      
+  <% if (!user) { %>
+  <a href="/login" class="login-btn">
+    <i class="fa-solid fa-user"></i> Login
+  </a>
+<% } else { %>
+  <div class="user-slidebar">
+    <button class="user-btn">
+      <i class="fa-solid fa-user"></i> <%= user.username || 'User' %> <i class="fa-solid fa-caret-down"></i>
+    </button>
+    <ul class="user-dropdown">
+      <li><a href="/profile">Thông tin cá nhân</a></li>
+      <li>
+        <form action="/logout?_method=DELETE" method="POST" style="margin:0;">
+          <button type="submit" style="background:none;border:none;padding:0;color:inherit;cursor:pointer;">
+            Đăng xuất
+          </button>
+        </form>
+      </li>
+    </ul>
+  </div>
+<% } %>
+
+
 
     </div>
 

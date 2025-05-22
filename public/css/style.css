@@ -1,3 +1,21 @@
+ .login-btn {
+            display: inline-block;
+            font-size: 1rem;
+            border: none;
+            outline: none;
+            padding: 10px 12px;
+            border-radius: 10px;
+            background-color: rgb(246, 45, 78);
+            color: white;
+            text-decoration: none; /* Loại bỏ gạch chân mặc định của thẻ <a> */
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+      
+        /* Căn chỉnh icon và text */
+        .login-btn i {
+            margin-right: 8px;
+        }
 /* Header */
 body {
   background: #F9F8FD;
@@ -230,10 +248,13 @@ padding: 10px 0;
 /* Reset một số CSS mặc định */
 
 
-.container {
+.container-login {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 h1 {
@@ -687,4 +708,42 @@ overlay{
   margin: 14px;
   cursor: pointer;
   transition: all 0.3s ease;
+}
+
+/* Add to css/style.css */
+.user-slidebar {
+  position: relative;
+  display: inline-block;
+}
+.user-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  padding: 8px 16px;
+}
+.user-dropdown {
+  display: none;
+  position: absolute;
+  right: 0;
+  background: #fff;
+  min-width: 150px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  z-index: 100;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.user-slidebar:hover .user-dropdown {
+  display: block;
+}
+.user-dropdown li a {
+  display: block;
+  padding: 10px 16px;
+  color: #333;
+  text-decoration: none;
+}
+.user-dropdown li a:hover {
+  background: #f0f0f0;
 }

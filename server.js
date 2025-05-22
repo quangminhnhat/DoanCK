@@ -23,7 +23,7 @@ app.use(methodOverride("_method"));
 
 app.use(express.urlencoded({ extended: false }));
 const connectionString =
-  "Driver={ODBC Driver 17 for SQL Server};Server=LAPTOP-ND7KAD0J;Database=DOANCS;Trusted_Connection=Yes;";
+  "Driver={ODBC Driver 17 for SQL Server};Server=DESKTOP-M7HENCK;Database=DOANCS;Trusted_Connection=Yes;";
 app.use(flash());
 app.use(
   session({
@@ -301,11 +301,11 @@ app.get("/", (req, res) => {
   res.render("index.ejs", { user: req.user });
 });
 
-app.get("/school", checkAuthenticated, (req, res) => {
+app.get("/school", (req, res) => {
   res.render("school.ejs", { user: req.user });
 });
 
-app.get("/news", checkAuthenticated, (req, res) => {
+app.get("/news", (req, res) => {
   res.render("news.ejs", { user: req.user });
 });
 
@@ -577,7 +577,7 @@ app.get(
 );
 
 app.post(
-  "/classes",
+  "/classes", 
   checkAuthenticated,
   authenticateRole(["admin", "teacher"]),
   (req, res) => {
@@ -1204,7 +1204,7 @@ app.delete("/logout", (req, res) => {
       console.error("Error during logout:", err);
       return res.status(500).send("Logout error");
     }
-    res.redirect("/login");
+    res.redirect("/");
   });
 });
 
