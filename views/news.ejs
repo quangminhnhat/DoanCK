@@ -50,20 +50,24 @@
                     <a id="nav-title" href="https://codepen.io" target="_blank" style="display:flex;align-items:center;gap:12px;">
                         <img class="logo" src="/images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png"
                             alt="Logo" style="width:40px;height:40px;object-fit:contain;">
-                        <span class="logo-text">HOW TO<br>DEV</span>
+                         
                     </a>
                     <label for="nav-toggle">
                         <span id="nav-toggle-burger"></span>
                     </label>
                     <hr>
                 </div>
+                <!-- Common nav section for all authenticated users -->
                 <div id="nav-content">
                     <a href="/" class="nav-button"><i class="fas fa-house"></i><span>Home</span></a>
             
                     <!-- Common options for all authenticated users -->
+                    <% if (user.role === 'teacher' || user.role === 'student') { %>
                     <a href="/schedule" class="nav-button"><i class="fas fa-calendar"></i><span>My Schedule</span></a>
+                    <% } %>
                     <a href="/notifications" class="nav-button"><i class="fas fa-bell"></i><span>Notifications</span></a>
                     <a href="/profile" class="nav-button"><i class="fas fa-user"></i><span>Profile</span></a>
+            
                     <!-- Teacher & Admin only options -->
                     <% if (user.role === 'admin' || user.role === 'teacher') { %>
                     <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
@@ -78,7 +82,7 @@
                     <a href="/register" class="nav-button"><i class="fas fa-user-plus"></i><span>Register User</span></a>
                     <a href="/enrollments" class="nav-button"><i class="fas fa-user-plus"></i><span>Enrollments</span></a>
                     <a href="/payments" class="nav-button"><i class="fas fa-money-bill"></i><span>Payments</span></a>
-                    <a href="/schedules" class="nav-button"><i class="fas fa-calendar-alt"></i><span>Schedules</span></a>
+                    
                     <a href="/courses/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Course</span></a>
                     <a href="/classes/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Class</span></a>
                     <a href="/enrollments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Enrollment</span></a>

@@ -49,20 +49,24 @@
           <a id="nav-title" href="https://codepen.io" target="_blank" style="display:flex;align-items:center;gap:12px;">
             <img class="logo" src="/images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png" alt="Logo"
               style="width:40px;height:40px;object-fit:contain;">
-            <span class="logo-text">HOW TO<br>DEV</span>
+             
           </a>
           <label for="nav-toggle">
             <span id="nav-toggle-burger"></span>
           </label>
           <hr>
         </div>
+        <!-- Common nav section for all authenticated users -->
         <div id="nav-content">
           <a href="/" class="nav-button"><i class="fas fa-house"></i><span>Home</span></a>
       
           <!-- Common options for all authenticated users -->
+          <% if (user.role === 'teacher' || user.role === 'student') { %>
           <a href="/schedule" class="nav-button"><i class="fas fa-calendar"></i><span>My Schedule</span></a>
+          <% } %>
           <a href="/notifications" class="nav-button"><i class="fas fa-bell"></i><span>Notifications</span></a>
           <a href="/profile" class="nav-button"><i class="fas fa-user"></i><span>Profile</span></a>
+      
           <!-- Teacher & Admin only options -->
           <% if (user.role === 'admin' || user.role === 'teacher') { %>
           <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
@@ -77,7 +81,7 @@
           <a href="/register" class="nav-button"><i class="fas fa-user-plus"></i><span>Register User</span></a>
           <a href="/enrollments" class="nav-button"><i class="fas fa-user-plus"></i><span>Enrollments</span></a>
           <a href="/payments" class="nav-button"><i class="fas fa-money-bill"></i><span>Payments</span></a>
-          <a href="/schedules" class="nav-button"><i class="fas fa-calendar-alt"></i><span>Schedules</span></a>
+          
           <a href="/courses/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Course</span></a>
           <a href="/classes/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Class</span></a>
           <a href="/enrollments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Enrollment</span></a>
@@ -96,8 +100,6 @@
       
           <div id="nav-content-highlight"></div>
         </div>
-      
-      
       
         <input type="checkbox" id="nav-footer-toggle" />
         <div id="nav-footer">
@@ -232,161 +234,4 @@
           <div class="image-content">
             <spam class="overlay"></spam>
 
-            <div class="card-image">
-              <img src="/images/gv1.png" alt="" class="card">
-
-
-            </div>
-            <div class="card-content">
-              <h2 class="name">Học viên</h2>
-              <p class="description">Học viên là những người tham gia vào quá trình học tập, nghiên cứu và phát triển
-                bản thân. Họ có thể là sinh viên, học sinh hoặc bất kỳ ai đang tìm kiếm kiến thức mới.</p>
-              <button class="button">Xem thêm</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="swiper-button-next"></div>
-    <div class="swiper-button-prev"></div>
-    <div class="swiper-pagination"></div>
-  </div>
-
-  <div class="container-gth">
-    <!-- Phần trên với hình ảnh lớp học và tầm nhìn -->
-    <div class="row">
-      <div class="image-section">
-        <img src="/images/sumenh.jpg" alt="Lớp học" />
-      </div>
-      <div class="vision-section">
-        <h2>Tầm nhìn</h2>
-        <ul>
-          <li>Xây dựng chương trình và phương pháp giảng dạy khoa học, đa dạng, liên tục cập nhật để đạt hiệu quả giáo
-            dục tốt nhất.</li>
-          <li>Truyền cảm hứng và chia sẻ những giá trị tích cực đến cộng đồng những người có niềm yêu thích với học
-            thuật.</li>
-          <li>Phát triển năng lực và phẩm chất của đội ngũ Giáo viên/CBNV, đề cao giá trị đạo đức và quyền lợi của mỗi
-            học viên.</li>
-        </ul>
-      </div>
-    </div>
-
-    <!-- Phần dưới với sứ mệnh và hình ảnh lớp học -->
-    <div class="row">
-      <div class="mission-section">
-        <h2>Sứ mệnh</h2>
-        <p>Trở thành Hệ thống Giáo dục học thuật chất lượng và đáng tin cậy trong việc phát triển năng lực hoc tập một
-          cách tự chủ, ứng dụng cao trong thực tiễn; đồng thời phát triển tư duy học tập nhanh nhạy cho các đối tượng
-          học viên từ mọi trình độ và mọi cấp bậc.</p>
-      </div>
-      <div class="image-section">
-        <img src="/images/tamnhin.jpg" alt="Học viên" />
-      </div>
-    </div>
-  </div>
-
-  <div class="container-map">
-    <h1>Vị Trí Của Chúng Tôi</h1>
-    <div class="location-box"
-      onclick="showMap('https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d30295.20482478971!2d105.87968922307688!3d18.35181851243646!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMTjCsDIxJzA1LjkiTiAxMDXCsDUzJzQ0LjciRQ!5e0!3m2!1svi!2s!4v1747195553103!5m2!1svi!2s')">
-      Cơ sở 1: Ví dụ Địa điểm
-    </div>
-    <div class="location-box"
-      onclick="showMap('https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3834.8058989026786!2d108.2204850153604!3d16.04707998889302!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMTbCsDAyJzQ5LjUiTiAxMDjCsDEyJzEwLjUiRQ!5e0!3m2!1svi!2s!4v1587485553103!5m2!1svi!2s')">
-      Cơ sở 2: Đà Nẵng
-    </div>
-    <div class="location-box"
-      onclick="showMap('https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3724.8145958424346!2d105.80194441539306!3d21.028511993465683!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMjHCsDAxJzQyLjciTiAxMDXCsDQ4JzA5LjIiRQ!5e0!3m2!1svi!2s!4v1687195553103!5m2!1svi!2s')">
-      Cơ sở 3: Hà Nội
-    </div>
-
-    <iframe id="map"
-      src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d30295.20482478971!2d105.87968922307688!3d18.35181851243646!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMTjCsDIxJzA1LjkiTiAxMDXCsDUzJzQ0LjciRQ!5e0!3m2!1svi!2s!4v1747195553103!5m2!1svi!2s"
-      width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy"
-      referrerpolicy="no-referrer-when-downgrade">
-    </iframe>
-  </div>
-
-  <script>
-    function showMap(mapUrl) {
-      document.getElementById('map').src = mapUrl;
-    }
-  </script>
-
-  <footer class="relative bg-blueGray-200 pt-8 pb-6">
-    <div class="container mx-auto px-4">
-      <div class="flex flex-wrap text-left lg:text-left">
-        <div class="w-full lg:w-6/12 px-4">
-          <h4 class="text-3xl font-semibold text-blueGray-700">Liên hệ với chúng tôi!</h4>
-          <h5 class="text-lg mt-0 mb-2 text-blueGray-600">
-            Tìm kiếm chúng tôi trên bất kỳ mạng xã hội nào và gửi cho chúng tôi một tin nhắn! Chúng tôi sẽ trả lời bạn
-            ngay khi có thể.
-          </h5>
-          <div class="mt-6 lg:mb-0 mb-6">
-            <button
-              class="bg-white text-lightBlue-400 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
-              type="button">
-              <i class="fab fa-twitter"></i>
-            </button>
-            <button
-              class="bg-white text-lightBlue-600 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
-              type="button">
-              <i class="fab fa-facebook-square"></i>
-            </button>
-            <button
-              class="bg-white text-pink-400 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
-              type="button">
-              <i class="fab fa-dribbble"></i>
-            </button>
-            <button
-              class="bg-white text-blueGray-800 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
-              type="button">
-              <i class="fab fa-github"></i>
-            </button>
-          </div>
-        </div>
-        <div class="w-full lg:w-6/12 px-4">
-          <div class="flex flex-wrap items-top mb-6">
-            <div class="w-full lg:w-4/12 px-4 ml-auto">
-              <span class="block uppercase text-blueGray-500 text-sm font-semibold mb-2">Bạn Đang Tìm Kiếm</span>
-              <ul class="list-unstyled">
-                <li>
-                  <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm" href="#">Liên
-                    Hệ</a>
-                </li>
-                <li>
-                  <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm" href="#">Thông
-                    Tin Mới</a>
-                </li>
-                <li>
-                  <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm" href="#">Tuyển
-                    Dụng</a>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-      <hr class="my-6 border-blueGray-300">
-      <div class="flex flex-wrap items-center md:justify-between justify-center">
-        <div class="w-full md:w-4/12 px-4 mx-auto text-center">
-          <div class="text-sm text-blueGray-500 font-semibold py-1">
-            Copyright © <span id="get-current-year">2025</span><a href="https://www.facebook.com/ttgdvpttnht"
-              class="text-blueGray-500 hover:text-gray-800" target="_blank"> Talent Education</a>. Made by
-            <a href="https://github.com/Rin-0808" class="text-blueGray-500 hover:text-blueGray-800">Rin</a>.
-          </div>
-        </div>
-      </div>
-    </div>
-  </footer>
-
-  <script>
-    // Lấy năm hiện tại cho footer
-    document.getElementById('get-current-year').textContent = new Date().getFullYear();
-  </script>
-
-  <script src="/js/swiper-bundle.min.js"></script>
-  <script src="/js/script-tc.js"></script>
-</body>
-
-</html>
+            <div class="card-image
