@@ -147,7 +147,7 @@
     <div class="flex items-center mb-4">
       <h1 class="text-2xl font-semibold">Thời khóa biểu</h1>
       <div class="ml-auto flex gap-2">
-        <a href="/schedule" class="px-4 py-1 bg-blue-600 text-white rounded">Tuần hiện tại</a>
+        <a href="/schedule" class="px-4 py-1 bg-blue-600 text-black rounded">Tuần hiện tại</a>
         <a href="/schedule?weekStart=<%= prevWeekStart %>" class="px-2 bg-gray-200 rounded">&lt;</a>
         <div class="px-4 py-1 border rounded">
           Tuần: <%= days[0].date %> – <%= days[6].date %>
@@ -159,11 +159,11 @@
     <!-- Grid -->
     <div class="grid grid-cols-8 border border-gray-300">
       <!-- Top-left corner -->
-      <div class="bg-blue-700 text-white font-semibold p-2 text-center">&nbsp;</div>
+      <div class="bg-blue-700 text-black font-semibold p-2 text-center">&nbsp;</div>
 
       <!-- Day headers -->
       <% days.forEach(function(day) { %>
-      <div class="bg-blue-700 text-white font-semibold p-2 text-center">
+      <div class="bg-blue-700 text-black font-semibold p-2 text-center">
         <%= day.name %><br>
         <span class="text-xs font-normal">
           <%= day.date %>
@@ -174,7 +174,7 @@
       <!-- Period rows (1 through maxPeriod+1) -->
       <% for (var i=1; i <=14; i++) { %>
       <!-- Label column -->
-      <div class="bg-blue-600 text-white text-sm font-medium p-2 text-center">
+      <div class="bg-blue-600 text-black text-sm font-medium p-2 text-center">
         Tiết <%= i %>
       </div>
 

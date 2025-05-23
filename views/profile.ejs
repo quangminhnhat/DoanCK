@@ -10,8 +10,83 @@
     <link rel="stylesheet" href="https://demos.creative-tim.com/notus-js/assets/styles/tailwind.css">
     <!-- link swiper-->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-    <link rel="stylesheet"
-        href="https://demos.creative-tim.com/notus-js/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="https://demos.creative-tim.com/notus-js/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css">
+    <style>
+        .profile-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .profile-title {
+            font-size: 2rem;
+            color: #2d3748;
+            margin: 0;
+        }
+        
+        .edit-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background-color: #4299e1;
+            color: white;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+        
+        .edit-button:hover {
+            background-color: #3182ce;
+        }
+        
+        .profile-section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: #f7fafc;
+            border-radius: 6px;
+        }
+        
+        .section-title {
+            font-size: 1.25rem;
+            color: #4a5568;
+            margin-bottom: 1rem;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+        
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .info-label {
+            font-size: 0.875rem;
+            color: #718096;
+            font-weight: 500;
+        }
+        
+        .info-value {
+            font-size: 1rem;
+            color: #2d3748;
+            font-weight: 600;
+        }
+    </style>
 </head>
 
 <body>
@@ -131,18 +206,54 @@
             <% } %>
         </div>
     </header>
-    <h1>Welcome, <%= user.username %>!</h1>
-    <p><strong>Role:</strong> <%= user.role %></p>
-    <p><strong>Created At:</strong> <%= user.created_at %></p>
-    <p><strong>Updated At:</strong> <%= user.updated_at %></p>
+    <div class="profile-container">
+        <div class="profile-header">
+            <h1 class="profile-title">Welcome, <%= user.username %>!</h1>
+            <a href="/users/<%= user.id %>/edit" class="edit-button">
+                <i class="fas fa-edit"></i> Edit Profile
+            </a>
+        </div>
 
-    <% if (details) { %>
-    <h2>Personal Information</h2>
-    <p><strong>Full Name:</strong> <%= details.full_name %></p>
-    <p><strong>Email:</strong> <%= details.email %></p>
-    <p><strong>Phone:</strong> <%= details.phone_number %></p>
-    <% } %>
-    <a href="/users/<%= user.id %>/edit">Edit</a>
+        <div class="profile-content">
+            <div class="profile-section">
+                <h2 class="section-title">Account Information</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Role</span>
+                        <span class="info-value"><%= user.role %></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Member Since</span>
+                        <span class="info-value"><%= new Date(user.created_at).toLocaleDateString() %></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Last Updated</span>
+                        <span class="info-value"><%= new Date(user.updated_at).toLocaleDateString() %></span>
+                    </div>
+                </div>
+            </div>
+
+            <% if (details) { %>
+            <div class="profile-section">
+                <h2 class="section-title">Personal Information</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Full Name</span>
+                        <span class="info-value"><%= details.full_name %></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Email</span>
+                        <span class="info-value"><%= details.email %></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Phone</span>
+                        <span class="info-value"><%= details.phone_number %></span>
+                    </div>
+                </div>
+            </div>
+            <% } %>
+        </div>
+    </div>
     <footer class="relative bg-blueGray-200 pt-8 pb-6">
         <div class="container mx-auto px-4">
             <div class="flex flex-wrap text-left lg:text-left">

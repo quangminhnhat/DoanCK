@@ -10,8 +10,101 @@
     <link rel="stylesheet" href="https://demos.creative-tim.com/notus-js/assets/styles/tailwind.css">
     <!-- link swiper-->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-    <link rel="stylesheet"
-        href="https://demos.creative-tim.com/notus-js/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="https://demos.creative-tim.com/notus-js/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css">
+    <style>
+        .form-container {
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-title {
+            font-size: 1.8rem;
+            color: #2d3748;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .schedule-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .form-group.half {
+            margin: 0;
+        }
+        
+        label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #4a5568;
+        }
+        
+        .form-control {
+            padding: 0.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .btn-primary {
+            background-color: #4299e1;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #3182ce;
+        }
+        
+        .btn-secondary {
+            background-color: #e2e8f0;
+            color: #4a5568;
+            text-decoration: none;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #cbd5e0;
+        }
+    </style>
 </head>
 
 <body>
@@ -131,30 +224,54 @@
         </div>
 
         </header>
-    <h1>Add New Schedule</h1>
-    <form method="POST" action="/schedules">
-        <label>Class:</label><br>
-        <select name="class_id">
-            <% classes.forEach(cls => { %>
-            <option value="<%= cls.id %>"><%= cls.class_name %></option>
-            <% }) %>
-        </select><br><br>
+    <div class="form-container">
+        <h1 class="form-title">Add New Schedule</h1>
+        <form method="POST" action="/schedules" class="schedule-form">
+            <div class="form-group">
+                <label for="class_id">Class:</label>
+                <select id="class_id" name="class_id" class="form-control">
+                    <% classes.forEach(cls => { %>
+                    <option value="<%= cls.id %>"><%= cls.class_name %></option>
+                    <% }) %>
+                </select>
+            </div>
 
-        <label>Day of Week:</label><br>
-        <input type="text" name="day_of_week" required><br><br>
+            <div class="form-group">
+                <label for="day_of_week">Day of Week:</label>
+                <select id="day_of_week" name="day_of_week" class="form-control" required>
+                    <option value="Monday">Monday</option>
+                    <option value="Tuesday">Tuesday</option>
+                    <option value="Wednesday">Wednesday</option>
+                    <option value="Thursday">Thursday</option>
+                    <option value="Friday">Friday</option>
+                    <option value="Saturday">Saturday</option>
+                    <option value="Sunday">Sunday</option>
+                </select>
+            </div>
 
-        <label>Date:</label><br>
-        <input type="date" name="schedule_date" required><br><br>
+            <div class="form-group">
+                <label for="schedule_date">Date:</label>
+                <input type="date" id="schedule_date" name="schedule_date" class="form-control" required>
+            </div>
 
-        <label>Start Time:</label><br>
-        <input type="time" name="start_time" required><br><br>
+            <div class="form-row">
+                <div class="form-group half">
+                    <label for="start_time">Start Time:</label>
+                    <input type="time" id="start_time" name="start_time" class="form-control" required>
+                </div>
 
-        <label>End Time:</label><br>
-        <input type="time" name="end_time" required><br><br>
+                <div class="form-group half">
+                    <label for="end_time">End Time:</label>
+                    <input type="time" id="end_time" name="end_time" class="form-control" required>
+                </div>
+            </div>
 
-        <button type="submit">Add Schedule</button>
-    </form>
-    <a href="/schedules">Back</a>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Add Schedule</button>
+                <a href="/schedules" class="btn btn-secondary">Back</a>
+            </div>
+        </form>
+    </div>
     <footer class="relative bg-blueGray-200 pt-8 pb-6">
         <div class="container mx-auto px-4">
             <div class="flex flex-wrap text-left lg:text-left">
