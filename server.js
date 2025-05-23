@@ -23,7 +23,7 @@ app.use(methodOverride("_method"));
 
 app.use(express.urlencoded({ extended: false }));
 const connectionString =
-  "Driver={ODBC Driver 17 for SQL Server};Server=DESKTOP-M7HENCK;Database=DOANCS;Trusted_Connection=Yes;";
+  "Driver={ODBC Driver 17 for SQL Server};Server=LAPTOP-ND7KAD0J;Database=DOANCS;Trusted_Connection=Yes;";
 app.use(flash());
 app.use(
   session({
@@ -335,7 +335,7 @@ app.get(
 app.get(
   "/courses",
   checkAuthenticated,
-  authenticateRole("admin"),
+  authenticateRole(["admin", "teacher"]),
   (req, res) => {
     const query = "SELECT * FROM courses ORDER BY start_date DESC";
     sql.query(connectionString, query, (err, rows) => {

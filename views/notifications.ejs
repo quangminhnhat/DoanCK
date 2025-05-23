@@ -1,4 +1,3 @@
-
 <section id="Slider"></section>
 <html lang="en">
 
@@ -139,94 +138,120 @@
 
         </div>
 
-    </header><div class="card">
-    <div class="card-header">
-        <h5 class="card-title mb-0">Send Notification</h5>
-    </div>
-    <div class="card-body">
-        <form action="/notifications" method="POST">
-            <div class="mb-3">
-                <label for="userId" class="form-label">Send to User ID:</label>
-                <input type="number" name="userId" class="form-control" required />
-            </div>
+    </header>
+    <div class="card shadow-lg rounded-lg mx-auto max-w-2xl my-8 bg-white">
+        <div class="card-header px-6 py-4 bg-gray-50 border-b">
+            <h5 class="text-xl font-semibold text-gray-700">Send Notification</h5>
+        </div>
+        <div class="card-body p-6">
+            <form action="/notifications" method="POST" class="space-y-6">
+                <div class="form-group">
+                    <label for="userId" class="block text-sm font-medium text-gray-700 mb-2">
+                        Send to User ID
+                    </label>
+                    <input 
+                        type="number" 
+                        name="userId" 
+                        id="userId"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                        required 
+                        placeholder="Enter user ID"
+                    />
+                </div>
 
-            <div class="mb-3">
-                <label for="message" class="form-label">Message:</label>
-                <textarea name="message" class="form-control" rows="3" required></textarea>
-            </div>
+                <div class="form-group">
+                    <label for="message" class="block text-sm font-medium text-gray-700 mb-2">
+                        Message
+                    </label>
+                    <textarea 
+                        name="message" 
+                        id="message"
+                        rows="4"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                        required
+                        placeholder="Type your message here..."
+                    ></textarea>
+                </div>
 
-            <button type="submit" class="btn btn-primary">Send Notification</button>
-        </form>
-    </div>
-</div>
-<footer class="relative bg-blueGray-200 pt-8 pb-6">
-    <div class="container mx-auto px-4">
-        <div class="flex flex-wrap text-left lg:text-left">
-            <div class="w-full lg:w-6/12 px-4">
-                <h4 class="text-3xl fonat-semibold text-blueGray-700">Liên hệ với chúng tôi!</h4>
-                <h5 class="text-lg mt-0 mb-2 text-blueGray-600">
-                    Tìm kiếm chúng tôi trên bất kỳ mạng xã hội nào và gửi cho chúng tôi một tin nhắn! Chúng tôi sẽ trả
-                    lời bạn
-                    ngay khi có thể.
-                </h5>
-                <div class="mt-6 lg:mb-0 mb-6">
-                    <button
-                        class="bg-white text-lightBlue-400 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
-                        type="button">
-                        <i class="fab fa-twitter"></i></button><button
-                        class="bg-white text-lightBlue-600 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
-                        type="button">
-                        <i class="fab fa-facebook-square"></i></button><button
-                        class="bg-white text-pink-400 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
-                        type="button">
-                        <i class="fab fa-dribbble"></i></button><button
-                        class="bg-white text-blueGray-800 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
-                        type="button">
-                        <i class="fab fa-github"></i>
+                <div class="flex justify-end">
+                    <button 
+                        type="submit" 
+                        class="px-6 py-2 bg-blue-600 text-black rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                    >
+                        Send Notification
                     </button>
                 </div>
+            </form>
+        </div>
+    </div>
+    <footer class="relative bg-blueGray-200 pt-8 pb-6">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-wrap text-left lg:text-left">
+                <div class="w-full lg:w-6/12 px-4">
+                    <h4 class="text-3xl fonat-semibold text-blueGray-700">Liên hệ với chúng tôi!</h4>
+                    <h5 class="text-lg mt-0 mb-2 text-blueGray-600">
+                        Tìm kiếm chúng tôi trên bất kỳ mạng xã hội nào và gửi cho chúng tôi một tin nhắn! Chúng tôi sẽ trả
+                        lời bạn
+                        ngay khi có thể.
+                    </h5>
+                    <div class="mt-6 lg:mb-0 mb-6">
+                        <button
+                            class="bg-white text-lightBlue-400 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
+                            type="button">
+                            <i class="fab fa-twitter"></i></button><button
+                            class="bg-white text-lightBlue-600 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
+                            type="button">
+                            <i class="fab fa-facebook-square"></i></button><button
+                            class="bg-white text-pink-400 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
+                            type="button">
+                            <i class="fab fa-dribbble"></i></button><button
+                            class="bg-white text-blueGray-800 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
+                            type="button">
+                            <i class="fab fa-github"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="w-full lg:w-6/12 px-4">
+                    <div class="flex flex-wrap items-top mb-6">
+                        <div class="w-full lg:w-4/12 px-4 ml-auto">
+                            <span class="block uppercase text-blueGray-500 text-sm font-semibold mb-2">Bạn Đang Tìm
+                                Kiếm</span>
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm"
+                                        href="">Liên
+                                        Hệ</a>
+                                </li>
+                                <li>
+                                    <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm"
+                                        href="">Thông
+                                        Tin Mới</a>
+                                </li>
+                                <li>
+                                    <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm"
+                                        href="">Tuyển
+                                        Dụng</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="w-full lg:w-6/12 px-4">
-                <div class="flex flex-wrap items-top mb-6">
-                    <div class="w-full lg:w-4/12 px-4 ml-auto">
-                        <span class="block uppercase text-blueGray-500 text-sm font-semibold mb-2">Bạn Đang Tìm
-                            Kiếm</span>
-                        <ul class="list-unstyled">
-                            <li>
-                                <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm"
-                                    href="">Liên
-                                    Hệ</a>
-                            </li>
-                            <li>
-                                <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm"
-                                    href="">Thông
-                                    Tin Mới</a>
-                            </li>
-                            <li>
-                                <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm"
-                                    href="">Tuyển
-                                    Dụng</a>
-                            </li>
-                        </ul>
+            <hr class="my-6 border-blueGray-300">
+            <div class="flex flex-wrap items-center md:justify-between justify-center">
+                <div class="w-full md:w-4/12 px-4 mx-auto text-center">
+                    <div class="text-sm text-blueGray-500 font-semibold py-1">
+                        Copyright © <span id="get-current-year">2025</span><a href="https://www.facebook.com/ttgdvpttnht"
+                            class="text-blueGray-500 hover:text-gray-800" target="_blank"> Talent Education</a>. Made by
+                        <a href="https://github.com/Rin-0808" class="text-blueGray-500 hover:text-blueGray-800">Rin</a>.
                     </div>
                 </div>
             </div>
         </div>
-        <hr class="my-6 border-blueGray-300">
-        <div class="flex flex-wrap items-center md:justify-between justify-center">
-            <div class="w-full md:w-4/12 px-4 mx-auto text-center">
-                <div class="text-sm text-blueGray-500 font-semibold py-1">
-                    Copyright © <span id="get-current-year">2025</span><a href="https://www.facebook.com/ttgdvpttnht"
-                        class="text-blueGray-500 hover:text-gray-800" target="_blank"> Talent Education</a>. Made by
-                    <a href="https://github.com/Rin-0808" class="text-blueGray-500 hover:text-blueGray-800">Rin</a>.
-                </div>
-            </div>
-        </div>
-    </div>
-</footer>
-<!-- link swiper-->
-<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-<script src="/js/script.js"></script>
+    </footer>
+    <!-- link swiper-->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="/js/script.js"></script>
 </body>
 
 </html>
