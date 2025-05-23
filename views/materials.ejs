@@ -10,8 +10,16 @@
     <link rel="stylesheet" href="https://demos.creative-tim.com/notus-js/assets/styles/tailwind.css">
     <!-- link swiper-->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-    <link rel="stylesheet"
-        href="https://demos.creative-tim.com/notus-js/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="https://demos.creative-tim.com/notus-js/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css">
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/2.3.1/css/dataTables.dataTables.min.css" />
+
+<!-- jQuery (required by DataTables) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/2.3.1/js/dataTables.min.js"></script>
+
 </head>
 
 <body>
@@ -139,7 +147,8 @@
             </div>
 
             <div class="overflow-x-auto">
-                <table class="w-full table-auto">
+                <table id="materialsTable" class="display w-full table-auto">
+
                     <thead>
                         <tr class="bg-gray-50 text-gray-600 uppercase text-sm leading-normal">
                             <th class="py-3 px-6 text-left">ID</th>
@@ -264,6 +273,24 @@
             </div>
         </div>
     </footer>
+    <script>
+        $(document).ready(function () {
+            $('#materialsTable').DataTable({
+                responsive: true,
+                language: {
+                    search: "Tìm kiếm:",
+                    lengthMenu: "Hiển thị _MENU_ tài liệu",
+                    info: "Hiển thị _START_ đến _END_ của _TOTAL_ tài liệu",
+                    paginate: {
+                        previous: "Trước",
+                        next: "Sau"
+                    },
+                    emptyTable: "Không có tài liệu nào"
+                }
+            });
+        });
+    </script>
+      
 </body>
 
 </html>
