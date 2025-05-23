@@ -156,54 +156,189 @@
 
   </header>
 
-  <main class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold text-gray-800 mb-6">All Courses</h1>
-  
+  <main class="course-container">
+    <div class="page-header">
+        <h1 class="page-title">Course Management</h1>
+        <% if (user && user.role === 'admin') { %>
+            <a href="/courses/new" class="add-button">
+                <i class="fas fa-plus"></i> Add New Course
+            </a>
+        <% } %>
+    </div>
+
     <% if (courses.length === 0) { %>
-    <p class="text-gray-600">No courses found.</p>
+        <p class="no-data">No courses available.</p>
     <% } else { %>
-    <div class="overflow-x-auto rounded-lg shadow border border-gray-200">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-blue-600 text-black">
-          <tr>
-            <th class="px-6 py-3 text-left text-sm font-semibold uppercase">Course Name</th>
-            <th class="px-6 py-3 text-left text-sm font-semibold uppercase">Description</th>
-            <th class="px-6 py-3 text-left text-sm font-semibold uppercase">Start Date</th>
-            <th class="px-6 py-3 text-left text-sm font-semibold uppercase">End Date</th>
-            <th class="px-6 py-3 text-left text-sm font-semibold uppercase">Created At</th>
-            <th class="px-6 py-3 text-left text-sm font-semibold uppercase">Actions</th>
-          </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-          <% courses.forEach(course => { %>
-          <tr class="hover:bg-gray-50">
-            <td class="px-6 py-4 text-gray-800"><%= course.course_name %></td>
-            <td class="px-6 py-4 text-gray-800"><%= course.description %></td>
-            <td class="px-6 py-4 text-gray-800"><%= course.start_date.toISOString().slice(0, 10) %></td>
-            <td class="px-6 py-4 text-gray-800"><%= course.end_date.toISOString().slice(0, 10) %></td>
-            <td class="px-6 py-4 text-gray-800"><%= course.created_at.toISOString().slice(0, 10) %></td>
-            <td class="px-6 py-4 text-sm space-x-2">
-              <a href="/courses/<%= course.id %>/edit" class="text-blue-600 hover:underline">Edit  </a>
-              <form action="/courses/<%= course.id %>?_method=DELETE" method="POST" class="inline">
-                <button type="submit" onclick="return confirm('Are you sure?')"
-                  class="text-red-600 hover:underline">Delete</button>
-              </form>
-            </td>
-          </tr>
-          <% }) %>
-        </tbody>
-      </table>
-    </div>
-    <% } %>
-  
-    <% if (user && (user.role === 'admin' || user.role === 'teacher')) { %>
-    <div class="mt-6">
-      <a href="/courses/new" class="bg-blue-600 text-black px-4 py-2 rounded hover:bg-blue-700 transition">+ Add New
-        Course</a>
-    </div>
+        <div class="courses-list">
+            <% courses.forEach(course => { %>
+                <div class="course-item">
+                    <div class="course-main-info">
+                        <div class="course-title-section">
+                            <h2><%= course.course_name %></h2>
+                            <span class="course-dates">
+                                <%= new Date(course.course_start).toLocaleDateString() %> - 
+                                <%= new Date(course.course_end).toLocaleDateString() %>
+                            </span>
+                        </div>
+                        <p class="course-description"><%= course.course_description %></p>
+                    </div>
+                    
+                    <div class="course-details-grid">
+                        <div class="detail-section">
+                            <h3><i class="fas fa-user"></i> Teacher</h3>
+                            <ul>
+                                <li><strong>Name:</strong> <%= course.teacher_name %></li>
+                                <li><strong>Email:</strong> <%= course.teacher_email %></li>
+                                <li><strong>Phone:</strong> <%= course.teacher_phone %></li>
+                            </ul>
+                        </div>
+
+                        <div class="detail-section">
+                            <h3><i class="fas fa-chalkboard"></i> Class</h3>
+                            <ul>
+                                <li><strong>Name:</strong> <%= course.class_name %></li>
+                                <li><strong>Time:</strong> 
+                                    <%= new Date(course.class_start_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) %> - 
+                                    <%= new Date(course.class_end_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) %>
+                                </li>
+                                <% if (course.schedule_date) { %>
+                                    <li><strong>Schedule:</strong>
+                                        <%= course.day_of_week %>, 
+                                        <%= new Date(course.schedule_date).toLocaleDateString() %>
+                                    </li>
+                                    <li><strong>Session Time:</strong>
+                                        <%= new Date(course.schedule_start).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) %> - 
+                                        <%= new Date(course.schedule_end).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) %>
+                                    </li>
+                                <% } %>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
     <% } %>
   </main>
-  
+
+  <style>
+    .course-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-size: 2rem;
+        color: #2d3748;
+    }
+
+    .add-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background-color: #4299e1;
+        color: white;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        transition: background-color 0.2s;
+    }
+
+    .add-button:hover {
+        background-color: #3182ce;
+    }
+
+    .courses-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .course-item {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .course-main-info {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .course-title-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+
+    .course-title-section h2 {
+        font-size: 1.5rem;
+        color: #2d3748;
+        margin: 0;
+    }
+
+    .course-dates {
+        font-size: 0.875rem;
+        color: #718096;
+    }
+
+    .course-description {
+        color: #4a5568;
+        margin: 0;
+    }
+
+    .course-details-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+    }
+
+    .detail-section {
+        flex: 1;
+    }
+
+    .detail-section h3 {
+        font-size: 1rem;
+        color: #2d3748;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .detail-section ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .detail-section li {
+        margin-bottom: 0.5rem;
+        color: #4a5568;
+    }
+
+    .detail-section li strong {
+        color: #2d3748;
+        margin-right: 0.5rem;
+    }
+
+    .no-data {
+        text-align: center;
+        color: #718096;
+        padding: 2rem;
+    }
+  </style>
 
   <footer class="relative bg-blueGray-200 pt-8 pb-6">
     <div class="container mx-auto px-4">

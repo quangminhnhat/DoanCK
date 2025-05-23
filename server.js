@@ -31,7 +31,7 @@ app.use(
     resave: false,
     saveUninitialized: false,
   })
-); 
+);
 const initalizePassport = require("./pass-config");
 const { time } = require("console");
 initalizePassport(
@@ -277,7 +277,7 @@ ORDER BY u.created_at DESC;
 
   sql.query(connectionString, query, (err, rows) => {
     if (err) return res.status(500).send("Database error");
-    res.render("userList", { users: rows , user: req.user });
+    res.render("userList", { users: rows, user: req.user });
   });
 });
 
@@ -337,7 +337,28 @@ app.get(
   checkAuthenticated,
   authenticateRole(["admin", "teacher"]),
   (req, res) => {
-    const query = "SELECT * FROM courses ORDER BY start_date DESC";
+    const query = `
+    SELECT 
+ c.course_name,
+    c.description AS course_description,
+    t.full_name AS teacher_name,
+    t.email AS teacher_email,
+    t.phone_number AS teacher_phone,   
+    c.start_date AS course_start,
+    c.end_date AS course_end,
+    cls.class_name,
+    cls.start_time AS class_start_time,
+    cls.end_time AS class_end_time,
+    s.day_of_week,
+    s.schedule_date,
+    s.start_time AS schedule_start,
+    s.end_time AS schedule_end
+FROM classes cls
+JOIN teachers t ON cls.teacher_id = t.id
+JOIN courses c ON cls.course_id = c.id
+LEFT JOIN schedules s ON cls.id = s.class_id
+ORDER BY t.full_name, c.course_name, s.schedule_date;
+`;
     sql.query(connectionString, query, (err, rows) => {
       if (err) {
         console.error("Fetch courses error:", err);
@@ -577,7 +598,7 @@ app.get(
 );
 
 app.post(
-  "/classes", 
+  "/classes",
   checkAuthenticated,
   authenticateRole(["admin", "teacher"]),
   (req, res) => {
@@ -794,7 +815,7 @@ app.get(
   authenticateRole(["admin", "teacher"]),
   checkAuthenticated,
   (req, res) => {
-    res.render("uploadMaterial.ejs" , { user: req.user });
+    res.render("uploadMaterial.ejs", { user: req.user });
   }
 );
 
@@ -1221,8 +1242,6 @@ app.delete(
     });
   }
 );
-
-
 
 /*
 link bình thường
