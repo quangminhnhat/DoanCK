@@ -291,3 +291,27 @@ LEFT JOIN students s ON u.id = s.user_id
 LEFT JOIN teachers t ON u.id = t.user_id
 LEFT JOIN admins a   ON u.id = a.user_id
 ORDER BY u.created_at DESC;
+
+
+
+
+SELECT 
+ c.course_name,
+    c.description AS course_description,
+    t.full_name AS teacher_name,
+    t.email AS teacher_email,
+    t.phone_number AS teacher_phone,   
+    c.start_date AS course_start,
+    c.end_date AS course_end,
+    cls.class_name,
+    cls.start_time AS class_start_time,
+    cls.end_time AS class_end_time,
+    s.day_of_week,
+    s.schedule_date,
+    s.start_time AS schedule_start,
+    s.end_time AS schedule_end
+FROM classes cls
+JOIN teachers t ON cls.teacher_id = t.id
+JOIN courses c ON cls.course_id = c.id
+LEFT JOIN schedules s ON cls.id = s.class_id
+ORDER BY t.full_name, c.course_name, s.schedule_date;

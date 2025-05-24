@@ -18,6 +18,8 @@
   "description": "",
   "dependencies": {
     "bcrypt": "^5.1.1",
+    "cookie-parser": "^1.4.7",
+    "csurf": "^1.11.0",
     "doancs": "file:",
     "ejs": "^3.1.10",
     "express": "^5.1.0",

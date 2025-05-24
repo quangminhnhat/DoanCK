@@ -15,31 +15,37 @@ const methodOverride = require("method-override");
 const { authenticateRole } = require("./roleAuth");
 const multer = require("multer");
 const fs = require("fs");
+// Static files
 app.use(express.static(path.join(__dirname, "public")));
-//require ("./schedular")
 
+// Essential middleware
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 app.use(methodOverride("_method"));
 
-app.use(express.urlencoded({ extended: false }));
+// Session setup
+app.use(flash());
+app.use(session({
+  secret: process.env.SECRET_KEY,
+  resave: false,
+  saveUninitialized: false,
+}));
+
+// Passport initialization
+app.use(passport.initialize());
+app.use(passport.session());
+
 const connectionString =
   "Driver={ODBC Driver 17 for SQL Server};Server=LAPTOP-ND7KAD0J;Database=DOANCS;Trusted_Connection=Yes;";
-app.use(flash());
-app.use(
-  session({
-    secret: process.env.SECRET_KEY,
-    resave: false,
-    saveUninitialized: false,
-  })
-);
 const initalizePassport = require("./pass-config");
 const { time } = require("console");
 initalizePassport(
   passport,
   (email) => {
-    // Query modified to include admin emails
+    console.log("Looking up user by email:", email);
+    // Query modified to include admin emails and join with role-specific tables
     const query = ` 
-      SELECT u.*
+      SELECT u.*, COALESCE(s.email, t.email, a.email) as email
       FROM users u
       LEFT JOIN students s ON u.id = s.user_id
       LEFT JOIN teachers t ON u.id = t.user_id
@@ -78,10 +84,20 @@ initalizePassport(
   }
 );
 
-app.use(passport.initialize());
-app.use(passport.session());
-app.use(methodOverride("_method"));
-app.set("view engine", "ejs");
+// Add this near the top of server.js
+function executeQuery(query, params = []) {
+  return new Promise((resolve, reject) => {
+    sql.query(connectionString, query, params, (err, result) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(result);
+      }
+    });
+  });
+}
+
+
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 const uploadFolder = path.join(__dirname, "uploads");
@@ -101,43 +117,83 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 //routing
-
 app.post(
   "/upload-material",
   checkAuthenticated,
   authenticateRole(["admin", "teacher"]),
-  (req, res, next) => {
-    next();
-  },
   upload.single("material"),
-  (req, res) => {
-    const { course_id } = req.body;
-    const file = req.file;
+  async (req, res) => {
+    try {
+      const { course_id } = req.body;
+      const file = req.file;
 
-    if (!course_id || !file) {
-      return res.status(400).send("Missing course_id or file.");
-    }
-
-    const insertQuery = `
-    INSERT INTO materials (course_id, file_name, file_path, mime_type)
-    VALUES (?, ?, ?, ?)
-  `;
-
-    const values = [
-      course_id,
-      file.originalname,
-      path.join("uploads", file.filename),
-      file.mimetype,
-    ];
-
-    sql.query(connectionString, insertQuery, values, (err) => {
-      if (err) {
-        console.error("Insert material error:", err);
-        return res.status(500).send("Database insert error");
+      // Input validation
+      if (!course_id || !file) {
+        return res.status(400).json({
+          error: "Missing required fields",
+          details: {
+            course_id: !course_id ? "Missing course ID" : null,
+            file: !file ? "No file uploaded" : null,
+          },
+        });
       }
-      console.log("Material uploaded successfully.");
-      res.send("File uploaded and saved to database.");
-    });
+
+      // Verify course exists first
+      const courseCheckQuery = "SELECT id FROM courses WHERE id = ?";
+      const courseResult = await new Promise((resolve, reject) => {
+        sql.query(
+          connectionString,
+          courseCheckQuery,
+          [course_id],
+          (err, result) => {
+            if (err) reject(err);
+            else resolve(result);
+          }
+        );
+      });
+
+      if (!courseResult || courseResult.length === 0) {
+        return res.status(404).json({
+          error: "Course not found",
+          course_id,
+        });
+      }
+
+      const insertQuery = `
+        INSERT INTO materials (course_id, file_name, file_path, uploaded_at)
+        VALUES (?, ?, ?, GETDATE())
+      `;
+
+      const values = [
+        course_id,
+        file.originalname,
+        path.join("uploads", file.filename)
+      ];
+
+      await new Promise((resolve, reject) => {
+        sql.query(connectionString, insertQuery, values, (err, result) => {
+          if (err) reject(err);
+          else resolve(result);
+        });
+      });
+
+      res.redirect("/materials");
+    } catch (error) {
+      console.error("Material upload error:", error);
+
+      // Delete uploaded file if database insert fails
+      if (req.file) {
+        const filePath = path.join(__dirname, "uploads", req.file.filename);
+        fs.unlink(filePath, (err) => {
+          if (err) console.error("Error deleting file:", err);
+        });
+      }
+
+      res.status(500).json({
+        error: "Failed to upload material",
+        details: error.message,
+      });
+    }
   }
 );
 
@@ -317,7 +373,9 @@ app.get(
   checkAuthenticated,
   authenticateRole("admin"),
   (req, res) => {
-    res.render("register.ejs", { user: req.user });
+    res.render("register.ejs", { 
+      user: req.user
+    });
   }
 );
 
@@ -824,7 +882,32 @@ app.get(
   checkAuthenticated,
   authenticateRole(["admin", "teacher"]),
   (req, res) => {
-    res.render("addClass.ejs", { user: req.user });
+    // Get courses and teachers data
+    const courseQuery = "SELECT id, course_name FROM courses";
+    const teacherQuery = "SELECT id, full_name FROM teachers";
+
+    // First get courses
+    sql.query(connectionString, courseQuery, (err, courses) => {
+      if (err) {
+        console.error("Course fetch error:", err);
+        return res.status(500).send("Error fetching courses");
+      }
+
+      // Then get teachers
+      sql.query(connectionString, teacherQuery, (err, teachers) => {
+        if (err) {
+          console.error("Teacher fetch error:", err);
+          return res.status(500).send("Error fetching teachers");
+        }
+
+        // Render with both courses and teachers data
+        res.render("addClass.ejs", {
+          user: req.user,
+          courses: courses,
+          teachers: teachers,
+        });
+      });
+    });
   }
 );
 
@@ -937,6 +1020,7 @@ app.post(
   (req, res) => {
     const { course_name, description, start_date, end_date } = req.body;
     const role = req.user.role;
+    console.log("test");
 
     // Only staff can add courses
     if (role !== "admin" && role !== "teacher") {
@@ -968,152 +1052,145 @@ app.post(
   }
 );
 
-app.post(
-  "/register",
-  checkNotAuthenticated,
-  authenticateRole("admin"),
-  async (req, res) => {
-    try {
-      const hashpassword = await bcrypt.hash(req.body.Password, 10);
-      const username = req.body.Name;
-      const email = req.body.email;
-      const birth = req.body.birthday;
-      const phone = req.body.phone;
-      const address = req.body.Address;
-      const subject = req.body.subject;
-      const salary = req.body.salary;
-
-      // Map role
-      const role = mapRole[subject];
-
-      if (!username) {
-        return res.status(400).send("Username is required");
+app.post("/register", checkAuthenticated, authenticateRole("admin"), async (req, res) => {
+  // Avoid sending multiple responses
+  let hasResponded = false;
+  const sendResponse = (statusCode, message) => {
+    if (!hasResponded) {
+      hasResponded = true;
+      if (statusCode === 200) {
+        return res.redirect("/login");
       }
-      if (!email) {
-        return res.status(400).send("Email is required");
-      }
-      if (!phone) {
-        return res.status(400).send("Phone number is required");
-      }
-      if (!address) {
-        return res.status(400).send("Address is required");
-      }
-      if (!birth) {
-        return res.status(400).send("Date of birth is required");
-      }
-      if (role === "teacher" && !salary) {
-        return res.status(400).send("Salary is required for teachers");
-      }
+      res.status(statusCode).send(message);
+    }
+  };
 
-      /* const insertQuery = `
-      INSERT INTO users (username, password, role, email, name, gender, birthday, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, GETDATE(), GETDATE());
-    `;
+  try {
+    console.log("Hitting registration endpoint with body:", req.body);
+    const { Name: username, email, birthday: birth, phone, Address: address, subject, salary, Password } = req.body;
+    
+    if (!username || !email || !birth || !phone || !address || !subject || !Password) {
+      console.log("Missing required fields:", { username, email, birth, phone, address, subject });
+      return sendResponse(400, "All fields are required");
+    }
 
-    const values = [username, hashpassword, role, email, gender, birth];
+    console.log("Processing registration for:", email);
+    const hashpassword = await bcrypt.hash(Password, 10);
+    const role = mapRole[subject];
 
-    sql.query(connectionString, insertQuery, values, (err, result) => {
-      if (err) {
-        console.error("Insert error:", err);
-        res.status(500).send("Database insert error");
-      } else {
-        console.log("User registered:", result);
-        res.send("Registration successful!");
+    if (!role) {
+      console.log("Invalid subject:", subject);
+      return sendResponse(400, "Invalid subject selection");
+    }
+
+    const handleSqlError = (err) => {
+      console.error("Insert error:", err);
+      if (err.code === "ER_DUP_ENTRY") {
+        return sendResponse(400, "Email or username already exists");
       }
-    });
+      if (err.code === "ER_NO_REFERENCED_ROW") {
+        return sendResponse(400, "Invalid reference data");
+      }
+      return sendResponse(500, "Registration failed. Please try again later.");
+    };
 
-const insertQueryUser = `INSERT INTO users (username, password, role, created_at, updated_at) VALUES (?, ?, ?, GETDATE(), GETDATE());`;
-const valuesUser = [username, hashpassword, role];*/
-
-      if (role === "student") {
-        const insertQuery = `INSERT INTO users (username, password, role, created_at, updated_at) VALUES (?, ?, ?, GETDATE(), GETDATE());
-       INSERT INTO students (user_id, full_name, email, phone_number, address, date_of_birth, created_at, updated_at)
-        SELECT id, ?, ?, ?, ?, ?, GETDATE(), GETDATE()
-        FROM users
-        WHERE username = ?;
+    if (role === "student") {
+      const insertQuery = `
+        BEGIN TRANSACTION;
+        INSERT INTO users (username, password, role, created_at, updated_at) 
+        VALUES (?, ?, ?, GETDATE(), GETDATE());
+        
+        DECLARE @NewUserId INT;
+        SET @NewUserId = SCOPE_IDENTITY();
+        
+        INSERT INTO students (user_id, full_name, email, phone_number, address, date_of_birth, created_at, updated_at)
+        VALUES (@NewUserId, ?, ?, ?, ?, ?, GETDATE(), GETDATE());
+        
+        COMMIT TRANSACTION;
       `;
-        const values = [
-          username,
-          hashpassword,
-          role,
-          username,
-          email,
-          phone,
-          address,
-          birth,
-          username,
-        ];
+      const values = [
+        username,
+        hashpassword,
+        role,
+        username,
+        email,
+        phone,
+        address,
+        birth
+      ];
 
-        sql.query(connectionString, insertQuery, values, (err, result) => {
-          if (err) {
-            console.error("Insert error:", err);
-            return res.status(500).send("Database insert error");
-          }
-          console.log("User registered:", result);
-        });
-      } else if (role === "teacher") {
-        const insertQuery = `INSERT INTO users (username, password, role, created_at, updated_at) VALUES (?, ?, ?, GETDATE(), GETDATE());
-      INSERT INTO teachers (user_id, full_name, email, phone_number, address, date_of_birth, salary, created_at, updated_at)
-        SELECT id, ?, ?, ?, ?, ?, ?, GETDATE(), GETDATE()
-        FROM users
-        WHERE username = ?;
+      sql.query(connectionString, insertQuery, values, (err, result) => {
+        if (err) return handleSqlError(err);
+        console.log("Student registered:", result);
+        return sendResponse(200, "Registration successful");
+      });
+    } else if (role === "teacher") {
+      const insertQuery = `
+        BEGIN TRANSACTION;
+        INSERT INTO users (username, password, role, created_at, updated_at) 
+        VALUES (?, ?, ?, GETDATE(), GETDATE());
+        
+        DECLARE @NewUserId INT;
+        SET @NewUserId = SCOPE_IDENTITY();
+        
+        INSERT INTO teachers (user_id, full_name, email, phone_number, address, date_of_birth, salary, created_at, updated_at)
+        VALUES (@NewUserId, ?, ?, ?, ?, ?, ?, GETDATE(), GETDATE());
+        
+        COMMIT TRANSACTION;
       `;
-        const values = [
-          username,
-          hashpassword,
-          role,
-          username,
-          email,
-          phone,
-          address,
-          birth,
-          salary,
-          username,
-        ];
+      const values = [
+        username,
+        hashpassword,
+        role,
+        username,
+        email,
+        phone,
+        address,
+        birth,
+        salary
+      ];
 
-        sql.query(connectionString, insertQuery, values, (err, result) => {
-          if (err) {
-            console.error("Insert error:", err);
-            return res.status(500).send("Database insert error");
-          }
-        });
-      } else if (role === "admin") {
-        const insertQuery = `
-        INSERT INTO users (username, password, role, created_at, updated_at) VALUES (?, ?, ?, GETDATE(), GETDATE());
+      sql.query(connectionString, insertQuery, values, (err, result) => {
+        if (err) return handleSqlError(err);
+        console.log("Teacher registered:", result);
+        return sendResponse(200, "Registration successful");
+      });
+    } else if (role === "admin") {
+      const insertQuery = `
+        BEGIN TRANSACTION;
+        INSERT INTO users (username, password, role, created_at, updated_at) 
+        VALUES (?, ?, ?, GETDATE(), GETDATE());
+        
+        DECLARE @NewUserId INT;
+        SET @NewUserId = SCOPE_IDENTITY();
+        
         INSERT INTO admins (user_id, full_name, email, phone_number, created_at, updated_at)
-          SELECT id, ?, ?, ?, GETDATE(), GETDATE()
-          FROM users
-          WHERE username = ?;
+        VALUES (@NewUserId, ?, ?, ?, GETDATE(), GETDATE());
+        
+        COMMIT TRANSACTION;
       `;
-        const values = [
-          username,
-          hashpassword,
-          role,
-          username,
-          email,
-          phone,
-          username,
-        ];
+      const values = [
+        username,
+        hashpassword,
+        role,
+        username,
+        email,
+        phone
+      ];
 
-        sql.query(connectionString, insertQuery, values, (err, result) => {
-          try {
-            if (err) {
-              console.error("Insert error:", err);
-              return res.status(500).send("Database insert error");
-            }
-            console.log("Admin registered:", result);
-            res.redirect("/login");
-          } catch (error) {
-            // Ignore headers already sent error
-            if (error.code !== "ERR_HTTP_HEADERS_SENT") {
-              console.error("Unhandled error:", error);
-            }
-          }
-        });
+      sql.query(connectionString, insertQuery, values, (err, result) => {
+        if (err) return handleSqlError(err);
+        console.log("Admin registered:", result);
+        return sendResponse(200, "Registration successful");
+      });
+    }    } catch (error) {    
+      if (error.code === "ERR_HTTP_HEADERS_SENT") {
+        console.log("Headers already sent, response already handled");
+        return;
       }
-    } catch (error) {
+      
       console.error("Error during registration:", error);
-      res.redirect("/register");
+      return sendResponse(500, "Registration failed. Please try again later.");
     }
   }
 );
@@ -1280,8 +1357,8 @@ app.post(
     }
 
     const insertQuery = `
-    INSERT INTO materials (course_id, file_name, file_path, mime_type)
-    VALUES (?, ?, ?, ?)
+    INSERT INTO materials (course_id, file_name, file_path, uploaded_at)
+    VALUES (?, ?, ?, GETDATE())
   `;
 
     const values = [
@@ -1322,7 +1399,7 @@ app.post(
         console.error("Insert schedule error:", err);
         return res.status(500).send("Insert failed");
       }
-      res.redirect("/schedule");
+      res.redirect("/schedules");
     });
   }
 );
@@ -1624,3 +1701,47 @@ function checkNotAuthenticated(req, res, next) {
 }
 
 app.listen(3000);
+
+// Configure connection pool
+const pool = {
+  max: 10, // Maximum number of connections
+  min: 0,  // Minimum number of connections
+  idleTimeoutMillis: 30000 // How long a connection can be idle before being released
+};
+
+// Test database connection on startup
+async function testConnection() {
+  try {
+    await executeQuery('SELECT 1');
+    console.log('Database connection successful');
+  } catch (error) {
+    console.error('Database connection failed:', error);
+    process.exit(1); // Exit if we can't connect to database
+  }
+}
+
+testConnection();
+
+// Add error handler middleware
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  
+  if (err.code === 'ECONNREFUSED') {
+    return res.status(503).json({
+      error: 'Database connection failed',
+      details: 'Unable to connect to database server'
+    });
+  }
+  
+  if (err.code === 'PROTOCOL_CONNECTION_LOST') {
+    return res.status(503).json({
+      error: 'Database connection lost',
+      details: 'Connection to database was lost'
+    });
+  }
+
+  res.status(500).json({
+    error: 'Internal server error',
+    details: err.message
+  });
+});

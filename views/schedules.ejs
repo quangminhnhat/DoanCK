@@ -12,8 +12,95 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <link rel="stylesheet"
         href="https://demos.creative-tim.com/notus-js/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css">
+<!-- DataTables CSS -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.css">
+<link rel="stylesheet" type="text/css"
+    href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
+
+<!-- jQuery -->
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.7.0.js"></script>
+<!-- DataTables JS -->
+<script type="text/javascript" src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript"  src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+<style>
+    #scheduleTable {
+        font-size: 11px;
+        width: 100% !important;
+        border-collapse: collapse;
+    }
+
+    #scheduleTable th,
+    #scheduleTable td {
+        padding: 3px 6px;
+        white-space: nowrap;
+        border: 1px solid #eee;
+        line-height: 1;
+    }
+
+    .btn {
+        padding: 1px 4px;
+        font-size: 10px;
+        margin: 0;
+        border-radius: 2px;
+        line-height: 1;
+    }
+
+    .btn-edit,
+    .btn-delete {
+        min-width: 35px;
+        display: inline-block;
+    }
+
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter {
+        margin-bottom: 5px;
+        font-size: 11px;
+        line-height: 1;
+    }
+
+    .dataTables_wrapper .dataTables_length select,
+    .dataTables_wrapper .dataTables_filter input {
+        height: 20px;
+        padding: 1px 4px;
+        font-size: 11px;
+    }
+
+    .container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 8px;
+    }
+
+    .table-controls {
+        margin-bottom: 8px;
+        font-size: 11px;
+        line-height: 1;
+    }
+
+    .dataTables_info,
+    .dataTables_paginate {
+        font-size: 11px;
+        margin-top: 5px;
+        line-height: 1;
+    }
+
+    h1 {
+        font-size: 16px;
+        margin-bottom: 8px;
+        line-height: 1;
+    }
+
+    .paginate_button {
+        padding: 2px 6px !important;
+        font-size: 11px !important;
+        line-height: 1 !important;
+    }
+
+    .dataTables_length select {
+        padding-right: 15px !important;
+    }
+</style>
 </head>
-  
 <body>
     <header>
         <div class="header-container">
@@ -80,18 +167,19 @@
                     <% } %>
     
                     <!-- Admin only options -->
-                    <% if (user.role === 'admin') { %>
-                    <a href="/users" class="nav-button"><i class="fas fa-user-cog"></i><span>User List</span></a>
-                    <a href="/register" class="nav-button"><i class="fas fa-user-plus"></i><span>Register User</span></a>
-                    <a href="/enrollments" class="nav-button"><i class="fas fa-user-plus"></i><span>Enrollments</span></a>
-                    <a href="/payments" class="nav-button"><i class="fas fa-money-bill"></i><span>Payments</span></a>
-                    
-                    <a href="/courses/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Course</span></a>
-                    <a href="/classes/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Class</span></a>
-                    <a href="/enrollments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Enrollment</span></a>
-                    <a href="/payments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Payment</span></a>
-                    <a href="/schedule/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Schedule</span></a>
-                    <% } %>
+                    <!-- Admin only options -->
+          <% if (user.role === 'admin') { %>
+          <a href="/users" class="nav-button"><i class="fas fa-user-cog"></i><span>User List</span></a>
+          <a href="/register" class="nav-button"><i class="fas fa-user-plus"></i><span>Register User</span></a>
+          <a href="/enrollments" class="nav-button"><i class="fas fa-user-plus"></i><span>Enrollments</span></a>
+          <a href="/payments" class="nav-button"><i class="fas fa-money-bill"></i><span>Payments</span></a>
+          <a href="/schedules" class="nav-button"><i class="fas fa-money-bill"></i><span>schedules list</span></a>
+          <a href="/courses/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Course</span></a>
+          <a href="/classes/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Class</span></a>
+          <a href="/enrollments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Enrollment</span></a>
+          <a href="/payments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Payment</span></a>
+          <a href="/schedule/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Schedule</span></a>
+          <% } %>
     
                     <!-- Logout button for all authenticated users -->
                     <div class="nav-button">
@@ -134,39 +222,44 @@
         </div>
     
         </header>
-    <h1>Schedule List</h1>
-    <a href="/schedules/new">Add New Schedule</a> | <a href="/">Back</a>
-    <table border="1">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Class</th>
-                <th>Day</th>
-                <th>Date</th>
-                <th>Start</th>
-                <th>End</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <% schedules.forEach(s => { %>
-            <tr>
-                <td><%= s.id %></td>
-                <td><%= s.class_name %></td>
-                <td><%= s.day_of_week %></td>
-                <td><%= s.schedule_date.toISOString().split('T')[0] %></td>
-                <td><%= s.start_time %></td>
-                <td><%= s.end_time %></td>
-                <td>
-                    <a href="/schedules/<%= s.id %>/edit">Edit</a>
-                    <form method="POST" action="/schedules/<%= s.id %>?_method=DELETE" style="display:inline;">
-                        <button type="submit" onclick="return confirm('Delete this schedule?')">Delete</button>
-                    </form>
-                </td>
-            </tr>
-            <% }) %>
-        </tbody>
-    </table>
+    <div class="container" style="margin: 20px;">
+        <h1>Schedule List</h1>
+        <div class="table-controls" style="margin-bottom: 20px;">
+            <a href="/schedules/new" class="btn btn-primary">Add New Schedule</a> | <a href="/" class="btn">Back</a>
+        </div>
+        
+        <table id="scheduleTable" class="display responsive nowrap" style="width:100%">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Class</th>
+                    <th>Day</th>
+                    <th>Date</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% schedules.forEach(s => { %>
+                <tr>
+                    <td><%= s.id %></td>
+                    <td><%= s.class_name %></td>
+                    <td><%= s.day_of_week %></td>
+                    <td><%= s.schedule_date.toISOString().split('T')[0] %></td>
+                    <td><%= s.start_time %></td>
+                    <td><%= s.end_time %></td>
+                    <td>
+                        <a href="/schedules/<%= s.id %>/edit" class="btn btn-edit">Edit</a>
+                        <form method="POST" action="/schedules/<%= s.id %>?_method=DELETE" style="display:inline;">
+                            <button type="submit" class="btn btn-delete" onclick="return confirm('Delete this schedule?')">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
     <footer class="relative bg-blueGray-200 pt-8 pb-6">
         <div class="container mx-auto px-4">
             <div class="flex flex-wrap text-left lg:text-left">
@@ -232,6 +325,42 @@
             </div>
         </div>
     </footer>
+    <script>
+        $(document).ready(function () {
+            $('#scheduleTable').DataTable({
+                responsive: true,
+                pageLength: 25,
+                order: [[0, 'desc']],
+                columnDefs: [
+                    {
+                        targets: -1,
+                        orderable: false,
+                        searchable: false,
+                        width: '70px'
+                    },
+                    {
+                        targets: '_all',
+                        className: 'dt-center'
+                    },
+                    {
+                        targets: [0], // ID column
+                        width: '30px'
+                    },
+                    {
+                        targets: [2, 4, 5], // Day, Start, End columns
+                        width: '50px'
+                    }
+                ],
+                dom: '<"top"lf>rt<"bottom"ip>',
+                language: {
+                    search: "",
+                    searchPlaceholder: "Search...",
+                    lengthMenu: "_MENU_",
+                    info: "_START_-_END_ of _TOTAL_"
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>

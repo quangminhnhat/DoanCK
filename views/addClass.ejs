@@ -4,11 +4,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create New Class | Learning Management System</title>
+    <title>Add New Class | Learning Management System</title>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://demos.creative-tim.com/notus-js/assets/styles/tailwind.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <style>
+        .form-container {
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-title {
+            font-size: 1.8rem;
+            color: #2d3748;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #4a5568;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+        }
+
+        .time-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary {
+            background-color: #4299e1;
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            background-color: #3182ce;
+        }
+
+        .btn-secondary {
+            background-color: #e2e8f0;
+            color: #4a5568;
+            text-decoration: none;
+            text-align: center;
+            flex: 1;
+        }
+
+        .btn-secondary:hover {
+            background-color: #cbd5e0;
+        }
+    </style>
 </head>
 
 <body>
@@ -76,19 +163,19 @@
                     <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload Material</span></a>
                     <% } %>
 
-                    <!-- Admin only options -->
-                    <% if (user.role === 'admin') { %>
-                    <a href="/users" class="nav-button"><i class="fas fa-user-cog"></i><span>User List</span></a>
-                    <a href="/register" class="nav-button"><i class="fas fa-user-plus"></i><span>Register User</span></a>
-                    <a href="/enrollments" class="nav-button"><i class="fas fa-user-plus"></i><span>Enrollments</span></a>
-                    <a href="/payments" class="nav-button"><i class="fas fa-money-bill"></i><span>Payments</span></a>
-                    
-                    <a href="/courses/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Course</span></a>
-                    <a href="/classes/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Class</span></a>
-                    <a href="/enrollments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Enrollment</span></a>
-                    <a href="/payments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Payment</span></a>
-                    <a href="/schedule/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Schedule</span></a>
-                    <% } %>
+                     <!-- Admin only options -->
+          <% if (user.role === 'admin') { %>
+          <a href="/users" class="nav-button"><i class="fas fa-user-cog"></i><span>User List</span></a>
+          <a href="/register" class="nav-button"><i class="fas fa-user-plus"></i><span>Register User</span></a>
+          <a href="/enrollments" class="nav-button"><i class="fas fa-user-plus"></i><span>Enrollments</span></a>
+          <a href="/payments" class="nav-button"><i class="fas fa-money-bill"></i><span>Payments</span></a>
+          <a href="/schedules" class="nav-button"><i class="fas fa-money-bill"></i><span>schedules list</span></a>
+          <a href="/courses/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Course</span></a>
+          <a href="/classes/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Class</span></a>
+          <a href="/enrollments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Enrollment</span></a>
+          <a href="/payments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Payment</span></a>
+          <a href="/schedule/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Schedule</span></a>
+          <% } %>
 
                     <!-- Logout button for all authenticated users -->
                     <div class="nav-button">
@@ -132,48 +219,78 @@
     
         </header>
     <main class="container mx-auto px-4 py-8">
-        <div class="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md"> <!-- Changed from max-w-2xl to max-w-md -->
-            <h1 class="text-2xl font-bold mb-6 text-center">Create New Class</h1>
+        <div class="form-container">
+            <h1 class="form-title">Add New Class</h1>
+            
+            <form action="/classes" method="POST">
+                <div class="form-group">
+                    <label for="class_name">Class Name</label>
+                    <input type="text" 
+                           id="class_name" 
+                           name="class_name" 
+                           class="form-control" 
+                           required>
+                </div>
 
-            <form action="/classes" method="POST" class="space-y-6" novalidate>
-                <div class="grid grid-cols-1 gap-6">
-                    <div class="form-group">
-                        <label for="class_name" class="block text-sm font-medium text-gray-700">
-                            Class Name <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" id="class_name" name="class_name" required minlength="3" maxlength="50"
-                            pattern="[A-Za-z0-9\s-]+" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                            aria-describedby="class_name_help">
-                        <p id="class_name_help" class="mt-1 text-sm text-gray-500">
-                            Enter a unique class name (3-50 characters)
-                        </p>
-                    </div>
+                <div class="form-group">
+                    <label for="course_id">Course</label>
+                    <select id="course_id" 
+                            name="course_id" 
+                            class="form-control" 
+                            required>
+                        <option value="">Select Course</option>
+                        <% courses.forEach(course => { %>
+                            <option value="<%= course.id %>">
+                                <%= course.course_name %>
+                            </option>
+                        <% }) %>
+                    </select>
+                </div>
 
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="form-group">
-                            <label for="start_time" class="block text-sm font-medium text-gray-700">
-                                Start Time <span class="text-red-500">*</span>
-                            </label>
-                            <input type="time" id="start_time" name="start_time" required
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                <div class="form-group">
+                    <label for="teacher_id">Teacher</label>
+                    <select id="teacher_id" 
+                            name="teacher_id" 
+                            class="form-control" 
+                            required>
+                        <option value="">Select Teacher</option>
+                        <% teachers.forEach(teacher => { %>
+                            <option value="<%= teacher.id %>">
+                                <%= teacher.full_name %>
+                            </option>
+                        <% }) %>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Class Time</label>
+                    <div class="time-inputs">
+                        <div>
+                            <label for="start_time">Start Time</label>
+                            <input type="time" 
+                                   id="start_time" 
+                                   name="start_time" 
+                                   class="form-control" 
+                                   required>
                         </div>
-
-                        <div class="form-group">
-                            <label for="end_time" class="block text-sm font-medium text-gray-700">
-                                End Time <span class="text-red-500">*</span>
-                            </label>
-                            <input type="time" id="end_time" name="end_time" required
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <div>
+                            <label for="end_time">End Time</label>
+                            <input type="time" 
+                                   id="end_time" 
+                                   name="end_time" 
+                                   class="form-control" 
+                                   required>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex items-center justify-between mt-6">
-                    <a href="/classes" class="text-gray-600 hover:text-gray-900">Cancel</a>
-                    <button type="submit"
-                        class="bg-blue-500 hover:bg-blue-700 text-black font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                        Create Class
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add Class
                     </button>
+                    <a href="/classes" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </a>
                 </div>
             </form>
         </div>
