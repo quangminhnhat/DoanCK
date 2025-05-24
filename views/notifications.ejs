@@ -1,4 +1,4 @@
-<section id="Slider"></section>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -12,6 +12,57 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <link rel="stylesheet"
         href="https://demos.creative-tim.com/notus-js/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css">
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.css">
+    <link rel="stylesheet" type="text/css"
+        href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
+
+    <style>
+        #notificationsTable {
+            font-size: 11px;
+            width: 100% !important;
+            border-collapse: collapse;
+        }
+
+        #notificationsTable th,
+        #notificationsTable td {
+            padding: 3px 6px;
+            white-space: nowrap;
+            border: 1px solid #eee;
+            line-height: 1;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 8px;
+        }
+
+        .dataTables_wrapper .dataTables_length,
+        .dataTables_wrapper .dataTables_filter {
+            margin-bottom: 5px;
+            font-size: 11px;
+            line-height: 1;
+        }
+
+        .btn {
+            padding: 1px 4px;
+            font-size: 10px;
+            margin: 0;
+            border-radius: 2px;
+            line-height: 1;
+        }
+
+        .unread-notification {
+            cursor: pointer;
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        .unread-notification:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 
 <body>
@@ -54,7 +105,7 @@
                         <img class="logo"
                             src="/images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png"
                             alt="Logo" style="width:40px;height:40px;object-fit:contain;">
-                         
+
                     </a>
                     <label for="nav-toggle">
                         <span id="nav-toggle-burger"></span>
@@ -80,19 +131,23 @@
                     <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload Material</span></a>
                     <% } %>
 
-                   <!-- Admin only options -->
-          <% if (user.role === 'admin') { %>
-          <a href="/users" class="nav-button"><i class="fas fa-user-cog"></i><span>User List</span></a>
-          <a href="/register" class="nav-button"><i class="fas fa-user-plus"></i><span>Register User</span></a>
-          <a href="/enrollments" class="nav-button"><i class="fas fa-user-plus"></i><span>Enrollments</span></a>
-          <a href="/payments" class="nav-button"><i class="fas fa-money-bill"></i><span>Payments</span></a>
-          <a href="/schedules" class="nav-button"><i class="fas fa-money-bill"></i><span>schedules list</span></a>
-          <a href="/courses/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Course</span></a>
-          <a href="/classes/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Class</span></a>
-          <a href="/enrollments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Enrollment</span></a>
-          <a href="/payments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Payment</span></a>
-          <a href="/schedule/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Schedule</span></a>
-          <% } %>
+                    <!-- Admin only options -->
+                    <% if (user.role === 'admin') { %>
+                    <a href="/users" class="nav-button"><i class="fas fa-user-cog"></i><span>User List</span></a>
+                    <a href="/register" class="nav-button"><i class="fas fa-user-plus"></i><span>Register
+                            User</span></a>
+                    <a href="/enrollments" class="nav-button"><i
+                            class="fas fa-user-plus"></i><span>Enrollments</span></a>
+                    <a href="/payments" class="nav-button"><i class="fas fa-money-bill"></i><span>Payments</span></a>
+                    <a href="/schedules" class="nav-button"><i class="fas fa-money-bill"></i><span>schedules
+                            list</span></a>
+                    <a href="/courses/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Course</span></a>
+                    <a href="/classes/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Class</span></a>
+                    <a href="/enrollments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add
+                            Enrollment</span></a>
+                    <a href="/payments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Payment</span></a>
+                    <a href="/schedule/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Schedule</span></a>
+                    <% } %>
 
                     <!-- Logout button for all authenticated users -->
                     <div class="nav-button">
@@ -146,40 +201,83 @@
                     <label for="userId" class="block text-sm font-medium text-gray-700 mb-2">
                         Send to User ID
                     </label>
-                    <input 
-                        type="number" 
-                        name="userId" 
-                        id="userId"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
-                        required 
-                        placeholder="Enter user ID"
-                    />
+                    <input type="number" name="userId" id="userId"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        required placeholder="Enter user ID" />
                 </div>
 
                 <div class="form-group">
                     <label for="message" class="block text-sm font-medium text-gray-700 mb-2">
                         Message
                     </label>
-                    <textarea 
-                        name="message" 
-                        id="message"
-                        rows="4"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
-                        required
-                        placeholder="Type your message here..."
-                    ></textarea>
+                    <textarea name="message" id="message" rows="4"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        required placeholder="Type your message here..."></textarea>
                 </div>
 
                 <div class="flex justify-end">
-                    <button 
-                        type="submit" 
-                        class="px-6 py-2 bg-blue-600 text-black rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-                    >
+                    <button type="submit"
+                        class="px-6 py-2 bg-blue-600 text-black rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
                         Send Notification
                     </button>
                 </div>
             </form>
         </div>
+    </div>
+    <div class="container">
+        <h2>Notifications</h2>
+
+        <% if (user.role === 'admin' || user.role === 'teacher') { %>
+        <div class="mb-4">
+            <form action="/notifications" method="POST" class="notification-form">
+                <select name="userId" required>
+                    <option value="">Select User</option>
+                    <% users.forEach(user => { %>
+                    <option value="<%= user.id %>"><%= user.full_name %></option>
+                    <% }) %>
+                </select>
+                <input type="text" name="message" placeholder="Notification message" required>
+                <button type="submit" class="btn">Send Notification</button>
+            </form>
+        </div>
+        <% } %>
+
+        <table id="notificationsTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Message</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                    
+                </tr>
+            </thead>
+            <tbody>
+                <% notifications.forEach(notification => { %>
+                <tr>
+                    <td><%= notification.id %></td>
+                    <td><%= notification.sender_name %></td>
+                    <td><%= notification.receiver_name %></td>
+                    <td><%= notification.message %></td>
+                    <td><%= notification.created_at.toLocaleString() %></td>
+                    <td class="notification-status <%= !notification.read ? 'unread-notification' : '' %>"
+                        data-id="<%= notification.id %>">
+                        <%= notification.read ? 'Read' : 'Unread' %>
+                    </td>
+                    <td>
+                        <form method="POST" action="/notifications/<%= notification.id %>?_method=DELETE"
+                            style="display:inline;">
+                            <button type="submit" class="btn btn-delete"
+                                onclick="return confirm('Delete this notification?')">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                <% }) %>
+            </tbody>
+        </table>
     </div>
     <footer class="relative bg-blueGray-200 pt-8 pb-6">
         <div class="container mx-auto px-4">
@@ -187,7 +285,8 @@
                 <div class="w-full lg:w-6/12 px-4">
                     <h4 class="text-3xl fonat-semibold text-blueGray-700">Liên hệ với chúng tôi!</h4>
                     <h5 class="text-lg mt-0 mb-2 text-blueGray-600">
-                        Tìm kiếm chúng tôi trên bất kỳ mạng xã hội nào và gửi cho chúng tôi một tin nhắn! Chúng tôi sẽ trả
+                        Tìm kiếm chúng tôi trên bất kỳ mạng xã hội nào và gửi cho chúng tôi một tin nhắn! Chúng tôi sẽ
+                        trả
                         lời bạn
                         ngay khi có thể.
                     </h5>
@@ -238,8 +337,9 @@
             <div class="flex flex-wrap items-center md:justify-between justify-center">
                 <div class="w-full md:w-4/12 px-4 mx-auto text-center">
                     <div class="text-sm text-blueGray-500 font-semibold py-1">
-                        Copyright © <span id="get-current-year">2025</span><a href="https://www.facebook.com/ttgdvpttnht"
-                            class="text-blueGray-500 hover:text-gray-800" target="_blank"> Talent Education</a>. Made by
+                        Copyright © <span id="get-current-year">2025</span><a
+                            href="https://www.facebook.com/ttgdvpttnht" class="text-blueGray-500 hover:text-gray-800"
+                            target="_blank"> Talent Education</a>. Made by
                         <a href="https://github.com/Rin-0808" class="text-blueGray-500 hover:text-blueGray-800">Rin</a>.
                     </div>
                 </div>
@@ -249,6 +349,52 @@
     <!-- link swiper-->
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script src="/js/script.js"></script>
+    <!-- jQuery -->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <!-- DataTables JS -->
+    <script type="text/javascript" src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#notificationsTable').DataTable({
+                responsive: true,
+                pageLength: 25,
+                order: [[0, 'desc']],
+                columnDefs: [
+                    {
+                        targets: -1,
+                        orderable: false,
+                        searchable: false,
+                        width: '70px'
+                    }
+                ],
+                dom: '<"top"lf>rt<"bottom"ip>',
+                language: {
+                    search: "",
+                    searchPlaceholder: "Search...",
+                    lengthMenu: "_MENU_",
+                    info: "_START_-_END_ of _TOTAL_"
+                }
+            });
+
+            // Add click handler for unread notifications
+            $('.unread-notification').click(function () {
+                const notificationId = $(this).data('id');
+                const statusCell = $(this);
+
+                $.post(`/notifications/${notificationId}/read`)
+                    .done(function () {
+                        statusCell.text('Read');
+                        statusCell.removeClass('unread-notification');
+                    })
+                    .fail(function (err) {
+                        console.error('Error marking notification as read:', err);
+                        alert('Failed to mark notification as read');
+                    });
+            });
+        });
+    </script>
 </body>
 
 </html>

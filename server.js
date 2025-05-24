@@ -278,10 +278,104 @@ app.post(
       }
 
       console.log("Notification sent to user ID:", userId);
-      res.status(201).send("Notification sent successfully!");
+      res.redirect("/notifications"); 
     });
   }
 );
+
+
+app.get("/notifications", checkAuthenticated, async (req, res) => {
+  try {
+    // Get notifications based on user role
+    let query;
+    let params = [];
+
+    if (req.user.role === "admin") {
+      query = `
+              SELECT n.*, 
+                  COALESCE(s.full_name, t.full_name, a.full_name) as receiver_name,
+                  sender.full_name as sender_name
+              FROM notifications n
+              LEFT JOIN students s ON n.user_id = s.user_id
+              LEFT JOIN teachers t ON n.user_id = t.user_id
+              LEFT JOIN admins a ON n.user_id = a.user_id
+              LEFT JOIN admins sender ON n.sender_id = sender.user_id
+              ORDER BY n.created_at DESC
+          `;
+    } else {
+      query = `
+              SELECT n.*, 
+                  COALESCE(s.full_name, t.full_name, a.full_name) as sender_name
+              FROM notifications n
+              LEFT JOIN students s ON n.sender_id = s.user_id
+              LEFT JOIN teachers t ON n.sender_id = t.user_id
+              LEFT JOIN admins a ON n.sender_id = a.user_id
+              WHERE n.user_id = ?
+              ORDER BY n.created_at DESC
+          `;
+      params = [req.user.id];
+    }
+
+    const notifications = await executeQuery(query, params);
+
+    // If admin/teacher, get list of users for sending notifications
+    let users = [];
+    if (req.user.role === "admin" || req.user.role === "teacher") {
+      const userQuery = `
+              SELECT u.id, COALESCE(s.full_name, t.full_name, a.full_name) as full_name
+              FROM users u
+              LEFT JOIN students s ON u.id = s.user_id
+              LEFT JOIN teachers t ON u.id = t.user_id
+              LEFT JOIN admins a ON u.id = a.user_id
+          `;
+      users = await executeQuery(userQuery);
+    }
+
+    res.render("notifications.ejs", {
+      user: req.user,
+      notifications: notifications,
+      users: users,
+    });
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
+    res.status(500).send("Error loading notifications");
+  }
+});
+
+// Mark notification as read
+app.post("/notifications/:id/read", checkAuthenticated, async (req, res) => {
+    try {
+        const query = `
+            UPDATE notifications 
+            SET [read] = 1, 
+                updated_at = GETDATE()
+            WHERE id = ? AND user_id = ?
+        `;
+        await executeQuery(query, [req.params.id, req.user.id]);
+        res.json({ success: true });
+    } catch (error) {
+        console.error("Error marking notification as read:", error);
+        res.status(500).json({ error: "Failed to update notification" });
+    }
+});
+
+// Delete notification (admin only)
+app.delete(
+  "/notifications/:id",
+  checkAuthenticated,
+  async (req, res) => {
+    try {
+      await executeQuery("DELETE FROM notifications WHERE id = ?", [
+        req.params.id,
+      ]);
+      res.redirect("/notifications");
+    } catch (error) {
+      console.error("Error deleting notification:", error);
+      res.status(500).send("Failed to delete notification");
+    }
+  }
+);
+
 
 app.get(
   "/materials",
@@ -1683,6 +1777,9 @@ app.delete(
     });
   }
 );
+
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
 
 //route end
 

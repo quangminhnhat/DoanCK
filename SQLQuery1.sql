@@ -1,5 +1,4 @@
-﻿
-CREATE DATABASE DOANCS;
+﻿CREATE DATABASE DOANCS;
 GO
 USE DOANCS;
 GO
@@ -57,7 +56,12 @@ CREATE TABLE notifications (
     user_id INT,
     message NVARCHAR(255),
     sent_at DATETIME DEFAULT GETDATE(),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    sender_id INT,
+     [read] BIT DEFAULT 0,
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (sender_id) REFERENCES users(id)
 );
 
 CREATE TABLE courses (
