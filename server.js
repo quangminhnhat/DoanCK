@@ -287,45 +287,74 @@ app.post(
 app.get(
   "/my-courses",
   checkAuthenticated,
-  authenticateRole("student"),
   async (req, res) => {
     try {
-      // Different queries based on user role
       let query;
       let params = [];
 
-      query = `
-        SELECT 
-          c.course_name,
-          c.description AS course_description,
-          c.tuition_fee,
-          t.full_name AS teacher_name,
-          t.email AS teacher_email,
-          t.phone_number AS teacher_phone,   
-          c.start_date AS course_start,
-          c.end_date AS course_end,
-          cls.class_name,
-          cls.start_time AS class_start_time,
-          cls.end_time AS class_end_time,
-          s.day_of_week,
-          s.schedule_date,
-          s.start_time AS schedule_start,
-          s.end_time AS schedule_end
-        FROM enrollments e
-        JOIN students st ON e.student_id = st.id
-        JOIN classes cls ON e.class_id = cls.id
-        JOIN teachers t ON cls.teacher_id = t.id
-        JOIN courses c ON cls.course_id = c.id
-        LEFT JOIN schedules s ON cls.id = s.class_id
-        WHERE st.user_id = ?
-        ORDER BY t.full_name, c.course_name, s.schedule_date
-      `;
-      params = [req.user.id];
+      if (req.user.role === 'student') {
+        query = `
+          SELECT 
+            c.course_name,
+            c.description AS course_description,
+            c.tuition_fee,
+            t.full_name AS teacher_name,
+            t.email AS teacher_email,
+            t.phone_number AS teacher_phone,   
+            c.start_date AS course_start,
+            c.end_date AS course_end,
+            cls.class_name,
+            cls.start_time AS class_start_time,
+            cls.end_time AS class_end_time,
+            s.day_of_week,
+            s.schedule_date,
+            s.start_time AS schedule_start,
+            s.end_time AS schedule_end
+          FROM enrollments e
+          JOIN students st ON e.student_id = st.id
+          JOIN classes cls ON e.class_id = cls.id
+          JOIN teachers t ON cls.teacher_id = t.id
+          JOIN courses c ON cls.course_id = c.id
+          LEFT JOIN schedules s ON cls.id = s.class_id
+          WHERE st.user_id = ?
+          ORDER BY t.full_name, c.course_name, s.schedule_date
+        `;
+        params = [req.user.id];
+      } else if (req.user.role === 'teacher') {
+        query = `
+          SELECT 
+            c.course_name,
+            c.description AS course_description,
+            c.tuition_fee,
+            t.full_name AS teacher_name,
+            t.email AS teacher_email,
+            t.phone_number AS teacher_phone,   
+            c.start_date AS course_start,
+            c.end_date AS course_end,
+            cls.class_name,
+            cls.start_time AS class_start_time,
+            cls.end_time AS class_end_time,
+            s.day_of_week,
+            s.schedule_date,
+            s.start_time AS schedule_start,
+            s.end_time AS schedule_end,
+            (SELECT COUNT(*) FROM enrollments e WHERE e.class_id = cls.id) as student_count
+          FROM teachers t
+          JOIN classes cls ON t.id = cls.teacher_id
+          JOIN courses c ON cls.course_id = c.id
+          LEFT JOIN schedules s ON cls.id = s.class_id
+          WHERE t.user_id = ?
+          ORDER BY c.course_name, s.schedule_date
+        `;
+        params = [req.user.id];
+      }
+
       const courses = await executeQuery(query, params);
       res.render("my-courses.ejs", {
         user: req.user,
         courses: courses,
       });
+
     } catch (error) {
       console.error("Error fetching courses:", error);
       res.status(500).send("Error loading courses");

@@ -98,6 +98,24 @@
             font-size: 11px;
             line-height: 1;
         }
+
+        .student-count {
+            font-size: 11px;
+            color: #4a5568;
+            background: #edf2f7;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+
+        .teacher-view .course-card {
+            border-left: 3px solid #4299e1;
+        }
+
+        .teacher-view .course-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
     </style>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -161,14 +179,13 @@
                         <!-- Common options for all authenticated users -->
                         <% if (user.role === 'teacher' || user.role === 'student') { %>
                         <a href="/schedule" class="nav-button"><i class="fas fa-calendar"></i><span>My Schedule</span></a>
+                        <a href="/my-courses" class="nav-button"><i class="fas fa-chalkboard"></i><span>My
+                                courses</span></a>
                         <% } %>
                         <a href="/notifications" class="nav-button"><i
                                 class="fas fa-bell"></i><span>Notifications</span></a>
                         <a href="/profile" class="nav-button"><i class="fas fa-user"></i><span>Profile</span></a>
-                        <% if (user.role === 'student') { %>
-                        <a href="/my-courses" class="nav-button"><i class="fas fa-chalkboard"></i><span>My
-                                courses</span></a>
-                        <% } %>
+                        
     
                         <!-- Teacher & Admin only options -->
                         <% if (user.role === 'admin' || user.role === 'teacher') { %>
@@ -247,9 +264,15 @@
                     <div class="course-header">
                         <div class="course-title">
                             <%= course.course_name %>
-                            <span class="course-fee">
-                                Fee: <%= course.tuition_fee ? `$${course.tuition_fee.toLocaleString()}` : 'Not set' %>
-                            </span>
+                            <% if (user.role === 'teacher') { %>
+                                <span class="student-count">
+                                    Students: <%= course.student_count %>
+                                </span>
+                            <% } else { %>
+                                <span class="course-fee">
+                                    Fee: <%= course.tuition_fee ? `$${course.tuition_fee.toLocaleString()}` : 'Not set' %>
+                                </span>
+                            <% } %>
                         </div>
                     </div>
                     <div class="course-details">
@@ -261,6 +284,7 @@
                             </div>
                         </div>
 
+                        <% if (user.role === 'student') { %>
                         <div class="detail-group">
                             <div class="detail-label">Teacher</div>
                             <div class="detail-value teacher-info">
@@ -268,14 +292,7 @@
                                 <%= course.teacher_name %>
                             </div>
                         </div>
-
-                        <div class="detail-group">
-                            <div class="detail-label">Contact</div>
-                            <div class="detail-value">
-                                <%= course.teacher_email %><br>
-                                <%= course.teacher_phone %>
-                            </div>
-                        </div>
+                        <% } %>
 
                         <div class="detail-group">
                             <div class="detail-label">Class</div>
