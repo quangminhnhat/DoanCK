@@ -63,16 +63,17 @@ CREATE TABLE notifications (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (sender_id) REFERENCES users(id)
 );
-
 CREATE TABLE courses (
     id INT PRIMARY KEY IDENTITY,
     course_name NVARCHAR(100),
     description NVARCHAR(MAX),
     start_date DATE,
     end_date DATE,
+    tuition_fee int,
     created_at DATETIME DEFAULT GETDATE(),
     updated_at DATETIME DEFAULT GETDATE()
 );
+
 
 CREATE TABLE materials (
     id INT PRIMARY KEY IDENTITY,
@@ -209,9 +210,10 @@ VALUES
  (3, 'vvvvvvvvvv', 'test3@gmail.com', '5646456363', '2025-05-12 09:37:00.567');
 
 -- Insert courses
-INSERT INTO courses (course_name, description, start_date, end_date)
+INSERT INTO courses (course_name, description, start_date, end_date, tuition_fee)
 VALUES 
-('Lập trình C#', 'Lập trình ứng dụng với C# và WinForms', '2025-05-01', '2025-08-01');
+(N'Lập trình C#', N'Lập trình ứng dụng với C# và WinForms', '2025-05-01', '2025-08-01', 3500000);
+
 
 -- Insert materials
 INSERT INTO materials (course_id, file_name, file_path)
@@ -302,6 +304,58 @@ ORDER BY u.created_at DESC;
 SELECT 
  c.course_name,
     c.description AS course_description,
+    t.full_name AS teacher_name,
+    t.email AS teacher_email,
+    t.phone_number AS teacher_phone,   
+    c.start_date AS course_start,
+    c.end_date AS course_end,
+    cls.class_name,
+    cls.start_time AS class_start_time,
+    cls.end_time AS class_end_time,
+    s.day_of_week,
+    s.schedule_date,
+    s.start_time AS schedule_start,
+    s.end_time AS schedule_end
+FROM classes cls
+JOIN teachers t ON cls.teacher_id = t.id
+JOIN courses c ON cls.course_id = c.id
+LEFT JOIN schedules s ON cls.id = s.class_id
+ORDER BY t.full_name, c.course_name, s.schedule_date;
+
+
+
+SELECT 
+    st.full_name AS student_name,
+    st.email AS student_email,
+    c.course_name,
+    c.description AS course_description,
+    t.full_name AS teacher_name,
+    t.email AS teacher_email,
+    t.phone_number AS teacher_phone,   
+    c.start_date AS course_start,
+    c.end_date AS course_end,
+    cls.class_name,
+    cls.start_time AS class_start_time,
+    cls.end_time AS class_end_time,
+    s.day_of_week,
+    s.schedule_date,
+    s.start_time AS schedule_start,
+    s.end_time AS schedule_end
+FROM enrollments e
+JOIN students st ON e.student_id = st.id
+JOIN classes cls ON e.class_id = cls.id
+JOIN teachers t ON cls.teacher_id = t.id
+JOIN courses c ON cls.course_id = c.id
+LEFT JOIN schedules s ON cls.id = s.class_id
+WHERE st.id = 1
+ORDER BY c.course_name, s.schedule_date;
+
+
+
+SELECT 
+    c.course_name,
+    c.description AS course_description,
+    c.tuition_fee,
     t.full_name AS teacher_name,
     t.email AS teacher_email,
     t.phone_number AS teacher_phone,   
