@@ -69,6 +69,9 @@
                     <% } %>
                     <a href="/notifications" class="nav-button"><i class="fas fa-bell"></i><span>Notifications</span></a>
                     <a href="/profile" class="nav-button"><i class="fas fa-user"></i><span>Profile</span></a>
+                    <% if (user.role === 'student') { %>
+                    <a href="/my-courses" class="nav-button"><i class="fas fa-chalkboard"></i><span>My courses</span></a>
+                    <% } %>
             
                     <!-- Teacher & Admin only options -->
                     <% if (user.role === 'admin' || user.role === 'teacher') { %>

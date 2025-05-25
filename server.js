@@ -25,11 +25,13 @@ app.use(methodOverride("_method"));
 
 // Session setup
 app.use(flash());
-app.use(session({
-  secret: process.env.SECRET_KEY,
-  resave: false,
-  saveUninitialized: false,
-}));
+app.use(
+  session({
+    secret: process.env.SECRET_KEY,
+    resave: false,
+    saveUninitialized: false,
+  })
+);
 
 // Passport initialization
 app.use(passport.initialize());
@@ -96,7 +98,6 @@ function executeQuery(query, params = []) {
     });
   });
 }
-
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
@@ -167,7 +168,7 @@ app.post(
       const values = [
         course_id,
         file.originalname,
-        path.join("uploads", file.filename)
+        path.join("uploads", file.filename),
       ];
 
       await new Promise((resolve, reject) => {
@@ -278,11 +279,59 @@ app.post(
       }
 
       console.log("Notification sent to user ID:", userId);
-      res.redirect("/notifications"); 
+      res.redirect("/notifications");
     });
   }
 );
 
+app.get(
+  "/my-courses",
+  checkAuthenticated,
+  authenticateRole("student"),
+  async (req, res) => {
+    try {
+      // Different queries based on user role
+      let query;
+      let params = [];
+
+      query = `
+        SELECT 
+          c.course_name,
+          c.description AS course_description,
+          c.tuition_fee,
+          t.full_name AS teacher_name,
+          t.email AS teacher_email,
+          t.phone_number AS teacher_phone,   
+          c.start_date AS course_start,
+          c.end_date AS course_end,
+          cls.class_name,
+          cls.start_time AS class_start_time,
+          cls.end_time AS class_end_time,
+          s.day_of_week,
+          s.schedule_date,
+          s.start_time AS schedule_start,
+          s.end_time AS schedule_end
+        FROM enrollments e
+        JOIN students st ON e.student_id = st.id
+        JOIN classes cls ON e.class_id = cls.id
+        JOIN teachers t ON cls.teacher_id = t.id
+        JOIN courses c ON cls.course_id = c.id
+        LEFT JOIN schedules s ON cls.id = s.class_id
+        WHERE st.user_id = ?
+        ORDER BY t.full_name, c.course_name, s.schedule_date
+      `;
+      params = [req.user.id];
+      const courses = await executeQuery(query, params);
+      res.render("my-courses.ejs", {
+        user: req.user,
+        courses: courses,
+      });
+    } catch (error) {
+      console.error("Error fetching courses:", error);
+      res.status(500).send("Error loading courses");
+    }
+  }
+);
 
 app.get("/notifications", checkAuthenticated, async (req, res) => {
   try {
@@ -344,38 +393,33 @@ app.get("/notifications", checkAuthenticated, async (req, res) => {
 
 // Mark notification as read
 app.post("/notifications/:id/read", checkAuthenticated, async (req, res) => {
-    try {
-        const query = `
+  try {
+    const query = `
             UPDATE notifications 
             SET [read] = 1, 
                 updated_at = GETDATE()
             WHERE id = ? AND user_id = ?
         `;
-        await executeQuery(query, [req.params.id, req.user.id]);
-        res.json({ success: true });
-    } catch (error) {
-        console.error("Error marking notification as read:", error);
-        res.status(500).json({ error: "Failed to update notification" });
-    }
+    await executeQuery(query, [req.params.id, req.user.id]);
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error marking notification as read:", error);
+    res.status(500).json({ error: "Failed to update notification" });
+  }
 });
 
 // Delete notification (admin only)
-app.delete(
-  "/notifications/:id",
-  checkAuthenticated,
-  async (req, res) => {
-    try {
-      await executeQuery("DELETE FROM notifications WHERE id = ?", [
-        req.params.id,
-      ]);
-      res.redirect("/notifications");
-    } catch (error) {
-      console.error("Error deleting notification:", error);
-      res.status(500).send("Failed to delete notification");
-    }
+app.delete("/notifications/:id", checkAuthenticated, async (req, res) => {
+  try {
+    await executeQuery("DELETE FROM notifications WHERE id = ?", [
+      req.params.id,
+    ]);
+    res.redirect("/notifications");
+  } catch (error) {
+    console.error("Error deleting notification:", error);
+    res.status(500).send("Failed to delete notification");
   }
-);
-
+});
 
 app.get(
   "/materials",
@@ -467,8 +511,8 @@ app.get(
   checkAuthenticated,
   authenticateRole("admin"),
   (req, res) => {
-    res.render("register.ejs", { 
-      user: req.user
+    res.render("register.ejs", {
+      user: req.user,
     });
   }
 );
@@ -1146,50 +1190,81 @@ app.post(
   }
 );
 
-app.post("/register", checkAuthenticated, authenticateRole("admin"), async (req, res) => {
-  // Avoid sending multiple responses
-  let hasResponded = false;
-  const sendResponse = (statusCode, message) => {
-    if (!hasResponded) {
-      hasResponded = true;
-      if (statusCode === 200) {
-        return res.redirect("/login");
+app.post(
+  "/register",
+  checkAuthenticated,
+  authenticateRole("admin"),
+  async (req, res) => {
+    // Avoid sending multiple responses
+    let hasResponded = false;
+    const sendResponse = (statusCode, message) => {
+      if (!hasResponded) {
+        hasResponded = true;
+        if (statusCode === 200) {
+          return res.redirect("/login");
+        }
+        res.status(statusCode).send(message);
       }
-      res.status(statusCode).send(message);
-    }
-  };
-
-  try {
-    console.log("Hitting registration endpoint with body:", req.body);
-    const { Name: username, email, birthday: birth, phone, Address: address, subject, salary, Password } = req.body;
-    
-    if (!username || !email || !birth || !phone || !address || !subject || !Password) {
-      console.log("Missing required fields:", { username, email, birth, phone, address, subject });
-      return sendResponse(400, "All fields are required");
-    }
-
-    console.log("Processing registration for:", email);
-    const hashpassword = await bcrypt.hash(Password, 10);
-    const role = mapRole[subject];
-
-    if (!role) {
-      console.log("Invalid subject:", subject);
-      return sendResponse(400, "Invalid subject selection");
-    }
-
-    const handleSqlError = (err) => {
-      console.error("Insert error:", err);
-      if (err.code === "ER_DUP_ENTRY") {
-        return sendResponse(400, "Email or username already exists");
-      }
-      if (err.code === "ER_NO_REFERENCED_ROW") {
-        return sendResponse(400, "Invalid reference data");
-      }
-      return sendResponse(500, "Registration failed. Please try again later.");
     };
 
-    if (role === "student") {
-      const insertQuery = `
+    try {
+      console.log("Hitting registration endpoint with body:", req.body);
+      const {
+        Name: username,
+        email,
+        birthday: birth,
+        phone,
+        Address: address,
+        subject,
+        salary,
+        Password,
+      } = req.body;
+
+      if (
+        !username ||
+        !email ||
+        !birth ||
+        !phone ||
+        !address ||
+        !subject ||
+        !Password
+      ) {
+        console.log("Missing required fields:", {
+          username,
+          email,
+          birth,
+          phone,
+          address,
+          subject,
+        });
+        return sendResponse(400, "All fields are required");
+      }
+
+      console.log("Processing registration for:", email);
+      const hashpassword = await bcrypt.hash(Password, 10);
+      const role = mapRole[subject];
+
+      if (!role) {
+        console.log("Invalid subject:", subject);
+        return sendResponse(400, "Invalid subject selection");
+      }
+
+      const handleSqlError = (err) => {
+        console.error("Insert error:", err);
+        if (err.code === "ER_DUP_ENTRY") {
+          return sendResponse(400, "Email or username already exists");
+        }
+        if (err.code === "ER_NO_REFERENCED_ROW") {
+          return sendResponse(400, "Invalid reference data");
+        }
+        return sendResponse(
+          500,
+          "Registration failed. Please try again later."
+        );
+      };
+
+      if (role === "student") {
+        const insertQuery = `
         BEGIN TRANSACTION;
         INSERT INTO users (username, password, role, created_at, updated_at) 
         VALUES (?, ?, ?, GETDATE(), GETDATE());
@@ -1202,24 +1277,24 @@ app.post("/register", checkAuthenticated, authenticateRole("admin"), async (req,
         
         COMMIT TRANSACTION;
       `;
-      const values = [
-        username,
-        hashpassword,
-        role,
-        username,
-        email,
-        phone,
-        address,
-        birth
-      ];
+        const values = [
+          username,
+          hashpassword,
+          role,
+          username,
+          email,
+          phone,
+          address,
+          birth,
+        ];
 
-      sql.query(connectionString, insertQuery, values, (err, result) => {
-        if (err) return handleSqlError(err);
-        console.log("Student registered:", result);
-        return sendResponse(200, "Registration successful");
-      });
-    } else if (role === "teacher") {
-      const insertQuery = `
+        sql.query(connectionString, insertQuery, values, (err, result) => {
+          if (err) return handleSqlError(err);
+          console.log("Student registered:", result);
+          return sendResponse(200, "Registration successful");
+        });
+      } else if (role === "teacher") {
+        const insertQuery = `
         BEGIN TRANSACTION;
         INSERT INTO users (username, password, role, created_at, updated_at) 
         VALUES (?, ?, ?, GETDATE(), GETDATE());
@@ -1232,25 +1307,25 @@ app.post("/register", checkAuthenticated, authenticateRole("admin"), async (req,
         
         COMMIT TRANSACTION;
       `;
-      const values = [
-        username,
-        hashpassword,
-        role,
-        username,
-        email,
-        phone,
-        address,
-        birth,
-        salary
-      ];
+        const values = [
+          username,
+          hashpassword,
+          role,
+          username,
+          email,
+          phone,
+          address,
+          birth,
+          salary,
+        ];
 
-      sql.query(connectionString, insertQuery, values, (err, result) => {
-        if (err) return handleSqlError(err);
-        console.log("Teacher registered:", result);
-        return sendResponse(200, "Registration successful");
-      });
-    } else if (role === "admin") {
-      const insertQuery = `
+        sql.query(connectionString, insertQuery, values, (err, result) => {
+          if (err) return handleSqlError(err);
+          console.log("Teacher registered:", result);
+          return sendResponse(200, "Registration successful");
+        });
+      } else if (role === "admin") {
+        const insertQuery = `
         BEGIN TRANSACTION;
         INSERT INTO users (username, password, role, created_at, updated_at) 
         VALUES (?, ?, ?, GETDATE(), GETDATE());
@@ -1263,26 +1338,20 @@ app.post("/register", checkAuthenticated, authenticateRole("admin"), async (req,
         
         COMMIT TRANSACTION;
       `;
-      const values = [
-        username,
-        hashpassword,
-        role,
-        username,
-        email,
-        phone
-      ];
+        const values = [username, hashpassword, role, username, email, phone];
 
-      sql.query(connectionString, insertQuery, values, (err, result) => {
-        if (err) return handleSqlError(err);
-        console.log("Admin registered:", result);
-        return sendResponse(200, "Registration successful");
-      });
-    }    } catch (error) {    
+        sql.query(connectionString, insertQuery, values, (err, result) => {
+          if (err) return handleSqlError(err);
+          console.log("Admin registered:", result);
+          return sendResponse(200, "Registration successful");
+        });
+      }
+    } catch (error) {
       if (error.code === "ERR_HTTP_HEADERS_SENT") {
         console.log("Headers already sent, response already handled");
         return;
       }
-      
+
       console.error("Error during registration:", error);
       return sendResponse(500, "Registration failed. Please try again later.");
     }
@@ -1802,17 +1871,17 @@ app.listen(3000);
 // Configure connection pool
 const pool = {
   max: 10, // Maximum number of connections
-  min: 0,  // Minimum number of connections
-  idleTimeoutMillis: 30000 // How long a connection can be idle before being released
+  min: 0, // Minimum number of connections
+  idleTimeoutMillis: 30000, // How long a connection can be idle before being released
 };
 
 // Test database connection on startup
 async function testConnection() {
   try {
-    await executeQuery('SELECT 1');
-    console.log('Database connection successful');
+    await executeQuery("SELECT 1");
+    console.log("Database connection successful");
   } catch (error) {
-    console.error('Database connection failed:', error);
+    console.error("Database connection failed:", error);
     process.exit(1); // Exit if we can't connect to database
   }
 }
@@ -1821,24 +1890,24 @@ testConnection();
 
 // Add error handler middleware
 app.use((err, req, res, next) => {
-  console.error('Error:', err);
-  
-  if (err.code === 'ECONNREFUSED') {
+  console.error("Error:", err);
+
+  if (err.code === "ECONNREFUSED") {
     return res.status(503).json({
-      error: 'Database connection failed',
-      details: 'Unable to connect to database server'
+      error: "Database connection failed",
+      details: "Unable to connect to database server",
     });
   }
-  
-  if (err.code === 'PROTOCOL_CONNECTION_LOST') {
+
+  if (err.code === "PROTOCOL_CONNECTION_LOST") {
     return res.status(503).json({
-      error: 'Database connection lost',
-      details: 'Connection to database was lost'
+      error: "Database connection lost",
+      details: "Connection to database was lost",
     });
   }
 
   res.status(500).json({
-    error: 'Internal server error',
-    details: err.message
+    error: "Internal server error",
+    details: err.message,
   });
 });
