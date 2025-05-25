@@ -915,10 +915,18 @@ app.get(
   authenticateRole("admin"),
   (req, res) => {
     const query = `
-    SELECT e.id, s.full_name AS student_name, c.class_name, e.enrollment_date
+    SELECT 
+      e.id, 
+      s.full_name AS student_name, 
+      c.class_name,
+      co.tuition_fee,
+      e.enrollment_date,
+      e.payment_status,
+      e.payment_date
     FROM enrollments e
     JOIN students s ON e.student_id = s.id
     JOIN classes c ON e.class_id = c.id
+    JOIN courses co ON c.course_id = co.id
     ORDER BY e.enrollment_date DESC
   `;
 
@@ -927,10 +935,48 @@ app.get(
         console.error("Fetch enrollments error:", err);
         return res.status(500).send("Database error");
       }
-      res.render("enrollments.ejs", { enrollments: rows, user: req.user });
+      res.render("enrollments.ejs", { 
+        enrollments: rows, 
+        user: req.user 
+      });
     });
   }
 );
+
+// Add route to toggle payment status
+app.post("/enrollments/:id/toggle-payment", checkAuthenticated, authenticateRole("admin"), (req, res) => {
+  const query = `
+    UPDATE enrollments 
+    SET 
+      payment_status = ~payment_status,
+      payment_date = CASE 
+        WHEN payment_status = 0 THEN GETDATE()
+        ELSE NULL 
+      END,
+      updated_at = GETDATE()
+    WHERE id = ?
+  `;
+
+  sql.query(connectionString, query, [req.params.id], (err) => {
+    try {
+      if (err) {
+        console.error("Update payment status error:", err);
+        if (!res.headersSent) {
+          return res.status(500).json({ error: "Update failed" });
+        }
+      }
+      if (!res.headersSent) {
+        res.json({ success: true });
+      }
+    } catch (error) {
+      // Only log non-headers-sent errors
+      if (error.code !== 'ERR_HTTP_HEADERS_SENT') {
+        console.error("Error in payment toggle:", error);
+      }
+    }
+  });
+});
+
 
 app.get(
   "/enrollments/:id/edit",
@@ -966,65 +1012,9 @@ app.get(
   }
 );
 
-app.get(
-  "/payments",
-  checkAuthenticated,
-  authenticateRole("admin"),
-  (req, res) => {
-    const query = `
-    SELECT p.id, s.full_name AS student_name, p.amount, p.payment_date
-    FROM payments p
-    JOIN students s ON p.student_id = s.id
-    ORDER BY p.payment_date DESC
-  `;
 
-    sql.query(connectionString, query, (err, rows) => {
-      if (err) {
-        console.error("Fetch payments error:", err);
-        return res.status(500).send("Database error");
-      }
-      res.render("payments.ejs", { payments: rows, user: req.user });
-    });
-  }
-);
 
-app.get(
-  "/payments/:id/edit",
-  checkAuthenticated,
-  authenticateRole("admin"),
-  (req, res) => {
-    const paymentId = req.params.id;
 
-    const paymentQuery = "SELECT * FROM payments WHERE id = ?";
-    const studentQuery = "SELECT id, full_name FROM students";
-
-    sql.query(connectionString, paymentQuery, [paymentId], (err, result) => {
-      if (err || result.length === 0)
-        return res.status(404).send("Payment not found");
-
-      const payment = result[0];
-
-      sql.query(connectionString, studentQuery, (err, students) => {
-        if (err) return res.status(500).send("Student fetch error");
-
-        res.render("editPayment.ejs", {
-          payment,
-          students,
-          user: req.user,
-        });
-      });
-    });
-  }
-);
-
-app.get(
-  "/payments/new",
-  checkAuthenticated,
-  authenticateRole("admin"),
-  (req, res) => {
-    res.render("Newpayments.ejs", { user: req.user });
-  }
-);
 
 app.get(
   "/enrollments/new",
@@ -1802,79 +1792,9 @@ app.delete(
   }
 );
 
-app.post(
-  "/payments/new",
-  checkAuthenticated,
-  authenticateRole("admin"),
-  (req, res) => {
-    const { student_id, amount, payment_date } = req.body;
 
-    if (!student_id || !amount || !payment_date) {
-      return res.status(400).send("Missing required fields");
-    }
 
-    const query = `
-    INSERT INTO payments (student_id, amount, payment_date)
-    VALUES (?, ?, ?);
-  `;
 
-    sql.query(
-      connectionString,
-      query,
-      [student_id, amount, payment_date],
-      (err) => {
-        if (err) {
-          console.error("Payment insert error:", err);
-          return res.status(500).send("Database error");
-        }
-        res.redirect("/payments");
-      }
-    );
-  }
-);
-
-app.post(
-  "/payments/:id",
-  checkAuthenticated,
-  authenticateRole("admin"),
-  (req, res) => {
-    const { student_id, amount, payment_date } = req.body;
-    const query = `
-    UPDATE payments
-    SET student_id = ?, amount = ?, payment_date = ?
-    WHERE id = ?
-  `;
-
-    sql.query(
-      connectionString,
-      query,
-      [student_id, amount, payment_date, req.params.id],
-      (err) => {
-        if (err) {
-          console.error("Update payment error:", err);
-          return res.status(500).send("Update failed");
-        }
-        res.redirect("/payments");
-      }
-    );
-  }
-);
-
-app.delete(
-  "/payments/:id",
-  checkAuthenticated,
-  authenticateRole("admin"),
-  (req, res) => {
-    const query = "DELETE FROM payments WHERE id = ?";
-    sql.query(connectionString, query, [req.params.id], (err) => {
-      if (err) {
-        console.error("Delete payment error:", err);
-        return res.status(500).send("Delete failed");
-      }
-      res.redirect("/payments");
-    });
-  }
-);
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));

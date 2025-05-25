@@ -113,18 +113,16 @@ CREATE TABLE enrollments (
     student_id INT,
     class_id INT,
     enrollment_date DATE,
+    payment_status BIT DEFAULT 0,
+    payment_date DATETIME,
+    updated_at DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE NO ACTION ON UPDATE NO ACTION,
     FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
 
-CREATE TABLE payments (
-    id INT PRIMARY KEY IDENTITY,
-    student_id INT,
-    amount DECIMAL(18, 2),
-    payment_date DATE,
-    FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
-);
+
+
 
 -- Indexes for better performance
 CREATE INDEX idx_students_user_id ON students(user_id);
@@ -136,7 +134,6 @@ CREATE INDEX idx_classes_teacher_id ON classes(teacher_id);
 CREATE INDEX idx_schedules_class_id ON schedules(class_id);
 CREATE INDEX idx_enrollments_student_id ON enrollments(student_id);
 CREATE INDEX idx_enrollments_class_id ON enrollments(class_id);
-CREATE INDEX idx_payments_student_id ON payments(student_id);
 
 
 
@@ -178,6 +175,14 @@ BEGIN
     WHERE id IN (SELECT id FROM inserted);
 END;
 go
+CREATE TRIGGER trg_enrollments_update ON enrollments
+AFTER UPDATE AS
+BEGIN
+    UPDATE enrollments
+    SET updated_at = GETDATE()
+    WHERE id IN (SELECT id FROM inserted);
+END;
+GO
 
 
 
@@ -232,10 +237,9 @@ VALUES
 (1, 'Wednesday', '2025-05-07', '08:00', '10:00'),
 (1, 'Friday', '2025-05-09', '08:00', '10:00');
 
--- Insert enrollments (link student to class)
+-- Insert sample enrollment with unpaid status
 INSERT INTO enrollments (student_id, class_id, enrollment_date)
-VALUES 
-(1, 1, '2025-05-01');
+VALUES (1, 1, '2025-05-01');
 
 -- Insert payments
 INSERT INTO payments (student_id, amount, payment_date)
@@ -267,7 +271,10 @@ DELETE FROM courses;
 DELETE FROM users;
 
 
-
+-- Simulate payment: update payment status and date
+UPDATE enrollments
+SET payment_status = 1, payment_date = '2025-05-02'
+WHERE student_id = 1 AND class_id = 1;
 
 
  SELECT s.schedule_date, s.start_time,
@@ -373,3 +380,13 @@ JOIN teachers t ON cls.teacher_id = t.id
 JOIN courses c ON cls.course_id = c.id
 LEFT JOIN schedules s ON cls.id = s.class_id
 ORDER BY t.full_name, c.course_name, s.schedule_date;
+
+
+
+
+
+SELECT s.full_name, c.class_name, e.enrollment_date, 
+       e.payment_status, e.payment_date
+FROM enrollments e
+JOIN students s ON e.student_id = s.id
+JOIN classes c ON e.class_id = c.id;
