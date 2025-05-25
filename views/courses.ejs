@@ -76,7 +76,7 @@
           <a id="nav-title" href="https://codepen.io" target="_blank" style="display:flex;align-items:center;gap:12px;">
             <img class="logo" src="/images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png"
               alt="Logo" style="width:40px;height:40px;object-fit:contain;">
-             
+
           </a>
           <label for="nav-toggle">
             <span id="nav-toggle-burger"></span>
@@ -87,27 +87,26 @@
         <div id="nav-content">
           <a href="/" class="nav-button"><i class="fas fa-house"></i><span>Home</span></a>
 
-         <!-- Common options for all authenticated users -->
-                        <% if (user.role === 'teacher' || user.role === 'student') { %>
-                        <a href="/schedule" class="nav-button"><i class="fas fa-calendar"></i><span>My Schedule</span></a>
-                        <a href="/my-courses" class="nav-button"><i class="fas fa-chalkboard"></i><span>My
-                                courses</span></a>
-                        <% } %>
-                        <a href="/notifications" class="nav-button"><i
-                                class="fas fa-bell"></i><span>Notifications</span></a>
-                        <a href="/profile" class="nav-button"><i class="fas fa-user"></i><span>Profile</span></a>
-                        
-    
-          <!-- Teacher & Admin only options -->
+          <!-- Common options for all authenticated users -->
+          <% if (user.role === 'teacher' || user.role === 'student') { %>
+          <a href="/schedule" class="nav-button"><i class="fas fa-calendar"></i><span>My Schedule</span></a>
+          <a href="/my-courses" class="nav-button"><i class="fas fa-chalkboard"></i><span>My
+              courses</span></a>
+          <% } %>
+          <a href="/notifications" class="nav-button"><i class="fas fa-bell"></i><span>Notifications</span></a>
+          <a href="/profile" class="nav-button"><i class="fas fa-user"></i><span>Profile</span></a>
+
+
+            <!-- Teacher & Admin only options -->
           <% if (user.role === 'admin' || user.role === 'teacher') { %>
           <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
-          <a href="/courses" class="nav-button"><i class="fas fa-book"></i><span>Courses</span></a>
           <a href="/materials" class="nav-button"><i class="fas fa-file"></i><span>Materials</span></a>
           <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload Material</span></a>
           <% } %>
-
+      
         <!-- Admin only options -->
           <% if (user.role === 'admin') { %>
+            <a href="/courses" class="nav-button"><i class="fas fa-book"></i><span>Courses</span></a>
           <a href="/users" class="nav-button"><i class="fas fa-user-cog"></i><span>User List</span></a>
           <a href="/register" class="nav-button"><i class="fas fa-user-plus"></i><span>Register User</span></a>
           <a href="/enrollments" class="nav-button"><i class="fas fa-user-plus"></i><span>Enrollments</span></a>
@@ -162,185 +161,185 @@
 
   <main class="course-container">
     <div class="page-header">
-        <h1 class="page-title">Course Management</h1>
-        <% if (user && user.role === 'admin') { %>
-            <a href="/courses/new" class="add-button">
-                <i class="fas fa-plus"></i> Add New Course
-            </a>
-        <% } %>
+      <h1 class="page-title">Course Management</h1>
+      <% if (user && user.role === 'admin') { %>
+      <a href="/courses/new" class="add-button">
+        <i class="fas fa-plus"></i> Add New Course
+      </a>
+      <% } %>
     </div>
 
     <% if (courses.length === 0) { %>
-        <p class="no-data">No courses available.</p>
+    <p class="no-data">No courses available.</p>
     <% } else { %>
-        <div class="courses-list">
-            <% courses.forEach(course => { %>
-                <div class="course-item">
-                    <div class="course-main-info">
-                        <div class="course-title-section">
-                            <h2><%= course.course_name %></h2>
-                            <span class="course-dates">
-                                <%= new Date(course.course_start).toLocaleDateString() %> - 
-                                <%= new Date(course.course_end).toLocaleDateString() %>
-                            </span>
-                        </div>
-                        <p class="course-description"><%= course.course_description %></p>
-                    </div>
-                    
-                    <div class="course-details-grid">
-                        <div class="detail-section">
-                            <h3><i class="fas fa-user"></i> Teacher</h3>
-                            <ul>
-                                <li><strong>Name:</strong> <%= course.teacher_name %></li>
-                                <li><strong>Email:</strong> <%= course.teacher_email %></li>
-                                <li><strong>Phone:</strong> <%= course.teacher_phone %></li>
-                            </ul>
-                        </div>
-
-                        <div class="detail-section">
-                            <h3><i class="fas fa-chalkboard"></i> Class</h3>
-                            <ul>
-                                <li><strong>Name:</strong> <%= course.class_name %></li>
-                                <li><strong>Time:</strong> 
-                                    <%= new Date(course.class_start_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) %> - 
-                                    <%= new Date(course.class_end_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) %>
-                                </li>
-                                <% if (course.schedule_date) { %>
-                                    <li><strong>Schedule:</strong>
-                                        <%= course.day_of_week %>, 
-                                        <%= new Date(course.schedule_date).toLocaleDateString() %>
-                                    </li>
-                                    <li><strong>Session Time:</strong>
-                                        <%= new Date(course.schedule_start).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) %> - 
-                                        <%= new Date(course.schedule_end).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) %>
-                                    </li>
-                                <% } %>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            <% }) %>
+    <div class="courses-list">
+      <% courses.forEach(course => { %>
+      <div class="course-item">
+        <div class="course-main-info">
+          <div class="course-title-section">
+            <h2><%= course.course_name %></h2>
+            <span class="course-dates">
+              <%= new Date(course.course_start).toLocaleDateString() %> -
+              <%= new Date(course.course_end).toLocaleDateString() %>
+            </span>
+          </div>
+          <p class="course-description"><%= course.course_description %></p>
         </div>
+
+        <div class="course-details-grid">
+          <div class="detail-section">
+            <h3><i class="fas fa-user"></i> Teacher</h3>
+            <ul>
+              <li><strong>Name:</strong> <%= course.teacher_name %></li>
+              <li><strong>Email:</strong> <%= course.teacher_email %></li>
+              <li><strong>Phone:</strong> <%= course.teacher_phone %></li>
+            </ul>
+          </div>
+
+          <div class="detail-section">
+            <h3><i class="fas fa-chalkboard"></i> Class</h3>
+            <ul>
+              <li><strong>Name:</strong> <%= course.class_name %></li>
+              <li><strong>Time:</strong>
+                <%= new Date(course.class_start_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) %> -
+                <%= new Date(course.class_end_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) %>
+              </li>
+              <% if (course.schedule_date) { %>
+              <li><strong>Schedule:</strong>
+                <%= course.day_of_week %>,
+                <%= new Date(course.schedule_date).toLocaleDateString() %>
+              </li>
+              <li><strong>Session Time:</strong>
+                <%= new Date(course.schedule_start).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) %> -
+                <%= new Date(course.schedule_end).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) %>
+              </li>
+              <% } %>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <% }) %>
+    </div>
     <% } %>
   </main>
 
   <style>
     .course-container {
-        max-width: 1200px;
-        margin: 2rem auto;
-        padding: 0 1rem;
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
     }
 
     .page-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
     }
 
     .page-title {
-        font-size: 2rem;
-        color: #2d3748;
+      font-size: 2rem;
+      color: #2d3748;
     }
 
     .add-button {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.75rem 1.5rem;
-        background-color: #4299e1;
-        color: white;
-        border-radius: 0.5rem;
-        text-decoration: none;
-        transition: background-color 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background-color: #4299e1;
+      color: white;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      transition: background-color 0.2s;
     }
 
     .add-button:hover {
-        background-color: #3182ce;
+      background-color: #3182ce;
     }
 
     .courses-list {
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
     }
 
     .course-item {
-        background: white;
-        border: 1px solid #e2e8f0;
-        border-radius: 0.5rem;
-        padding: 1.5rem;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
     .course-main-info {
-        margin-bottom: 1.5rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid #e2e8f0;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #e2e8f0;
     }
 
     .course-title-section {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
     }
 
     .course-title-section h2 {
-        font-size: 1.5rem;
-        color: #2d3748;
-        margin: 0;
+      font-size: 1.5rem;
+      color: #2d3748;
+      margin: 0;
     }
 
     .course-dates {
-        font-size: 0.875rem;
-        color: #718096;
+      font-size: 0.875rem;
+      color: #718096;
     }
 
     .course-description {
-        color: #4a5568;
-        margin: 0;
+      color: #4a5568;
+      margin: 0;
     }
 
     .course-details-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 2rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
     }
 
     .detail-section {
-        flex: 1;
+      flex: 1;
     }
 
     .detail-section h3 {
-        font-size: 1rem;
-        color: #2d3748;
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
+      font-size: 1rem;
+      color: #2d3748;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
 
     .detail-section ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
+      list-style: none;
+      padding: 0;
+      margin: 0;
     }
 
     .detail-section li {
-        margin-bottom: 0.5rem;
-        color: #4a5568;
+      margin-bottom: 0.5rem;
+      color: #4a5568;
     }
 
     .detail-section li strong {
-        color: #2d3748;
-        margin-right: 0.5rem;
+      color: #2d3748;
+      margin-right: 0.5rem;
     }
 
     .no-data {
-        text-align: center;
-        color: #718096;
-        padding: 2rem;
+      text-align: center;
+      color: #718096;
+      padding: 2rem;
     }
   </style>
 

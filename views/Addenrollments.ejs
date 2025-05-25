@@ -11,34 +11,42 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link rel="stylesheet" href="https://demos.creative-tim.com/notus-js/assets/styles/tailwind.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-    <link rel="stylesheet"  href="https://demos.creative-tim.com/notus-js/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css" />
-<style>
-    .form-group {
-        position: relative;
-        transition: all 0.3s ease;
-    }
-    
-    .form-group:hover {
-        transform: translateY(-2px);
-    }
-    
-    input:not(:placeholder-shown):valid {
-        border-color: #10B981;
-    }
-    
-    input:not(:placeholder-shown):invalid {
-        border-color: #EF4444;
-    }
-    
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    
-    form {
-        animation: fadeIn 0.5s ease-out;
-    }
-</style>
+    <link rel="stylesheet"
+        href="https://demos.creative-tim.com/notus-js/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css" />
+    <style>
+        .form-group {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .form-group:hover {
+            transform: translateY(-2px);
+        }
+
+        input:not(:placeholder-shown):valid {
+            border-color: #10B981;
+        }
+
+        input:not(:placeholder-shown):invalid {
+            border-color: #EF4444;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        form {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
 </head>
 
 <body>
@@ -87,39 +95,43 @@
                 <div id="nav-content">
                     <a href="/" class="nav-button"><i class="fas fa-house"></i><span>Home</span></a>
 
-                 <!-- Common options for all authenticated users -->
-                        <% if (user.role === 'teacher' || user.role === 'student') { %>
-                        <a href="/schedule" class="nav-button"><i class="fas fa-calendar"></i><span>My Schedule</span></a>
-                        <a href="/my-courses" class="nav-button"><i class="fas fa-chalkboard"></i><span>My
-                                courses</span></a>
-                        <% } %>
-                        <a href="/notifications" class="nav-button"><i
-                                class="fas fa-bell"></i><span>Notifications</span></a>
-                        <a href="/profile" class="nav-button"><i class="fas fa-user"></i><span>Profile</span></a>
-                        
-    
+                    <!-- Common options for all authenticated users -->
+                    <% if (user.role === 'teacher' || user.role === 'student') { %>
+                    <a href="/schedule" class="nav-button"><i class="fas fa-calendar"></i><span>My Schedule</span></a>
+                    <a href="/my-courses" class="nav-button"><i class="fas fa-chalkboard"></i><span>My
+                            courses</span></a>
+                    <% } %>
+                    <a href="/notifications" class="nav-button"><i
+                            class="fas fa-bell"></i><span>Notifications</span></a>
+                    <a href="/profile" class="nav-button"><i class="fas fa-user"></i><span>Profile</span></a>
+
+
 
                     <!-- Teacher & Admin only options -->
-                    <% if (user.role === 'admin' || user.role === 'teacher') { %>
-                    <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
-                    <a href="/courses" class="nav-button"><i class="fas fa-book"></i><span>Courses</span></a>
-                    <a href="/materials" class="nav-button"><i class="fas fa-file"></i><span>Materials</span></a>
-                    <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload Material</span></a>
-                    <% } %>
-
-                     <!-- Admin only options -->
-          <% if (user.role === 'admin') { %>
-          <a href="/users" class="nav-button"><i class="fas fa-user-cog"></i><span>User List</span></a>
-          <a href="/register" class="nav-button"><i class="fas fa-user-plus"></i><span>Register User</span></a>
-          <a href="/enrollments" class="nav-button"><i class="fas fa-user-plus"></i><span>Enrollments</span></a>
-          <a href="/payments" class="nav-button"><i class="fas fa-money-bill"></i><span>Payments</span></a>
-          <a href="/schedules" class="nav-button"><i class="fas fa-money-bill"></i><span>schedules list</span></a>
-          <a href="/courses/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Course</span></a>
-          <a href="/classes/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Class</span></a>
-          <a href="/enrollments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Enrollment</span></a>
-          <a href="/payments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Payment</span></a>
-          <a href="/schedule/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Schedule</span></a>
+          <% if (user.role === 'admin' || user.role === 'teacher') { %>
+          <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
+          <a href="/materials" class="nav-button"><i class="fas fa-file"></i><span>Materials</span></a>
+          <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload Material</span></a>
           <% } %>
+      
+        <!-- Admin only options -->
+          <% if (user.role === 'admin') { %>
+            <a href="/courses" class="nav-button"><i class="fas fa-book"></i><span>Courses</span></a>
+                    <a href="/users" class="nav-button"><i class="fas fa-user-cog"></i><span>User List</span></a>
+                    <a href="/register" class="nav-button"><i class="fas fa-user-plus"></i><span>Register
+                            User</span></a>
+                    <a href="/enrollments" class="nav-button"><i
+                            class="fas fa-user-plus"></i><span>Enrollments</span></a>
+                    <a href="/payments" class="nav-button"><i class="fas fa-money-bill"></i><span>Payments</span></a>
+                    <a href="/schedules" class="nav-button"><i class="fas fa-money-bill"></i><span>schedules
+                            list</span></a>
+                    <a href="/courses/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Course</span></a>
+                    <a href="/classes/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Class</span></a>
+                    <a href="/enrollments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add
+                            Enrollment</span></a>
+                    <a href="/payments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Payment</span></a>
+                    <a href="/schedule/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Schedule</span></a>
+                    <% } %>
 
                     <!-- Logout button for all authenticated users -->
                     <div class="nav-button">
@@ -154,7 +166,8 @@
     </header>
 
     <main>
-        <form action="/enrollments/new" method="POST" class="max-w-xl mx-auto mt-10 p-8 bg-white shadow-lg rounded-xl border border-gray-100">
+        <form action="/enrollments/new" method="POST"
+            class="max-w-xl mx-auto mt-10 p-8 bg-white shadow-lg rounded-xl border border-gray-100">
             <fieldset>
                 <legend class="text-3xl font-bold mb-8 text-center text-blue-600">
                     <i class="fas fa-user-plus mr-2"></i>
@@ -166,11 +179,7 @@
                         <label for="student_id" class="block text-gray-700 font-semibold mb-2">
                             <i class="fas fa-id-card mr-2"></i>Student ID
                         </label>
-                        <input type="number" 
-                            id="student_id" 
-                            name="student_id" 
-                            required
-                            placeholder="Enter student ID"
+                        <input type="number" id="student_id" name="student_id" required placeholder="Enter student ID"
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200" />
                     </div>
 
@@ -178,11 +187,7 @@
                         <label for="class_id" class="block text-gray-700 font-semibold mb-2">
                             <i class="fas fa-chalkboard mr-2"></i>Class ID
                         </label>
-                        <input type="number" 
-                            id="class_id" 
-                            name="class_id" 
-                            required
-                            placeholder="Enter class ID"
+                        <input type="number" id="class_id" name="class_id" required placeholder="Enter class ID"
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200" />
                     </div>
 
@@ -190,10 +195,7 @@
                         <label for="enrollment_date" class="block text-gray-700 font-semibold mb-2">
                             <i class="fas fa-calendar-alt mr-2"></i>Enrollment Date
                         </label>
-                        <input type="date" 
-                            id="enrollment_date" 
-                            name="enrollment_date" 
-                            required
+                        <input type="date" id="enrollment_date" name="enrollment_date" required
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200" />
                     </div>
 
@@ -207,7 +209,7 @@
                 </div>
             </fieldset>
         </form>
-          
+
     </main>
 
     <footer class="relative bg-blueGray-200 pt-8 pb-6">

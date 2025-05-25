@@ -12,95 +12,97 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <link rel="stylesheet"
         href="https://demos.creative-tim.com/notus-js/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css">
-<!-- DataTables CSS -->
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.css">
-<link rel="stylesheet" type="text/css"
-    href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.css">
+    <link rel="stylesheet" type="text/css"
+        href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
 
-<!-- jQuery -->
-<script type="text/javascript" src="https://code.jquery.com/jquery-3.7.0.js"></script>
-<!-- DataTables JS -->
-<script type="text/javascript" src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-<script type="text/javascript"  src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
-<style>
-    #scheduleTable {
-        font-size: 11px;
-        width: 100% !important;
-        border-collapse: collapse;
-    }
+    <!-- jQuery -->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <!-- DataTables JS -->
+    <script type="text/javascript" src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+    <style>
+        #scheduleTable {
+            font-size: 11px;
+            width: 100% !important;
+            border-collapse: collapse;
+        }
 
-    #scheduleTable th,
-    #scheduleTable td {
-        padding: 3px 6px;
-        white-space: nowrap;
-        border: 1px solid #eee;
-        line-height: 1;
-    }
+        #scheduleTable th,
+        #scheduleTable td {
+            padding: 3px 6px;
+            white-space: nowrap;
+            border: 1px solid #eee;
+            line-height: 1;
+        }
 
-    .btn {
-        padding: 1px 4px;
-        font-size: 10px;
-        margin: 0;
-        border-radius: 2px;
-        line-height: 1;
-    }
+        .btn {
+            padding: 1px 4px;
+            font-size: 10px;
+            margin: 0;
+            border-radius: 2px;
+            line-height: 1;
+        }
 
-    .btn-edit,
-    .btn-delete {
-        min-width: 35px;
-        display: inline-block;
-    }
+        .btn-edit,
+        .btn-delete {
+            min-width: 35px;
+            display: inline-block;
+        }
 
-    .dataTables_wrapper .dataTables_length,
-    .dataTables_wrapper .dataTables_filter {
-        margin-bottom: 5px;
-        font-size: 11px;
-        line-height: 1;
-    }
+        .dataTables_wrapper .dataTables_length,
+        .dataTables_wrapper .dataTables_filter {
+            margin-bottom: 5px;
+            font-size: 11px;
+            line-height: 1;
+        }
 
-    .dataTables_wrapper .dataTables_length select,
-    .dataTables_wrapper .dataTables_filter input {
-        height: 20px;
-        padding: 1px 4px;
-        font-size: 11px;
-    }
+        .dataTables_wrapper .dataTables_length select,
+        .dataTables_wrapper .dataTables_filter input {
+            height: 20px;
+            padding: 1px 4px;
+            font-size: 11px;
+        }
 
-    .container {
-        max-width: 900px;
-        margin: 0 auto;
-        padding: 8px;
-    }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 8px;
+        }
 
-    .table-controls {
-        margin-bottom: 8px;
-        font-size: 11px;
-        line-height: 1;
-    }
+        .table-controls {
+            margin-bottom: 8px;
+            font-size: 11px;
+            line-height: 1;
+        }
 
-    .dataTables_info,
-    .dataTables_paginate {
-        font-size: 11px;
-        margin-top: 5px;
-        line-height: 1;
-    }
+        .dataTables_info,
+        .dataTables_paginate {
+            font-size: 11px;
+            margin-top: 5px;
+            line-height: 1;
+        }
 
-    h1 {
-        font-size: 16px;
-        margin-bottom: 8px;
-        line-height: 1;
-    }
+        h1 {
+            font-size: 16px;
+            margin-bottom: 8px;
+            line-height: 1;
+        }
 
-    .paginate_button {
-        padding: 2px 6px !important;
-        font-size: 11px !important;
-        line-height: 1 !important;
-    }
+        .paginate_button {
+            padding: 2px 6px !important;
+            font-size: 11px !important;
+            line-height: 1 !important;
+        }
 
-    .dataTables_length select {
-        padding-right: 15px !important;
-    }
-</style>
+        .dataTables_length select {
+            padding-right: 15px !important;
+        }
+    </style>
 </head>
+
 <body>
     <header>
         <div class="header-container">
@@ -115,7 +117,8 @@
                     <li>
                         <a href="#0">Thư Viện</a>
                         <ul>
-                            <li><a href="https://drive.google.com/drive/folders/1j_lNKViTx_UUyZNXRlkhRd-w9ghDxAYB">Sách Giáo
+                            <li><a href="https://drive.google.com/drive/folders/1j_lNKViTx_UUyZNXRlkhRd-w9ghDxAYB">Sách
+                                    Giáo
                                     Khoa</a>
                             </li>
                             <li><a href="#0">Tài Liệu Tham Khảo</a></li>
@@ -127,7 +130,7 @@
                     </li>
                 </ul>
             </nav>
-    
+
             <% if (!user) { %>
             <a href="/login" class="login-btn">
                 <i class="fa-solid fa-user"></i> Login
@@ -138,9 +141,10 @@
                 <div id="nav-header">
                     <a id="nav-title" href="https://codepen.io" target="_blank"
                         style="display:flex;align-items:center;gap:12px;">
-                        <img class="logo" src="/images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png"
+                        <img class="logo"
+                            src="/images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png"
                             alt="Logo" style="width:40px;height:40px;object-fit:contain;">
-                         
+
                     </a>
                     <label for="nav-toggle">
                         <span id="nav-toggle-burger"></span>
@@ -150,42 +154,45 @@
                 <!-- Common nav section for all authenticated users -->
                 <div id="nav-content">
                     <a href="/" class="nav-button"><i class="fas fa-house"></i><span>Home</span></a>
-    
-                 <!-- Common options for all authenticated users -->
-                        <% if (user.role === 'teacher' || user.role === 'student') { %>
-                        <a href="/schedule" class="nav-button"><i class="fas fa-calendar"></i><span>My Schedule</span></a>
-                        <a href="/my-courses" class="nav-button"><i class="fas fa-chalkboard"></i><span>My
-                                courses</span></a>
-                        <% } %>
-                        <a href="/notifications" class="nav-button"><i
-                                class="fas fa-bell"></i><span>Notifications</span></a>
-                        <a href="/profile" class="nav-button"><i class="fas fa-user"></i><span>Profile</span></a>
-                        
-    
-    
-                    <!-- Teacher & Admin only options -->
-                    <% if (user.role === 'admin' || user.role === 'teacher') { %>
-                    <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
-                    <a href="/courses" class="nav-button"><i class="fas fa-book"></i><span>Courses</span></a>
-                    <a href="/materials" class="nav-button"><i class="fas fa-file"></i><span>Materials</span></a>
-                    <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload Material</span></a>
+
+                    <!-- Common options for all authenticated users -->
+                    <% if (user.role === 'teacher' || user.role === 'student') { %>
+                    <a href="/schedule" class="nav-button"><i class="fas fa-calendar"></i><span>My Schedule</span></a>
+                    <a href="/my-courses" class="nav-button"><i class="fas fa-chalkboard"></i><span>My
+                            courses</span></a>
                     <% } %>
-    
-                    <!-- Admin only options -->
-                    <!-- Admin only options -->
-          <% if (user.role === 'admin') { %>
-          <a href="/users" class="nav-button"><i class="fas fa-user-cog"></i><span>User List</span></a>
-          <a href="/register" class="nav-button"><i class="fas fa-user-plus"></i><span>Register User</span></a>
-          <a href="/enrollments" class="nav-button"><i class="fas fa-user-plus"></i><span>Enrollments</span></a>
-          <a href="/payments" class="nav-button"><i class="fas fa-money-bill"></i><span>Payments</span></a>
-          <a href="/schedules" class="nav-button"><i class="fas fa-money-bill"></i><span>schedules list</span></a>
-          <a href="/courses/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Course</span></a>
-          <a href="/classes/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Class</span></a>
-          <a href="/enrollments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Enrollment</span></a>
-          <a href="/payments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Payment</span></a>
-          <a href="/schedule/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Schedule</span></a>
+                    <a href="/notifications" class="nav-button"><i
+                            class="fas fa-bell"></i><span>Notifications</span></a>
+                    <a href="/profile" class="nav-button"><i class="fas fa-user"></i><span>Profile</span></a>
+
+
+
+                    <!-- Teacher & Admin only options -->
+          <% if (user.role === 'admin' || user.role === 'teacher') { %>
+          <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
+          <a href="/materials" class="nav-button"><i class="fas fa-file"></i><span>Materials</span></a>
+          <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload Material</span></a>
           <% } %>
-    
+      
+        <!-- Admin only options -->
+          <% if (user.role === 'admin') { %>
+            <a href="/courses" class="nav-button"><i class="fas fa-book"></i><span>Courses</span></a>
+                    <a href="/users" class="nav-button"><i class="fas fa-user-cog"></i><span>User List</span></a>
+                    <a href="/register" class="nav-button"><i class="fas fa-user-plus"></i><span>Register
+                            User</span></a>
+                    <a href="/enrollments" class="nav-button"><i
+                            class="fas fa-user-plus"></i><span>Enrollments</span></a>
+                    <a href="/payments" class="nav-button"><i class="fas fa-money-bill"></i><span>Payments</span></a>
+                    <a href="/schedules" class="nav-button"><i class="fas fa-money-bill"></i><span>schedules
+                            list</span></a>
+                    <a href="/courses/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Course</span></a>
+                    <a href="/classes/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Class</span></a>
+                    <a href="/enrollments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add
+                            Enrollment</span></a>
+                    <a href="/payments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Payment</span></a>
+                    <a href="/schedule/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Schedule</span></a>
+                    <% } %>
+
                     <!-- Logout button for all authenticated users -->
                     <div class="nav-button">
                         <form action="/logout?_method=DELETE" method="POST">
@@ -194,12 +201,12 @@
                             </button>
                         </form>
                     </div>
-    
+
                     <div id="nav-content-highlight"></div>
                 </div>
-    
-    
-    
+
+
+
                 <input type="checkbox" id="nav-footer-toggle" />
                 <div id="nav-footer">
                     <div id="nav-footer-heading">
@@ -207,7 +214,8 @@
                             <img src="/images/gv1.png" />
                         </div>
                         <div id="nav-footer-titlebox">
-                            <a id="nav-footer-title" href="https://codepen.io/uahnbu/pens/public" target="_blank">User</a>
+                            <a id="nav-footer-title" href="https://codepen.io/uahnbu/pens/public"
+                                target="_blank">User</a>
                             <span id="nav-footer-subtitle">Role</span>
                         </div>
                         <label for="nav-footer-toggle">
@@ -215,24 +223,24 @@
                         </label>
                     </div>
                     <div id="nav-footer-content">
-    
+
                     </div>
                 </div>
             </div>
-    
+
             <% } %>
-    
-    
-    
+
+
+
         </div>
-    
-        </header>
+
+    </header>
     <div class="container" style="margin: 20px;">
         <h1>Schedule List</h1>
         <div class="table-controls" style="margin-bottom: 20px;">
             <a href="/schedules/new" class="btn btn-primary">Add New Schedule</a> | <a href="/" class="btn">Back</a>
         </div>
-        
+
         <table id="scheduleTable" class="display responsive nowrap" style="width:100%">
             <thead>
                 <tr>
@@ -257,7 +265,8 @@
                     <td>
                         <a href="/schedules/<%= s.id %>/edit" class="btn btn-edit">Edit</a>
                         <form method="POST" action="/schedules/<%= s.id %>?_method=DELETE" style="display:inline;">
-                            <button type="submit" class="btn btn-delete" onclick="return confirm('Delete this schedule?')">Delete</button>
+                            <button type="submit" class="btn btn-delete"
+                                onclick="return confirm('Delete this schedule?')">Delete</button>
                         </form>
                     </td>
                 </tr>
@@ -271,7 +280,8 @@
                 <div class="w-full lg:w-6/12 px-4">
                     <h4 class="text-3xl fonat-semibold text-blueGray-700">Liên hệ với chúng tôi!</h4>
                     <h5 class="text-lg mt-0 mb-2 text-blueGray-600">
-                        Tìm kiếm chúng tôi trên bất kỳ mạng xã hội nào và gửi cho chúng tôi một tin nhắn! Chúng tôi sẽ trả
+                        Tìm kiếm chúng tôi trên bất kỳ mạng xã hội nào và gửi cho chúng tôi một tin nhắn! Chúng tôi sẽ
+                        trả
                         lời bạn
                         ngay khi có thể.
                     </h5>
@@ -322,8 +332,9 @@
             <div class="flex flex-wrap items-center md:justify-between justify-center">
                 <div class="w-full md:w-4/12 px-4 mx-auto text-center">
                     <div class="text-sm text-blueGray-500 font-semibold py-1">
-                        Copyright © <span id="get-current-year">2025</span><a href="https://www.facebook.com/ttgdvpttnht"
-                            class="text-blueGray-500 hover:text-gray-800" target="_blank"> Talent Education</a>. Made by
+                        Copyright © <span id="get-current-year">2025</span><a
+                            href="https://www.facebook.com/ttgdvpttnht" class="text-blueGray-500 hover:text-gray-800"
+                            target="_blank"> Talent Education</a>. Made by
                         <a href="https://github.com/Rin-0808" class="text-blueGray-500 hover:text-blueGray-800">Rin</a>.
                     </div>
                 </div>

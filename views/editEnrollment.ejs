@@ -14,244 +14,238 @@
         href="https://demos.creative-tim.com/notus-js/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css">
 </head>
 
- 
-    <header>
-        <div class="header-container">
-            <div class="logo">
-                <img src="/images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png" alt="Logo"
-                    width="90" height="90">
-            </div>
-            <nav>
-                <ul>
-                    <li><a href="/">Trang Chủ</a></li>
-                    <li><a href="/school">Trung Tâm</a></li>
-                    <li>
-                        <a href="#0">Thư Viện</a>
-                        <ul>
-                            <li><a href="https://drive.google.com/drive/folders/1j_lNKViTx_UUyZNXRlkhRd-w9ghDxAYB">Sách
-                                    Giáo Khoa</a>
-                            </li>
-                            <li><a href="#0">Tài Liệu Tham Khảo</a></li>
-                            <li><a href="#0">Tài Liệu Tiếng Anh</a></li>
-                        </ul>
-                    </li>
-                    <li>
-                        <a href="/news">Tin Tức - Sự Kiện</a>
-                    </li>
-                </ul>
-            </nav>
 
-            <% if (!user) { %>
-            <a href="/login" class="login-btn">
-                <i class="fa-solid fa-user"></i> Login
-            </a>
-            <% } else { %>
-            <div id="nav-bar">
-                <input type="checkbox" id="nav-toggle" />
-                <div id="nav-header">
-                    <a id="nav-title" href="https://codepen.io" target="_blank" style="display:flex;align-items:center;gap:12px;">
-                        <img class="logo" src="/images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png"
-                            alt="Logo" style="width:40px;height:40px;object-fit:contain;">
-                         
-                    </a>
-                    <label for="nav-toggle">
-                        <span id="nav-toggle-burger"></span>
-                    </label>
-                    <hr>
-                </div>
-                <!-- Common nav section for all authenticated users -->
-                <div id="nav-content">
-                    <a href="/" class="nav-button"><i class="fas fa-house"></i><span>Home</span></a>
-            
-                 <!-- Common options for all authenticated users -->
-                        <% if (user.role === 'teacher' || user.role === 'student') { %>
-                        <a href="/schedule" class="nav-button"><i class="fas fa-calendar"></i><span>My Schedule</span></a>
-                        <a href="/my-courses" class="nav-button"><i class="fas fa-chalkboard"></i><span>My
-                                courses</span></a>
-                        <% } %>
-                        <a href="/notifications" class="nav-button"><i
-                                class="fas fa-bell"></i><span>Notifications</span></a>
-                        <a href="/profile" class="nav-button"><i class="fas fa-user"></i><span>Profile</span></a>
-                        
-    
-            
-                    <!-- Teacher & Admin only options -->
-                    <% if (user.role === 'admin' || user.role === 'teacher') { %>
-                    <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
-                    <a href="/courses" class="nav-button"><i class="fas fa-book"></i><span>Courses</span></a>
-                    <a href="/materials" class="nav-button"><i class="fas fa-file"></i><span>Materials</span></a>
-                    <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload Material</span></a>
-                    <% } %>
-            
-                     <!-- Admin only options -->
-          <% if (user.role === 'admin') { %>
-          <a href="/users" class="nav-button"><i class="fas fa-user-cog"></i><span>User List</span></a>
-          <a href="/register" class="nav-button"><i class="fas fa-user-plus"></i><span>Register User</span></a>
-          <a href="/enrollments" class="nav-button"><i class="fas fa-user-plus"></i><span>Enrollments</span></a>
-          <a href="/payments" class="nav-button"><i class="fas fa-money-bill"></i><span>Payments</span></a>
-          <a href="/schedules" class="nav-button"><i class="fas fa-money-bill"></i><span>schedules list</span></a>
-          <a href="/courses/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Course</span></a>
-          <a href="/classes/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Class</span></a>
-          <a href="/enrollments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Enrollment</span></a>
-          <a href="/payments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Payment</span></a>
-          <a href="/schedule/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Schedule</span></a>
-          <% } %>
-            
-                    <!-- Logout button for all authenticated users -->
-                    <div class="nav-button">
-                        <form action="/logout?_method=DELETE" method="POST">
-                            <button type="submit" class="nav-button">
-                                <i class="fas fa-right-from-bracket"></i><span>Logout</span>
-                            </button>
-                        </form>
-                    </div>
-            
-                    <div id="nav-content-highlight"></div>
-                </div>
-            
-            
-            
-                <input type="checkbox" id="nav-footer-toggle" />
-                <div id="nav-footer">
-                    <div id="nav-footer-heading">
-                        <div id="nav-footer-avatar">
-                            <img src="/images/gv1.png" />
-                        </div>
-                        <div id="nav-footer-titlebox">
-                            <a id="nav-footer-title" href="https://codepen.io/uahnbu/pens/public" target="_blank">User</a>
-                            <span id="nav-footer-subtitle">Role</span>
-                        </div>
-                        <label for="nav-footer-toggle">
-                            <i class="fas fa-caret-up"></i>
-                        </label>
-                    </div>
-                    <div id="nav-footer-content">
-            
-                    </div>
-                </div>
-            </div>       <% } %>
-
+<header>
+    <div class="header-container">
+        <div class="logo">
+            <img src="/images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png" alt="Logo"
+                width="90" height="90">
         </div>
+        <nav>
+            <ul>
+                <li><a href="/">Trang Chủ</a></li>
+                <li><a href="/school">Trung Tâm</a></li>
+                <li>
+                    <a href="#0">Thư Viện</a>
+                    <ul>
+                        <li><a href="https://drive.google.com/drive/folders/1j_lNKViTx_UUyZNXRlkhRd-w9ghDxAYB">Sách
+                                Giáo Khoa</a>
+                        </li>
+                        <li><a href="#0">Tài Liệu Tham Khảo</a></li>
+                        <li><a href="#0">Tài Liệu Tiếng Anh</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="/news">Tin Tức - Sự Kiện</a>
+                </li>
+            </ul>
+        </nav>
 
-        </header>
+        <% if (!user) { %>
+        <a href="/login" class="login-btn">
+            <i class="fa-solid fa-user"></i> Login
+        </a>
+        <% } else { %>
+        <div id="nav-bar">
+            <input type="checkbox" id="nav-toggle" />
+            <div id="nav-header">
+                <a id="nav-title" href="https://codepen.io" target="_blank"
+                    style="display:flex;align-items:center;gap:12px;">
+                    <img class="logo" src="/images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png"
+                        alt="Logo" style="width:40px;height:40px;object-fit:contain;">
 
- 
-    <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl m-4 p-6">
-        <h1 class="text-2xl font-bold mb-4 text-center">Edit Enrollment</h1>
-        <form method="POST" action="/enrollments/<%= enrollment.id %>" class="space-y-4">
-            <div class="flex flex-col">
-                <label class="text-gray-700 font-medium mb-1">Student:</label>
-                <select name="student_id" 
-                        required
-                        class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <% students.forEach(s => { %>
-                    <option value="<%= s.id %>" <% if (s.id === enrollment.student_id) { %>selected<% } %>>
-                        <%= s.full_name %>
-                    </option>
-                    <% }) %>
-                </select>
-            </div>
-
-            <div class="flex flex-col">
-                <label class="text-gray-700 font-medium mb-1">Class:</label>
-                <select name="class_id" 
-                        required
-                        class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <% classes.forEach(c => { %>
-                    <option value="<%= c.id %>" <% if (c.id === enrollment.class_id) { %>selected<% } %>>
-                        <%= c.class_name %>
-                    </option>
-                    <% }) %>
-                </select>
-            </div>
-
-            <div class="flex flex-col">
-                <label class="text-gray-700 font-medium mb-1">Enrollment Date:</label>
-                <input type="date" 
-                       name="enrollment_date" 
-                       value="<%= enrollment.enrollment_date.toISOString().split('T')[0] %>"
-                       required
-                       class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-
-            <div class="flex justify-between items-center mt-6">
-                <a href="/enrollments" 
-                   class="text-blue-500 hover:text-blue-700 font-medium">
-                    Back to enrollments
                 </a>
-                <button type="submit" 
-                        class="bg-blue-500 text-black px-4 py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    Save Changes
-                </button>
+                <label for="nav-toggle">
+                    <span id="nav-toggle-burger"></span>
+                </label>
+                <hr>
             </div>
-        </form>
+            <!-- Common nav section for all authenticated users -->
+            <div id="nav-content">
+                <a href="/" class="nav-button"><i class="fas fa-house"></i><span>Home</span></a>
+
+                <!-- Common options for all authenticated users -->
+                <% if (user.role === 'teacher' || user.role === 'student') { %>
+                <a href="/schedule" class="nav-button"><i class="fas fa-calendar"></i><span>My Schedule</span></a>
+                <a href="/my-courses" class="nav-button"><i class="fas fa-chalkboard"></i><span>My
+                        courses</span></a>
+                <% } %>
+                <a href="/notifications" class="nav-button"><i class="fas fa-bell"></i><span>Notifications</span></a>
+                <a href="/profile" class="nav-button"><i class="fas fa-user"></i><span>Profile</span></a>
+
+
+
+            <!-- Teacher & Admin only options -->
+            <% if (user.role === 'admin' || user.role === 'teacher') { %>
+            <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
+            <a href="/materials" class="nav-button"><i class="fas fa-file"></i><span>Materials</span></a>
+            <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload Material</span></a>
+            <% } %>
+            
+            <!-- Admin only options -->
+            <% if (user.role === 'admin') { %>
+            <a href="/courses" class="nav-button"><i class="fas fa-book"></i><span>Courses</span></a>
+                <a href="/register" class="nav-button"><i class="fas fa-user-plus"></i><span>Register User</span></a>
+                <a href="/enrollments" class="nav-button"><i class="fas fa-user-plus"></i><span>Enrollments</span></a>
+                <a href="/payments" class="nav-button"><i class="fas fa-money-bill"></i><span>Payments</span></a>
+                <a href="/schedules" class="nav-button"><i class="fas fa-money-bill"></i><span>schedules list</span></a>
+                <a href="/courses/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Course</span></a>
+                <a href="/classes/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Class</span></a>
+                <a href="/enrollments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Enrollment</span></a>
+                <a href="/payments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Payment</span></a>
+                <a href="/schedule/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Schedule</span></a>
+                <% } %>
+
+                <!-- Logout button for all authenticated users -->
+                <div class="nav-button">
+                    <form action="/logout?_method=DELETE" method="POST">
+                        <button type="submit" class="nav-button">
+                            <i class="fas fa-right-from-bracket"></i><span>Logout</span>
+                        </button>
+                    </form>
+                </div>
+
+                <div id="nav-content-highlight"></div>
+            </div>
+
+
+
+            <input type="checkbox" id="nav-footer-toggle" />
+            <div id="nav-footer">
+                <div id="nav-footer-heading">
+                    <div id="nav-footer-avatar">
+                        <img src="/images/gv1.png" />
+                    </div>
+                    <div id="nav-footer-titlebox">
+                        <a id="nav-footer-title" href="https://codepen.io/uahnbu/pens/public" target="_blank">User</a>
+                        <span id="nav-footer-subtitle">Role</span>
+                    </div>
+                    <label for="nav-footer-toggle">
+                        <i class="fas fa-caret-up"></i>
+                    </label>
+                </div>
+                <div id="nav-footer-content">
+
+                </div>
+            </div>
+        </div> <% } %>
+
     </div>
 
-    <footer class="relative bg-blueGray-200 pt-8 pb-6">
-        <div class="container mx-auto px-4">
-            <div class="flex flex-wrap text-left lg:text-left">
-                <div class="w-full lg:w-6/12 px-4">
-                    <h4 class="text-3xl fonat-semibold text-blueGray-700">Liên hệ với chúng tôi!</h4>
-                    <h5 class="text-lg mt-0 mb-2 text-blueGray-600">
-                        Tìm kiếm chúng tôi trên bất kỳ mạng xã hội nào và gửi cho chúng tôi một tin nhắn! Chúng tôi sẽ trả
-                        lời bạn
-                        ngay khi có thể.
-                    </h5>
-                    <div class="mt-6 lg:mb-0 mb-6">
-                        <button
-                            class="bg-white text-lightBlue-400 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
-                            type="button">
-                            <i class="fab fa-twitter"></i></button><button
-                            class="bg-white text-lightBlue-600 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
-                            type="button">
-                            <i class="fab fa-facebook-square"></i></button><button
-                            class="bg-white text-pink-400 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
-                            type="button">
-                            <i class="fab fa-dribbble"></i></button><button
-                            class="bg-white text-blueGray-800 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
-                            type="button">
-                            <i class="fab fa-github"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="w-full lg:w-6/12 px-4">
-                    <div class="flex flex-wrap items-top mb-6">
-                        <div class="w-full lg:w-4/12 px-4 ml-auto">
-                            <span class="block uppercase text-blueGray-500 text-sm font-semibold mb-2">Bạn Đang Tìm
-                                Kiếm</span>
-                            <ul class="list-unstyled">
-                                <li>
-                                    <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm"
-                                        href="">Liên
-                                        Hệ</a>
-                                </li>
-                                <li>
-                                    <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm"
-                                        href="">Thông
-                                        Tin Mới</a>
-                                </li>
-                                <li>
-                                    <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm"
-                                        href="">Tuyển
-                                        Dụng</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
+</header>
+
+
+<div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl m-4 p-6">
+    <h1 class="text-2xl font-bold mb-4 text-center">Edit Enrollment</h1>
+    <form method="POST" action="/enrollments/<%= enrollment.id %>" class="space-y-4">
+        <div class="flex flex-col">
+            <label class="text-gray-700 font-medium mb-1">Student:</label>
+            <select name="student_id" required
+                class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <% students.forEach(s => { %>
+                <option value="<%= s.id %>" <% if (s.id === enrollment.student_id) { %>selected<% } %>>
+                    <%= s.full_name %>
+                </option>
+                <% }) %>
+            </select>
+        </div>
+
+        <div class="flex flex-col">
+            <label class="text-gray-700 font-medium mb-1">Class:</label>
+            <select name="class_id" required
+                class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <% classes.forEach(c => { %>
+                <option value="<%= c.id %>" <% if (c.id === enrollment.class_id) { %>selected<% } %>>
+                    <%= c.class_name %>
+                </option>
+                <% }) %>
+            </select>
+        </div>
+
+        <div class="flex flex-col">
+            <label class="text-gray-700 font-medium mb-1">Enrollment Date:</label>
+            <input type="date" name="enrollment_date"
+                value="<%= enrollment.enrollment_date.toISOString().split('T')[0] %>" required
+                class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <div class="flex justify-between items-center mt-6">
+            <a href="/enrollments" class="text-blue-500 hover:text-blue-700 font-medium">
+                Back to enrollments
+            </a>
+            <button type="submit"
+                class="bg-blue-500 text-black px-4 py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                Save Changes
+            </button>
+        </div>
+    </form>
+</div>
+
+<footer class="relative bg-blueGray-200 pt-8 pb-6">
+    <div class="container mx-auto px-4">
+        <div class="flex flex-wrap text-left lg:text-left">
+            <div class="w-full lg:w-6/12 px-4">
+                <h4 class="text-3xl fonat-semibold text-blueGray-700">Liên hệ với chúng tôi!</h4>
+                <h5 class="text-lg mt-0 mb-2 text-blueGray-600">
+                    Tìm kiếm chúng tôi trên bất kỳ mạng xã hội nào và gửi cho chúng tôi một tin nhắn! Chúng tôi sẽ trả
+                    lời bạn
+                    ngay khi có thể.
+                </h5>
+                <div class="mt-6 lg:mb-0 mb-6">
+                    <button
+                        class="bg-white text-lightBlue-400 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
+                        type="button">
+                        <i class="fab fa-twitter"></i></button><button
+                        class="bg-white text-lightBlue-600 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
+                        type="button">
+                        <i class="fab fa-facebook-square"></i></button><button
+                        class="bg-white text-pink-400 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
+                        type="button">
+                        <i class="fab fa-dribbble"></i></button><button
+                        class="bg-white text-blueGray-800 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
+                        type="button">
+                        <i class="fab fa-github"></i>
+                    </button>
                 </div>
             </div>
-            <hr class="my-6 border-blueGray-300">
-            <div class="flex flex-wrap items-center md:justify-between justify-center">
-                <div class="w-full md:w-4/12 px-4 mx-auto text-center">
-                    <div class="text-sm text-blueGray-500 font-semibold py-1">
-                        Copyright © <span id="get-current-year">2025</span><a href="https://www.facebook.com/ttgdvpttnht"
-                            class="text-blueGray-500 hover:text-gray-800" target="_blank"> Talent Education</a>. Made by
-                        <a href="https://github.com/Rin-0808" class="text-blueGray-500 hover:text-blueGray-800">Rin</a>.
+            <div class="w-full lg:w-6/12 px-4">
+                <div class="flex flex-wrap items-top mb-6">
+                    <div class="w-full lg:w-4/12 px-4 ml-auto">
+                        <span class="block uppercase text-blueGray-500 text-sm font-semibold mb-2">Bạn Đang Tìm
+                            Kiếm</span>
+                        <ul class="list-unstyled">
+                            <li>
+                                <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm"
+                                    href="">Liên
+                                    Hệ</a>
+                            </li>
+                            <li>
+                                <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm"
+                                    href="">Thông
+                                    Tin Mới</a>
+                            </li>
+                            <li>
+                                <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm"
+                                    href="">Tuyển
+                                    Dụng</a>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
         </div>
-    </footer>
+        <hr class="my-6 border-blueGray-300">
+        <div class="flex flex-wrap items-center md:justify-between justify-center">
+            <div class="w-full md:w-4/12 px-4 mx-auto text-center">
+                <div class="text-sm text-blueGray-500 font-semibold py-1">
+                    Copyright © <span id="get-current-year">2025</span><a href="https://www.facebook.com/ttgdvpttnht"
+                        class="text-blueGray-500 hover:text-gray-800" target="_blank"> Talent Education</a>. Made by
+                    <a href="https://github.com/Rin-0808" class="text-blueGray-500 hover:text-blueGray-800">Rin</a>.
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
 </body>
 
 </html>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -48,10 +49,12 @@
             <div id="nav-bar">
                 <input type="checkbox" id="nav-toggle" />
                 <div id="nav-header">
-                    <a id="nav-title" href="https://codepen.io" target="_blank" style="display:flex;align-items:center;gap:12px;">
-                        <img class="logo" src="/images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png"
+                    <a id="nav-title" href="https://codepen.io" target="_blank"
+                        style="display:flex;align-items:center;gap:12px;">
+                        <img class="logo"
+                            src="/images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png"
                             alt="Logo" style="width:40px;height:40px;object-fit:contain;">
-                         
+
                     </a>
                     <label for="nav-toggle">
                         <span id="nav-toggle-burger"></span>
@@ -61,41 +64,45 @@
                 <!-- Common nav section for all authenticated users -->
                 <div id="nav-content">
                     <a href="/" class="nav-button"><i class="fas fa-house"></i><span>Home</span></a>
-            
-                 <!-- Common options for all authenticated users -->
-                        <% if (user.role === 'teacher' || user.role === 'student') { %>
-                        <a href="/schedule" class="nav-button"><i class="fas fa-calendar"></i><span>My Schedule</span></a>
-                        <a href="/my-courses" class="nav-button"><i class="fas fa-chalkboard"></i><span>My
-                                courses</span></a>
-                        <% } %>
-                        <a href="/notifications" class="nav-button"><i
-                                class="fas fa-bell"></i><span>Notifications</span></a>
-                        <a href="/profile" class="nav-button"><i class="fas fa-user"></i><span>Profile</span></a>
-                        
-    
-            
-                    <!-- Teacher & Admin only options -->
-                    <% if (user.role === 'admin' || user.role === 'teacher') { %>
-                    <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
-                    <a href="/courses" class="nav-button"><i class="fas fa-book"></i><span>Courses</span></a>
-                    <a href="/materials" class="nav-button"><i class="fas fa-file"></i><span>Materials</span></a>
-                    <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload Material</span></a>
+
+                    <!-- Common options for all authenticated users -->
+                    <% if (user.role === 'teacher' || user.role === 'student') { %>
+                    <a href="/schedule" class="nav-button"><i class="fas fa-calendar"></i><span>My Schedule</span></a>
+                    <a href="/my-courses" class="nav-button"><i class="fas fa-chalkboard"></i><span>My
+                            courses</span></a>
                     <% } %>
-            
-                     <!-- Admin only options -->
-          <% if (user.role === 'admin') { %>
-          <a href="/users" class="nav-button"><i class="fas fa-user-cog"></i><span>User List</span></a>
-          <a href="/register" class="nav-button"><i class="fas fa-user-plus"></i><span>Register User</span></a>
-          <a href="/enrollments" class="nav-button"><i class="fas fa-user-plus"></i><span>Enrollments</span></a>
-          <a href="/payments" class="nav-button"><i class="fas fa-money-bill"></i><span>Payments</span></a>
-          <a href="/schedules" class="nav-button"><i class="fas fa-money-bill"></i><span>schedules list</span></a>
-          <a href="/courses/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Course</span></a>
-          <a href="/classes/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Class</span></a>
-          <a href="/enrollments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Enrollment</span></a>
-          <a href="/payments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Payment</span></a>
-          <a href="/schedule/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Schedule</span></a>
+                    <a href="/notifications" class="nav-button"><i
+                            class="fas fa-bell"></i><span>Notifications</span></a>
+                    <a href="/profile" class="nav-button"><i class="fas fa-user"></i><span>Profile</span></a>
+
+
+
+                    <!-- Teacher & Admin only options -->
+          <% if (user.role === 'admin' || user.role === 'teacher') { %>
+          <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
+          <a href="/materials" class="nav-button"><i class="fas fa-file"></i><span>Materials</span></a>
+          <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload Material</span></a>
           <% } %>
-            
+      
+        <!-- Admin only options -->
+          <% if (user.role === 'admin') { %>
+            <a href="/courses" class="nav-button"><i class="fas fa-book"></i><span>Courses</span></a>
+                    <a href="/users" class="nav-button"><i class="fas fa-user-cog"></i><span>User List</span></a>
+                    <a href="/register" class="nav-button"><i class="fas fa-user-plus"></i><span>Register
+                            User</span></a>
+                    <a href="/enrollments" class="nav-button"><i
+                            class="fas fa-user-plus"></i><span>Enrollments</span></a>
+                    <a href="/payments" class="nav-button"><i class="fas fa-money-bill"></i><span>Payments</span></a>
+                    <a href="/schedules" class="nav-button"><i class="fas fa-money-bill"></i><span>schedules
+                            list</span></a>
+                    <a href="/courses/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Course</span></a>
+                    <a href="/classes/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Class</span></a>
+                    <a href="/enrollments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add
+                            Enrollment</span></a>
+                    <a href="/payments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Payment</span></a>
+                    <a href="/schedule/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Schedule</span></a>
+                    <% } %>
+
                     <!-- Logout button for all authenticated users -->
                     <div class="nav-button">
                         <form action="/logout?_method=DELETE" method="POST">
@@ -104,12 +111,12 @@
                             </button>
                         </form>
                     </div>
-            
+
                     <div id="nav-content-highlight"></div>
                 </div>
-            
-            
-            
+
+
+
                 <input type="checkbox" id="nav-footer-toggle" />
                 <div id="nav-footer">
                     <div id="nav-footer-heading">
@@ -117,7 +124,8 @@
                             <img src="/images/gv1.png" />
                         </div>
                         <div id="nav-footer-titlebox">
-                            <a id="nav-footer-title" href="https://codepen.io/uahnbu/pens/public" target="_blank">User</a>
+                            <a id="nav-footer-title" href="https://codepen.io/uahnbu/pens/public"
+                                target="_blank">User</a>
                             <span id="nav-footer-subtitle">Role</span>
                         </div>
                         <label for="nav-footer-toggle">
@@ -125,55 +133,45 @@
                         </label>
                     </div>
                     <div id="nav-footer-content">
-            
+
                     </div>
                 </div>
-            </div>       <% } %>
+            </div> <% } %>
 
 
         </div>
 
-        </header>
+    </header>
     <div class="container mx-auto px-4 sm:px-8 py-8">
         <div class="max-w-md mx-auto bg-white rounded-lg shadow-md">
             <div class="p-6">
                 <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Upload Course Material</h2>
-                
+
                 <form action="/upload-material" method="POST" enctype="multipart/form-data" class="space-y-6">
                     <div class="flex flex-col">
-                        <label for="course_id" 
-                               class="text-gray-700 font-medium mb-1">
+                        <label for="course_id" class="text-gray-700 font-medium mb-1">
                             Course ID
                         </label>
-                        <input type="number" 
-                               id="course_id" 
-                               name="course_id" 
-                               required
-                               class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="number" id="course_id" name="course_id" required
+                            class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
 
                     <div class="flex flex-col">
-                        <label for="material" 
-                               class="text-gray-700 font-medium mb-1">
+                        <label for="material" class="text-gray-700 font-medium mb-1">
                             Select File
                         </label>
-                        <input type="file" 
-                               id="material" 
-                               name="material" 
-                               required
-                               class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500
+                        <input type="file" id="material" name="material" required class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500
                                       file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0
                                       file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700
                                       hover:file:bg-blue-100">
                     </div>
 
                     <div class="flex justify-between items-center pt-4">
-                        <a href="/materials" 
-                           class="text-blue-500 hover:text-blue-700 font-medium">
+                        <a href="/materials" class="text-blue-500 hover:text-blue-700 font-medium">
                             Back to materials
                         </a>
-                        <button type="submit" 
-                                class="bg-blue-500 text-black px-6 py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <button type="submit"
+                            class="bg-blue-500 text-black px-6 py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <i class="fas fa-upload mr-2"></i>
                             Upload Material
                         </button>
@@ -188,7 +186,8 @@
                 <div class="w-full lg:w-6/12 px-4">
                     <h4 class="text-3xl fonat-semibold text-blueGray-700">Liên hệ với chúng tôi!</h4>
                     <h5 class="text-lg mt-0 mb-2 text-blueGray-600">
-                        Tìm kiếm chúng tôi trên bất kỳ mạng xã hội nào và gửi cho chúng tôi một tin nhắn! Chúng tôi sẽ trả
+                        Tìm kiếm chúng tôi trên bất kỳ mạng xã hội nào và gửi cho chúng tôi một tin nhắn! Chúng tôi sẽ
+                        trả
                         lời bạn
                         ngay khi có thể.
                     </h5>
@@ -239,8 +238,9 @@
             <div class="flex flex-wrap items-center md:justify-between justify-center">
                 <div class="w-full md:w-4/12 px-4 mx-auto text-center">
                     <div class="text-sm text-blueGray-500 font-semibold py-1">
-                        Copyright © <span id="get-current-year">2025</span><a href="https://www.facebook.com/ttgdvpttnht"
-                            class="text-blueGray-500 hover:text-gray-800" target="_blank"> Talent Education</a>. Made by
+                        Copyright © <span id="get-current-year">2025</span><a
+                            href="https://www.facebook.com/ttgdvpttnht" class="text-blueGray-500 hover:text-gray-800"
+                            target="_blank"> Talent Education</a>. Made by
                         <a href="https://github.com/Rin-0808" class="text-blueGray-500 hover:text-blueGray-800">Rin</a>.
                     </div>
                 </div>

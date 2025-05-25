@@ -14,7 +14,8 @@
         href="https://demos.creative-tim.com/notus-js/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css">
     <!-- DataTables CSS -->
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.dataTables.min.css">
+    <link rel="stylesheet" type="text/css"
+        href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.dataTables.min.css">
     <style>
         .dataTables_wrapper .dataTables_length select {
             padding-right: 25px;
@@ -22,21 +23,21 @@
             border: 1px solid #e2e8f0;
             border-radius: 0.375rem;
         }
-        
+
         .dataTables_wrapper .dataTables_filter input {
             border: 1px solid #e2e8f0;
             border-radius: 0.375rem;
             padding: 0.5rem;
             margin-left: 0.5rem;
         }
-        
+
         .dataTables_wrapper .dataTables_paginate .paginate_button {
             padding: 0.5rem 1rem;
             margin: 0 0.25rem;
             border-radius: 0.375rem;
             border: 1px solid #e2e8f0;
         }
-        
+
         .dataTables_wrapper .dataTables_paginate .paginate_button.current {
             background: #3b82f6 !important;
             color: white !important;
@@ -80,10 +81,12 @@
             <div id="nav-bar">
                 <input type="checkbox" id="nav-toggle" />
                 <div id="nav-header">
-                    <a id="nav-title" href="https://codepen.io" target="_blank" style="display:flex;align-items:center;gap:12px;">
-                        <img class="logo" src="/images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png"
+                    <a id="nav-title" href="https://codepen.io" target="_blank"
+                        style="display:flex;align-items:center;gap:12px;">
+                        <img class="logo"
+                            src="/images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png"
                             alt="Logo" style="width:40px;height:40px;object-fit:contain;">
-                         
+
                     </a>
                     <label for="nav-toggle">
                         <span id="nav-toggle-burger"></span>
@@ -93,41 +96,45 @@
                 <!-- Common nav section for all authenticated users -->
                 <div id="nav-content">
                     <a href="/" class="nav-button"><i class="fas fa-house"></i><span>Home</span></a>
-            
-                 <!-- Common options for all authenticated users -->
-                        <% if (user.role === 'teacher' || user.role === 'student') { %>
-                        <a href="/schedule" class="nav-button"><i class="fas fa-calendar"></i><span>My Schedule</span></a>
-                        <a href="/my-courses" class="nav-button"><i class="fas fa-chalkboard"></i><span>My
-                                courses</span></a>
-                        <% } %>
-                        <a href="/notifications" class="nav-button"><i
-                                class="fas fa-bell"></i><span>Notifications</span></a>
-                        <a href="/profile" class="nav-button"><i class="fas fa-user"></i><span>Profile</span></a>
-                        
-    
-            
-                    <!-- Teacher & Admin only options -->
-                    <% if (user.role === 'admin' || user.role === 'teacher') { %>
-                    <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
-                    <a href="/courses" class="nav-button"><i class="fas fa-book"></i><span>Courses</span></a>
-                    <a href="/materials" class="nav-button"><i class="fas fa-file"></i><span>Materials</span></a>
-                    <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload Material</span></a>
+
+                    <!-- Common options for all authenticated users -->
+                    <% if (user.role === 'teacher' || user.role === 'student') { %>
+                    <a href="/schedule" class="nav-button"><i class="fas fa-calendar"></i><span>My Schedule</span></a>
+                    <a href="/my-courses" class="nav-button"><i class="fas fa-chalkboard"></i><span>My
+                            courses</span></a>
                     <% } %>
-            
-                     <!-- Admin only options -->
-          <% if (user.role === 'admin') { %>
-          <a href="/users" class="nav-button"><i class="fas fa-user-cog"></i><span>User List</span></a>
-          <a href="/register" class="nav-button"><i class="fas fa-user-plus"></i><span>Register User</span></a>
-          <a href="/enrollments" class="nav-button"><i class="fas fa-user-plus"></i><span>Enrollments</span></a>
-          <a href="/payments" class="nav-button"><i class="fas fa-money-bill"></i><span>Payments</span></a>
-          <a href="/schedules" class="nav-button"><i class="fas fa-money-bill"></i><span>schedules list</span></a>
-          <a href="/courses/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Course</span></a>
-          <a href="/classes/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Class</span></a>
-          <a href="/enrollments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Enrollment</span></a>
-          <a href="/payments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Payment</span></a>
-          <a href="/schedule/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Schedule</span></a>
+                    <a href="/notifications" class="nav-button"><i
+                            class="fas fa-bell"></i><span>Notifications</span></a>
+                    <a href="/profile" class="nav-button"><i class="fas fa-user"></i><span>Profile</span></a>
+
+
+
+                    <!-- Teacher & Admin only options -->
+          <% if (user.role === 'admin' || user.role === 'teacher') { %>
+          <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
+          <a href="/materials" class="nav-button"><i class="fas fa-file"></i><span>Materials</span></a>
+          <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload Material</span></a>
           <% } %>
-            
+      
+        <!-- Admin only options -->
+          <% if (user.role === 'admin') { %>
+            <a href="/courses" class="nav-button"><i class="fas fa-book"></i><span>Courses</span></a>
+                    <a href="/users" class="nav-button"><i class="fas fa-user-cog"></i><span>User List</span></a>
+                    <a href="/register" class="nav-button"><i class="fas fa-user-plus"></i><span>Register
+                            User</span></a>
+                    <a href="/enrollments" class="nav-button"><i
+                            class="fas fa-user-plus"></i><span>Enrollments</span></a>
+                    <a href="/payments" class="nav-button"><i class="fas fa-money-bill"></i><span>Payments</span></a>
+                    <a href="/schedules" class="nav-button"><i class="fas fa-money-bill"></i><span>schedules
+                            list</span></a>
+                    <a href="/courses/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Course</span></a>
+                    <a href="/classes/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Class</span></a>
+                    <a href="/enrollments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add
+                            Enrollment</span></a>
+                    <a href="/payments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Payment</span></a>
+                    <a href="/schedule/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Schedule</span></a>
+                    <% } %>
+
                     <!-- Logout button for all authenticated users -->
                     <div class="nav-button">
                         <form action="/logout?_method=DELETE" method="POST">
@@ -136,12 +143,12 @@
                             </button>
                         </form>
                     </div>
-            
+
                     <div id="nav-content-highlight"></div>
                 </div>
-            
-            
-            
+
+
+
                 <input type="checkbox" id="nav-footer-toggle" />
                 <div id="nav-footer">
                     <div id="nav-footer-heading">
@@ -149,7 +156,8 @@
                             <img src="/images/gv1.png" />
                         </div>
                         <div id="nav-footer-titlebox">
-                            <a id="nav-footer-title" href="https://codepen.io/uahnbu/pens/public" target="_blank">User</a>
+                            <a id="nav-footer-title" href="https://codepen.io/uahnbu/pens/public"
+                                target="_blank">User</a>
                             <span id="nav-footer-subtitle">Role</span>
                         </div>
                         <label for="nav-footer-toggle">
@@ -157,22 +165,22 @@
                         </label>
                     </div>
                     <div id="nav-footer-content">
-            
+
                     </div>
                 </div>
-            </div>       <% } %>
+            </div> <% } %>
 
 
         </div>
 
-        </header>
+    </header>
 
     <div class="container mx-auto px-4 sm:px-8 py-8">
         <div class="bg-white rounded-lg shadow-md">
             <div class="flex items-center justify-between p-6 border-b">
                 <h2 class="text-xl font-semibold text-gray-800">Payment Records</h2>
-                <a href="/payments/new" 
-                   class="inline-flex items-center px-4 py-2 bg-blue-600 text-black rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                <a href="/payments/new"
+                    class="inline-flex items-center px-4 py-2 bg-blue-600 text-black rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                     <i class="fas fa-plus mr-2"></i>
                     Add Payment
                 </a>
@@ -191,41 +199,37 @@
                     </thead>
                     <tbody class="text-gray-600 text-sm">
                         <% if (payments.length === 0) { %>
-                            <tr>
-                                <td colspan="5" class="py-4 px-6 text-center text-gray-500">
-                                    No payments found
-                                </td>
-                            </tr>
+                        <tr>
+                            <td colspan="5" class="py-4 px-6 text-center text-gray-500">
+                                No payments found
+                            </td>
+                        </tr>
                         <% } else { %>
-                            <% payments.forEach(p => { %>
-                                <tr class="border-b border-gray-200 hover:bg-gray-50">
-                                    <td class="py-3 px-6"><%= p.id %></td>
-                                    <td class="py-3 px-6"><%= p.student_name %></td>
-                                    <td class="py-3 px-6">$<%= p.amount.toFixed(2) %></td>
-                                    <td class="py-3 px-6">
-                                        <%= p.payment_date.toLocaleDateString() %>
-                                    </td>
-                                    <td class="py-3 px-6 text-center">
-                                        <div class="flex item-center justify-center gap-2">
-                                            <a href="/payments/<%= p.id %>/edit" 
-                                               class="text-blue-600 hover:text-blue-900"
-                                               title="Edit">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <form action="/payments/<%= p.id %>?_method=DELETE" 
-                                                  method="POST" 
-                                                  class="inline-block"
-                                                  onsubmit="return confirm('Are you sure you want to delete this payment?')">
-                                                <button type="submit" 
-                                                        class="text-red-600 hover:text-red-900"
-                                                        title="Delete">
-                                                    <i class="fas fa-trash-alt"></i>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <% }) %>
+                        <% payments.forEach(p => { %>
+                        <tr class="border-b border-gray-200 hover:bg-gray-50">
+                            <td class="py-3 px-6"><%= p.id %></td>
+                            <td class="py-3 px-6"><%= p.student_name %></td>
+                            <td class="py-3 px-6">$<%= p.amount.toFixed(2) %></td>
+                            <td class="py-3 px-6">
+                                <%= p.payment_date.toLocaleDateString() %>
+                            </td>
+                            <td class="py-3 px-6 text-center">
+                                <div class="flex item-center justify-center gap-2">
+                                    <a href="/payments/<%= p.id %>/edit" class="text-blue-600 hover:text-blue-900"
+                                        title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form action="/payments/<%= p.id %>?_method=DELETE" method="POST"
+                                        class="inline-block"
+                                        onsubmit="return confirm('Are you sure you want to delete this payment?')">
+                                        <button type="submit" class="text-red-600 hover:text-red-900" title="Delete">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        <% }) %>
                         <% } %>
                     </tbody>
                 </table>
@@ -239,7 +243,8 @@
                 <div class="w-full lg:w-6/12 px-4">
                     <h4 class="text-3xl fonat-semibold text-blueGray-700">Liên hệ với chúng tôi!</h4>
                     <h5 class="text-lg mt-0 mb-2 text-blueGray-600">
-                        Tìm kiếm chúng tôi trên bất kỳ mạng xã hội nào và gửi cho chúng tôi một tin nhắn! Chúng tôi sẽ trả
+                        Tìm kiếm chúng tôi trên bất kỳ mạng xã hội nào và gửi cho chúng tôi một tin nhắn! Chúng tôi sẽ
+                        trả
                         lời bạn
                         ngay khi có thể.
                     </h5>
@@ -290,8 +295,9 @@
             <div class="flex flex-wrap items-center md:justify-between justify-center">
                 <div class="w-full md:w-4/12 px-4 mx-auto text-center">
                     <div class="text-sm text-blueGray-500 font-semibold py-1">
-                        Copyright © <span id="get-current-year">2025</span><a href="https://www.facebook.com/ttgdvpttnht"
-                            class="text-blueGray-500 hover:text-gray-800" target="_blank"> Talent Education</a>. Made by
+                        Copyright © <span id="get-current-year">2025</span><a
+                            href="https://www.facebook.com/ttgdvpttnht" class="text-blueGray-500 hover:text-gray-800"
+                            target="_blank"> Talent Education</a>. Made by
                         <a href="https://github.com/Rin-0808" class="text-blueGray-500 hover:text-blueGray-800">Rin</a>.
                     </div>
                 </div>
@@ -300,10 +306,11 @@
     </footer>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
-    <script type="text/javascript" src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
 
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             $('#paymentTable').DataTable({
                 responsive: true,
                 pageLength: 10,
@@ -313,7 +320,7 @@
                     info: "Showing _START_ to _END_ of _TOTAL_ payments",
                     paginate: {
                         first: "First",
-                        last: "Last", 
+                        last: "Last",
                         next: "Next",
                         previous: "Previous"
                     }
