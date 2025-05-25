@@ -78,16 +78,16 @@
           <a href="/profile" class="nav-button"><i class="fas fa-user"></i><span>Profile</span></a>
 
 
-            <!-- Teacher & Admin only options -->
+          <!-- Teacher & Admin only options -->
           <% if (user.role === 'admin' || user.role === 'teacher') { %>
           <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
           <a href="/materials" class="nav-button"><i class="fas fa-file"></i><span>Materials</span></a>
           <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload Material</span></a>
           <% } %>
-      
-        <!-- Admin only options -->
+
+          <!-- Admin only options -->
           <% if (user.role === 'admin') { %>
-            <a href="/courses" class="nav-button"><i class="fas fa-book"></i><span>Courses</span></a>
+          <a href="/courses" class="nav-button"><i class="fas fa-book"></i><span>Courses</span></a>
           <a href="/users" class="nav-button"><i class="fas fa-user-cog"></i><span>User List</span></a>
           <a href="/register" class="nav-button"><i class="fas fa-user-plus"></i><span>Register User</span></a>
           <a href="/enrollments" class="nav-button"><i class="fas fa-user-plus"></i><span>Enrollments</span></a>
@@ -150,7 +150,7 @@
     <div class="flex items-center mb-4">
       <h1 class="text-2xl font-semibold">Thời khóa biểu</h1>
       <div class="ml-auto flex gap-2">
-        <a href="/schedule" class="px-4 py-1 bg-blue-600 text-black rounded">Tuần hiện tại</a>
+        <a href="/schedule" class="px-4 py-1 bg-blue-600 text-white rounded">Tuần hiện tại</a>
         <a href="/schedule?weekStart=<%= prevWeekStart %>" class="px-2 bg-gray-200 rounded">&lt;</a>
         <div class="px-4 py-1 border rounded">
           Tuần: <%= days[0].date %> – <%= days[6].date %>
@@ -162,44 +162,71 @@
     <!-- Grid -->
     <div class="grid grid-cols-8 border border-gray-300">
       <!-- Top-left corner -->
-      <div class="bg-blue-700 text-black font-semibold p-2 text-center">&nbsp;</div>
+      <div class="bg-blue-700 text-white font-semibold p-2 text-center">Tiết</div>
 
       <!-- Day headers -->
       <% days.forEach(function(day) { %>
-      <div class="bg-blue-700 text-black font-semibold p-2 text-center">
+      <div class="bg-blue-700 text-white font-semibold p-2 text-center">
         <%= day.name %><br>
-        <span class="text-xs font-normal">
-          <%= day.date %>
-        </span>
+        <span class="text-xs font-normal"><%= day.date %></span>
       </div>
       <% }); %>
 
-      <!-- Period rows (1 through maxPeriod+1) -->
-      <% for (var i=1; i <=14; i++) { %>
-      <!-- Label column -->
-      <div class="bg-blue-600 text-black text-sm font-medium p-2 text-center">
-        Tiết <%= i %>
+      <!-- Period rows -->
+      <% for (let period = 1; period <= 15; period++) { %>
+      <!-- Period label -->
+      <div class="bg-blue-600 text-white text-sm font-medium p-2 text-center">
+        Tiết <%= period %>
       </div>
 
-      <!-- One cell per day -->
-      <% days.forEach(function(day) { var cell=scheduleData.find(function(s){ return s.date===day.iso &&
-              s.periodIndex===i; }); %>
-      <div class="border border-gray-200 p-2 text-xs text-center h-20 align-top
-                      <% if (cell) { %> bg-blue-50 border-l-4 border-blue-400 <% } %>">
-        <% if (cell) { %>
-        <div class="font-semibold text-blue-800">
-          <%= cell.className %>
+      <!-- Cells for each day -->
+      <% days.forEach((day, dayIndex) => { 
+        <% if (courseStart && courseEnd) { %>
+          const courseStart = new Date('<%= courseStart.toISOString().slice(0, 10) %>');
+          const courseEnd = new Date('<%= courseEnd.toISOString().slice(0, 10) %>');
+      <% } else { %>
+          // Xử lý khi không có dữ liệu
+          const courseStart = new Date();
+          const courseEnd = new Date();
+      <% } %>
+              const currentDay = new Date(day.iso);
+            %>
+      <div class="border border-gray-200 p-2 text-xs h-20 align-top">
+        <% if (currentDay >= courseStart && currentDay <= courseEnd) { %>
+        <% 
+                        const dayClasses = scheduleData.filter(cls => {
+                          return cls.date === day.iso && 
+                                 cls.startPeriod <= period && 
+                                 cls.endPeriod >= period;
+                        });
+                        
+                        if (dayClasses.length > 0) {
+                          // Show first class with full details
+                          const firstClass = dayClasses[0];
+                      %>
+        <div class="<%= firstClass.type === 'regular' ? 'border-l-4 border-blue-400' : 'border-l-4 border-yellow-400' %> 
+                                    p-2 mb-1 rounded bg-white shadow-sm">
+          <div class="font-semibold text-blue-800"><%= firstClass.courseName %></div>
+          <div class="text-gray-600"><%= firstClass.className %></div>
+          <% if (firstClass.teacher) { %>
+          <div class="text-gray-500 text-xs"><%= firstClass.teacher %></div>
+          <% } %>
         </div>
-        <div class="text-gray-600 text-xs">
-          <%= cell.teacher %>
+
+        <% if (dayClasses.length > 1) { %>
+        <!-- Show indicator for additional classes -->
+        <div class="text-xs text-gray-500 mt-1">
+          +<%= dayClasses.length - 1 %> lớp khác
         </div>
-        <% } else { %>
-        &nbsp;
         <% } %>
+        <% } %>
+      </div>
+      <% } else { %>
+      <div class="text-gray-400"></div>
+      <% } %>
       </div>
       <% }); %>
       <% } %>
-
     </div>
   </div>
   <footer class="relative bg-blueGray-200 pt-8 pb-6">

@@ -93,6 +93,7 @@ CREATE TABLE classes (
     end_time TIME,
     created_at DATETIME DEFAULT GETDATE(),
     updated_at DATETIME DEFAULT GETDATE(),
+    weekly_schedule varchar(100),  -- Stores days like "1,3,5" for Mon,Wed,Fri
     FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
     FOREIGN KEY (teacher_id) REFERENCES teachers(id) ON DELETE CASCADE
 );
@@ -183,9 +184,83 @@ BEGIN
     WHERE id IN (SELECT id FROM inserted);
 END;
 GO
+CREATE TRIGGER trg_classes_check_dates
+ON classes
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM inserted i
+        JOIN courses c ON i.course_id = c.id
+        WHERE i.start_time IS NULL OR i.end_time IS NULL OR c.start_date > c.end_date
+    )
+    BEGIN
+        RAISERROR ('Invalid class times or course date range.', 16, 1);
+        ROLLBACK TRANSACTION;
+    END
+END;
+GO
+CREATE TRIGGER trg_schedules_check_date
+ON schedules
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM inserted s
+        JOIN classes cls ON s.class_id = cls.id
+        JOIN courses crs ON cls.course_id = crs.id
+        WHERE s.schedule_date < crs.start_date OR s.schedule_date > crs.end_date
+    )
+    BEGIN
+        RAISERROR ('Schedule date must be within course date range.', 16, 1);
+        ROLLBACK TRANSACTION;
+    END
+END;
+GO
+
+
+ALTER TRIGGER trg_students_update ON students
+AFTER UPDATE AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        BEGIN TRANSACTION;
+        UPDATE students 
+        SET updated_at = GETDATE()
+        WHERE id IN (SELECT id FROM inserted);
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+        THROW;
+    END CATCH
+END;
+GO
 
 
 
+
+CREATE TRIGGER trg_chk_schedule_date
+ON schedules
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM inserted i
+        JOIN classes cls ON i.class_id = cls.id
+        JOIN courses crs ON cls.course_id = crs.id
+        WHERE i.schedule_date < crs.start_date OR i.schedule_date > crs.end_date
+    )
+    BEGIN
+        RAISERROR ('schedule_date must be within the related course start and end dates.', 16, 1);
+        ROLLBACK TRANSACTION;
+    END
+END;
+GO
 
 
 
@@ -216,8 +291,7 @@ VALUES
 
 -- Insert courses
 INSERT INTO courses (course_name, description, start_date, end_date, tuition_fee)
-VALUES 
-(N'Lập trình C#', N'Lập trình ứng dụng với C# và WinForms', '2025-05-01', '2025-08-01', 3500000);
+VALUES (N'Math 101', N'Basic math course', '2025-06-01', '2025-08-30', 2000000);
 
 
 -- Insert materials
@@ -226,25 +300,23 @@ VALUES
 (1, 'Slide bài giảng 1', '/materials/csharp_slide1.pdf');
 
 -- Insert classes
-INSERT INTO classes (class_name, course_id, teacher_id, start_time, end_time)
-VALUES 
-('LTC001', 1, 1, '08:00', '10:00');
+INSERT INTO classes (class_name, course_id, teacher_id, start_time, end_time, weekly_schedule)
+VALUES (N'Math A1', 1, 1, '08:00', '10:00', '2,4,6');  -- Tue, Thu, Sat
 
--- Insert schedules with specific dates
+
+-- Corrected schedule dates
 INSERT INTO schedules (class_id, day_of_week, schedule_date, start_time, end_time)
 VALUES 
-(1, 'Monday', '2025-05-05', '08:00', '10:00'),
-(1, 'Wednesday', '2025-05-07', '08:00', '10:00'),
-(1, 'Friday', '2025-05-09', '08:00', '10:00');
+(1, 'Monday', '2025-06-03', '08:00', '10:00'),
+(1, 'Wednesday', '2025-06-05', '08:00', '10:00'),
+(1, 'Friday', '2025-06-07', '08:00', '10:00');
+
 
 -- Insert sample enrollment with unpaid status
-INSERT INTO enrollments (student_id, class_id, enrollment_date)
-VALUES (1, 1, '2025-05-01');
+INSERT INTO enrollments (student_id, class_id, enrollment_date, payment_status, payment_date)
+VALUES (1, 1, GETDATE(), 1, GETDATE());
 
--- Insert payments
-INSERT INTO payments (student_id, amount, payment_date)
-VALUES 
-(1, 1500000, '2025-05-02');
+
 
 -- Insert notifications
 INSERT INTO notifications (user_id, message)
@@ -298,7 +370,7 @@ WHERE student_id = 1 AND class_id = 1;
 	SELECT u.id, u.username, u.role, u.created_at, u.updated_at,
        COALESCE(s.full_name, t.full_name, a.full_name) AS full_name,
        COALESCE(s.email, t.email, a.email) AS email,
-       COALESCE(s.phone_number, t.phone_number, a.phone_number) AS phone
+       COALESCE(s.phone_number, t.phone_number, a.phone) AS phone
 FROM users u
 LEFT JOIN students s ON u.id = s.user_id
 LEFT JOIN teachers t ON u.id = t.user_id
@@ -390,3 +462,20 @@ SELECT s.full_name, c.class_name, e.enrollment_date,
 FROM enrollments e
 JOIN students s ON e.student_id = s.id
 JOIN classes c ON e.class_id = c.id;
+
+SELECT 
+        c.class_name,
+        co.course_name,
+        t.full_name AS teacher,
+        cls.start_time,		
+        cls.end_time,
+        cls.weekly_schedule,
+        s.schedule_date AS extra_date,
+        s.start_time AS extra_start,
+        s.end_time AS extra_end
+      FROM students st
+      JOIN enrollments e ON st.id = e.student_id
+      JOIN classes cls ON e.class_id = cls.id
+      JOIN courses co ON cls.course_id = co.id
+      JOIN teachers t ON cls.teacher_id = t.id
+      LEFT JOIN schedules s ON cls.id = s.class_id 

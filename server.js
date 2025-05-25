@@ -284,16 +284,13 @@ app.post(
   }
 );
 
-app.get(
-  "/my-courses",
-  checkAuthenticated,
-  async (req, res) => {
-    try {
-      let query;
-      let params = [];
+app.get("/my-courses", checkAuthenticated, async (req, res) => {
+  try {
+    let query;
+    let params = [];
 
-      if (req.user.role === 'student') {
-        query = `
+    if (req.user.role === "student") {
+      query = `
           SELECT 
             c.course_name,
             c.description AS course_description,
@@ -319,9 +316,9 @@ app.get(
           WHERE st.user_id = ?
           ORDER BY t.full_name, c.course_name, s.schedule_date
         `;
-        params = [req.user.id];
-      } else if (req.user.role === 'teacher') {
-        query = `
+      params = [req.user.id];
+    } else if (req.user.role === "teacher") {
+      query = `
           SELECT 
             c.course_name,
             c.description AS course_description,
@@ -346,21 +343,19 @@ app.get(
           WHERE t.user_id = ?
           ORDER BY c.course_name, s.schedule_date
         `;
-        params = [req.user.id];
-      }
-
-      const courses = await executeQuery(query, params);
-      res.render("my-courses.ejs", {
-        user: req.user,
-        courses: courses,
-      });
-
-    } catch (error) {
-      console.error("Error fetching courses:", error);
-      res.status(500).send("Error loading courses");
+      params = [req.user.id];
     }
+
+    const courses = await executeQuery(query, params);
+    res.render("my-courses.ejs", {
+      user: req.user,
+      courses: courses,
+    });
+  } catch (error) {
+    console.error("Error fetching courses:", error);
+    res.status(500).send("Error loading courses");
   }
-);
+});
 
 app.get("/notifications", checkAuthenticated, async (req, res) => {
   try {
@@ -614,7 +609,7 @@ app.get(
 
 //you gonna need to redo this part
 app.get("/schedule", checkAuthenticated, (req, res) => {
-  // 1. Determine the Monday of the week
+  // 1. Week calculation
   let monday;
   if (req.query.weekStart) {
     monday = new Date(req.query.weekStart);
@@ -625,15 +620,8 @@ app.get("/schedule", checkAuthenticated, (req, res) => {
     monday.setDate(today.getDate() - offset);
   }
 
-  // 2. Build days and periods
-  const fmt = (d) =>
-    d.toLocaleDateString("vi-VN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
-
-  const names = [
+  // 2. Days setup
+  const dayNames = [
     "Thứ 2",
     "Thứ 3",
     "Thứ 4",
@@ -646,111 +634,174 @@ app.get("/schedule", checkAuthenticated, (req, res) => {
     const dt = new Date(monday);
     dt.setDate(monday.getDate() + i);
     return {
-      name: names[i],
-      date: fmt(dt),
+      name: dayNames[i],
+      date: dt.toLocaleDateString("vi-VN"),
       iso: dt.toISOString().slice(0, 10),
     };
   });
-  const periods = Array.from({ length: 15 }, (_, i) => `Tiết ${i + 1}`);
 
-  // 3. SQL query for schedule in week
+  // 3. Query based on user role
   const userId = req.user.id;
   const role = req.user.role;
-  const startOfWeek = days[0].iso;
-  const endOfWeek = days[6].iso;
 
-  let query, params;
+  let query;
+  let params = [];
+
   if (role === "student") {
-    query = `
-      SELECT s.schedule_date, s.start_time,
-             c.class_name, t.full_name AS teacher
-      FROM students st
-      JOIN enrollments e ON st.id = e.student_id
-      JOIN classes c     ON e.class_id = c.id
-      JOIN schedules s   ON c.id = s.class_id
-      JOIN teachers t    ON c.teacher_id = t.id
-      WHERE st.user_id = ?
-        AND s.schedule_date BETWEEN ? AND ?
-    `;
-    params = [userId, startOfWeek, endOfWeek];
+      query = `
+        SELECT 
+          cls.id as class_id,
+          cls.class_name,
+          co.course_name,
+          t.full_name AS teacher,
+          CONVERT(VARCHAR(5), cls.start_time, 108) as start_time,
+          CONVERT(VARCHAR(5), cls.end_time, 108) as end_time,
+          cls.weekly_schedule,
+          s.schedule_date AS extra_date,
+          s.start_time AS extra_start,
+          s.end_time AS extra_end,
+          co.start_date AS course_start,
+          co.end_date AS course_end 
+        FROM students st
+        JOIN enrollments e ON st.id = e.student_id
+        JOIN classes cls ON e.class_id = cls.id
+        JOIN courses co ON cls.course_id = co.id
+        JOIN teachers t ON cls.teacher_id = t.id
+        LEFT JOIN schedules s ON cls.id = s.class_id 
+          AND s.schedule_date BETWEEN ? AND ?
+        WHERE st.user_id = ?
+          AND co.start_date <= ?  -- Thêm điều kiện này
+          AND co.end_date >= ?    -- Thêm điều kiện này
+      `;
+      params = [days[0].iso, days[6].iso, userId, days[6].iso, days[0].iso]; 
   } else if (role === "teacher") {
     query = `
-      SELECT s.schedule_date, s.start_time,
-             c.class_name, NULL AS teacher
+      SELECT 
+        cls.id as class_id,
+        cls.class_name,
+        co.course_name,
+        NULL AS teacher,
+        CONVERT(VARCHAR(5), cls.start_time, 108) as start_time,
+        CONVERT(VARCHAR(5), cls.end_time, 108) as end_time,
+        cls.weekly_schedule,
+        s.schedule_date AS extra_date,
+        s.start_time AS extra_start,
+        s.end_time AS extra_end
       FROM teachers t
-      JOIN classes c    ON t.id = c.teacher_id
-      JOIN schedules s  ON c.id = s.class_id
-      WHERE t.user_id = ?
+      JOIN classes cls ON t.id = cls.teacher_id
+      JOIN courses co ON cls.course_id = co.id
+      LEFT JOIN schedules s ON cls.id = s.class_id 
         AND s.schedule_date BETWEEN ? AND ?
+      WHERE t.user_id = ?
     `;
-    params = [userId, startOfWeek, endOfWeek];
+    params = [days[0].iso, days[6].iso, userId];
   } else {
     return res.status(403).send("Unauthorized role");
   }
 
-  console.log("Role:", role, "UserId:", userId);
-  console.log("Date Range:", startOfWeek, "→", endOfWeek);
-
   sql.query(connectionString, query, params, (err, rows) => {
     if (err) {
-      console.error("SQL Error:", err);
-      return res.status(500).send("Database error");
+      console.error("SQL Error Details:", {
+        error: err.message,
+        code: err.code,
+        query: query,
+        params: params,
+      });
+      return res.status(500).send("Database operation failed");
     }
 
-    const timeToPeriod = {
-      "07:00:00": 0,
-      "08:00:00": 1,
-      "09:00:00": 2,
-      "10:00:00": 3,
-      "11:00:00": 4,
-      "12:00:00": 5,
-      "13:00:00": 6,
-      "14:00:00": 7,
-      "15:00:00": 8,
-      "16:00:00": 9,
-      "17:00:00": 10,
-      "18:00:00": 11,
-      "19:00:00": 12,
-      "20:00:00": 13,
-      "21:00:00": 14,
+    const scheduleData = [];
+    const periodMap = {}; // To track which periods are already filled
+
+    // Helper function to convert time string to period number
+    const timeToPeriod = (timeValue) => {
+      // Xử lý cả Date object và string
+      let hours, minutes;
+      if (timeValue instanceof Date) {
+        hours = timeValue.getHours();
+        minutes = timeValue.getMinutes();
+      } else if (typeof timeValue === "string") {
+        [hours, minutes] = timeValue.split(":").map(Number);
+      } else {
+        // Fallback nếu có kiểu dữ liệu khác
+        const timeStr = timeValue.toString();
+        [hours, minutes] = timeStr.split(":").map(Number);
+      }
+
+      // Tính toán period dựa trên giờ bắt đầu là 7:00
+      return Math.floor(hours - 7 + minutes / 60) + 1;
     };
+    // Trong phần xử lý kết quả query
+    const courseStart = rows.length > 0 ? rows[0].course_start : null;
+    const courseEnd = rows.length > 0 ? rows[0].course_end : null;
 
-    const scheduleData = rows.map((r) => {
-      const isoDate = r.schedule_date.toISOString().slice(0, 10);
+    // Process regular weekly classes
+    rows.forEach((row) => {
+      if (row.weekly_schedule) {
+        const weekDays = row.weekly_schedule.split(",").map(Number);
 
-      const timeStr = r.start_time.toISOString().slice(11, 19);
-      const periodIndex = timeToPeriod[timeStr];
+        weekDays.forEach((dayIndex) => {
+          if (dayIndex >= 1 && dayIndex <= 7) {
+            const startPeriod = timeToPeriod(row.start_time);
+            const endPeriod = timeToPeriod(row.end_time);
+            const dayIso = days[dayIndex - 1].iso; // Lấy ngày ISO tương ứng
 
-      return {
-        time: timeStr,
-        date: isoDate,
-        periodIndex,
-        className: r.class_name,
-        teacher: r.teacher || "",
-      };
+            // Thêm từng tiết học vào scheduleData
+            for (let period = startPeriod; period <= endPeriod; period++) {
+              scheduleData.push({
+                type: "regular",
+                date: dayIso,
+                startPeriod: period,
+                endPeriod: period,
+                className: row.class_name,
+                courseName: row.course_name,
+                teacher: row.teacher || "",
+                classId: row.class_id,
+              });
+            }
+          }
+        });
+      }
+
+      // Process extra sessions
+      if (row.extra_date) {
+        const extraDate = new Date(row.extra_date).toISOString().slice(0, 10);
+        const startPeriod = timeToPeriod(row.extra_start);
+        const endPeriod = timeToPeriod(row.extra_end);
+
+        for (let period = startPeriod; period <= endPeriod; period++) {
+          const key = `${extraDate}-${period}`;
+
+          if (!periodMap[key]) {
+            scheduleData.push({
+              type: "extra",
+              date: extraDate,
+              startPeriod: period,
+              endPeriod: period,
+              className: row.class_name,
+              courseName: row.course_name,
+              teacher: row.teacher || "",
+              classId: row.class_id,
+            });
+            periodMap[key] = true;
+          }
+        }
+      }
     });
-    console.log("Schedule data:", scheduleData);
 
-    const maxPeriod = scheduleData.length
-      ? Math.max(...scheduleData.map((s) => s.periodIndex))
-      : 0;
-
-    // 4. Prev/Next week
-    const prevWeekStart = new Date(monday);
-    prevWeekStart.setDate(prevWeekStart.getDate() - 7);
-    const nextWeekStart = new Date(monday);
-    nextWeekStart.setDate(nextWeekStart.getDate() + 7);
-
-    // 5. Render
     res.render("schedule", {
       user: req.user,
       days,
-      periods,
       scheduleData,
-      weekStart: monday.toISOString().slice(0, 10),
-      prevWeekStart: prevWeekStart.toISOString().slice(0, 10),
-      nextWeekStart: nextWeekStart.toISOString().slice(0, 10),
-      maxPeriod,
+      weekStart: days[0].iso,
+      prevWeekStart: new Date(new Date(monday).setDate(monday.getDate() - 7))
+        .toISOString()
+        .slice(0, 10),
+      nextWeekStart: new Date(new Date(monday).setDate(monday.getDate() + 7))
+        .toISOString()
+        .slice(0, 10),
+      courseStart, 
+      courseEnd,
     });
   });
 });
@@ -768,11 +819,23 @@ app.get(
   }
 );
 
-app.get(
-  "/schedules",
-  checkAuthenticated,
-  authenticateRole("admin"),
-  (req, res) => {
+app.post("/schedules", checkAuthenticated, authenticateRole("admin"), async (req, res) => {
+  const { class_id, schedule_date } = req.body;
+
+  // Kiểm tra phạm vi ngày
+  const courseQuery = `
+    SELECT start_date, end_date 
+    FROM courses 
+    WHERE id = (SELECT course_id FROM classes WHERE id = ?)
+  `;
+  
+  const courseDates = await executeQuery(courseQuery, [class_id]);
+  
+  if ((new Date(schedule_date) < new Date(courseDates[0].start_date)) || 
+     (new Date(schedule_date) > new Date(courseDates[0].end_date))) {
+    return res.status(400).send("Ngày học nằm ngoài phạm vi khóa học");
+  }
+
     const query = `
     SELECT s.*, c.class_name
     FROM schedules s
@@ -935,17 +998,21 @@ app.get(
         console.error("Fetch enrollments error:", err);
         return res.status(500).send("Database error");
       }
-      res.render("enrollments.ejs", { 
-        enrollments: rows, 
-        user: req.user 
+      res.render("enrollments.ejs", {
+        enrollments: rows,
+        user: req.user,
       });
     });
   }
 );
 
 // Add route to toggle payment status
-app.post("/enrollments/:id/toggle-payment", checkAuthenticated, authenticateRole("admin"), (req, res) => {
-  const query = `
+app.post(
+  "/enrollments/:id/toggle-payment",
+  checkAuthenticated,
+  authenticateRole("admin"),
+  (req, res) => {
+    const query = `
     UPDATE enrollments 
     SET 
       payment_status = ~payment_status,
@@ -957,26 +1024,26 @@ app.post("/enrollments/:id/toggle-payment", checkAuthenticated, authenticateRole
     WHERE id = ?
   `;
 
-  sql.query(connectionString, query, [req.params.id], (err) => {
-    try {
-      if (err) {
-        console.error("Update payment status error:", err);
+    sql.query(connectionString, query, [req.params.id], (err) => {
+      try {
+        if (err) {
+          console.error("Update payment status error:", err);
+          if (!res.headersSent) {
+            return res.status(500).json({ error: "Update failed" });
+          }
+        }
         if (!res.headersSent) {
-          return res.status(500).json({ error: "Update failed" });
+          res.json({ success: true });
+        }
+      } catch (error) {
+        // Only log non-headers-sent errors
+        if (error.code !== "ERR_HTTP_HEADERS_SENT") {
+          console.error("Error in payment toggle:", error);
         }
       }
-      if (!res.headersSent) {
-        res.json({ success: true });
-      }
-    } catch (error) {
-      // Only log non-headers-sent errors
-      if (error.code !== 'ERR_HTTP_HEADERS_SENT') {
-        console.error("Error in payment toggle:", error);
-      }
-    }
-  });
-});
-
+    });
+  }
+);
 
 app.get(
   "/enrollments/:id/edit",
@@ -1011,10 +1078,6 @@ app.get(
     });
   }
 );
-
-
-
-
 
 app.get(
   "/enrollments/new",
@@ -1791,10 +1854,6 @@ app.delete(
     });
   }
 );
-
-
-
-
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
