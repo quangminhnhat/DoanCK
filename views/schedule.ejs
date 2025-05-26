@@ -179,53 +179,40 @@
         Tiết <%= period %>
       </div>
 
-      <!-- Cells for each day -->
-      <% days.forEach((day, dayIndex) => { 
-        <% if (courseStart && courseEnd) { %>
-          const courseStart = new Date('<%= courseStart.toISOString().slice(0, 10) %>');
-          const courseEnd = new Date('<%= courseEnd.toISOString().slice(0, 10) %>');
-      <% } else { %>
-          // Xử lý khi không có dữ liệu
-          const courseStart = new Date();
-          const courseEnd = new Date();
-      <% } %>
-              const currentDay = new Date(day.iso);
-            %>
-      <div class="border border-gray-200 p-2 text-xs h-20 align-top">
-        <% if (currentDay >= courseStart && currentDay <= courseEnd) { %>
-        <% 
-                        const dayClasses = scheduleData.filter(cls => {
-                          return cls.date === day.iso && 
-                                 cls.startPeriod <= period && 
-                                 cls.endPeriod >= period;
-                        });
-                        
-                        if (dayClasses.length > 0) {
-                          // Show first class with full details
-                          const firstClass = dayClasses[0];
-                      %>
-        <div class="<%= firstClass.type === 'regular' ? 'border-l-4 border-blue-400' : 'border-l-4 border-yellow-400' %> 
-                                    p-2 mb-1 rounded bg-white shadow-sm">
-          <div class="font-semibold text-blue-800"><%= firstClass.courseName %></div>
-          <div class="text-gray-600"><%= firstClass.className %></div>
-          <% if (firstClass.teacher) { %>
-          <div class="text-gray-500 text-xs"><%= firstClass.teacher %></div>
-          <% } %>
-        </div>
-
-        <% if (dayClasses.length > 1) { %>
-        <!-- Show indicator for additional classes -->
-        <div class="text-xs text-gray-500 mt-1">
-          +<%= dayClasses.length - 1 %> lớp khác
-        </div>
-        <% } %>
+    <!-- Phần cells for each day -->
+    <% days.forEach((day, dayIndex) => { 
+      const currentDay = new Date(day.iso);
+    %>
+    <div class="border border-gray-200 p-2 text-xs h-20 align-top">
+      <% if (currentDay >= courseStart && currentDay <= courseEnd) { %>
+      <% 
+                  const dayClasses = scheduleData.filter(cls => {
+                      return cls.date === day.iso && 
+                             cls.startPeriod <= period && 
+                             cls.endPeriod >= period;
+                  });
+                  
+                  if (dayClasses.length > 0) {
+                      const firstClass = dayClasses[0];
+              %>
+      <div
+        class="<%= firstClass.type === 'regular' ? 'border-l-4 border-blue-400' : 'border-l-4 border-yellow-400' %> p-2 mb-1 rounded bg-white shadow-sm">
+        <div class="font-semibold text-blue-800"><%= firstClass.courseName %></div>
+        <div class="text-gray-600"><%= firstClass.className %></div>
+        <% if (firstClass.teacher) { %>
+        <div class="text-gray-500 text-xs"><%= firstClass.teacher %></div>
         <% } %>
       </div>
+      
+      <% } else { %>
+      <!-- Thêm thông báo khi không có lớp -->
+      <div class="text-gray-400 text-xs text-center pt-2"></div>
+      <% } %>
       <% } else { %>
       <div class="text-gray-400"></div>
       <% } %>
-      </div>
-      <% }); %>
+    </div>
+    <% }); %>
       <% } %>
     </div>
   </div>

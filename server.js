@@ -788,11 +788,14 @@ app.get("/schedule", checkAuthenticated, (req, res) => {
         }
       }
     });
+    
 
     res.render("schedule", {
       user: req.user,
       days,
       scheduleData,
+      courseStart, 
+      courseEnd, 
       weekStart: days[0].iso,
       prevWeekStart: new Date(new Date(monday).setDate(monday.getDate() - 7))
         .toISOString()
@@ -800,8 +803,6 @@ app.get("/schedule", checkAuthenticated, (req, res) => {
       nextWeekStart: new Date(new Date(monday).setDate(monday.getDate() + 7))
         .toISOString()
         .slice(0, 10),
-      courseStart, 
-      courseEnd,
     });
   });
 });
