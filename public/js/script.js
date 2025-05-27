@@ -17,3 +17,26 @@ sliderTabs.forEach((tab, index) => {
         updatePagination(tab, index);
     })
 });
+
+const newsSwiper = new Swiper('.news-swiper', {
+  slidesPerView: 'auto',
+  spaceBetween: 16,
+  loop: true,
+  navigation: {
+    nextEl: '.news-slider-arrow.right',
+    prevEl: '.news-slider-arrow.left',
+  }
+});
+
+// Swiper init
+const profileSwiper = new Swiper('.profile-swiper', {
+  slidesPerView: 'auto',
+  centeredSlides: true,
+  spaceBetween: 30,
+    loop: true,
+  effect: 'slide', // hoặc bỏ effect để mặc định, KHÔNG dùng 'coverflow'
+  navigation: {
+    nextEl: '.profile-slider-arrow.right',
+    prevEl: '.profile-slider-arrow.left',
+  }
+});

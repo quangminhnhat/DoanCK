@@ -11,6 +11,7 @@
   <link rel="stylesheet"
     href="https://demos.creative-tim.com/notus-js/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css">
   <link rel="stylesheet" href="/css/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="profile-card.css">
 </head>
 
 <body>
@@ -130,20 +131,131 @@
 
   </header>
 
-  <div class="slider-container">
+   <div class="slider-container school-slider">
     <!-- items lish-->
     <div class="slider-wrapper swiper-wrapper">
       <div class="slider-item swiper-slide">
         <div class="slide-content">
-          <h3 class="slide-subtitle">Slide 01</h3>
-          <h2 class="slide-title">Chương trình học thử 2 buổi miễn Phí</h2>
-          <p class="slide-description">Mời bạn đến trải nghiệm</p>
+          <h2 class="slide-title"></h2>
+          <p class="slide-description"></p>
+        </div>
+      </div>
+      <div class="slider-item swiper-slide">
+        <div class="slide-content">
+          <h3 class="slide-subtitle"></h3>
+        </div>
+      </div>
+      <div class="slider-item swiper-slide">
+        <div class="slide-content">
+          <h3 class="slide-subtitle"></h3>
+        </div>
+      </div>
+      <div class="slider-item swiper-slide">
+        <div class="slide-content">
+          <h3 class="slide-subtitle"></h3>
+        </div>
+      </div>
+      <div class="slider-item swiper-slide">
+        <div class="slide-content">
+          <h3 class="slide-subtitle"></h3>
         </div>
       </div>
     </div>
     <!-- slide button-->
+    <div class="slider-controls">
 
+      <ul class="slider-pagination">
+        <div class="slider-indicator"></div>
+        <li class="slider-tab">CS1</li>
+        <li class="slider-tab">CS2</li>
+        <li class="slider-tab">CS3</li>
+        <li class="slider-tab">CS4</li>
+        <li class="slider-tab">CS5</li>
+      </ul>
+    </div>
   </div>
+
+ <div class="profile-slider-container">
+  <button class="profile-slider-arrow left"><i class="fas fa-chevron-left"></i></button>
+  <div class="profile-swiper swiper">
+    <div class="swiper-wrapper">
+      <div class="swiper-slide">
+        <div class="profile-card">
+          <div class="profile-image">
+            <img src="/images/gv1.png" alt="Hoàng Long">
+          </div>
+          <h2 class="profile-name">Hoàng Long</h2>
+          <p class="profile-title">Giám đốc Trung tâm</p>
+        </div>
+      </div>
+      <div class="swiper-slide">
+        <div class="profile-card">
+          <div class="profile-image">
+        <img src="/images/gv2.png" alt="Nguyễn Thị Lan">
+          </div>
+          <h2 class="profile-name">Nguyễn Thị Lan</h2>
+          <p class="profile-title">Giáo viên IELTS</p>
+        </div>
+      </div>
+      <div class="swiper-slide">
+        <div class="profile-card">
+          <div class="profile-image">
+        <img src="/images/gv3.png" alt="Trần Văn Minh">
+          </div>
+          <h2 class="profile-name">Trần Văn Minh</h2>
+          <p class="profile-title">Giáo viên Toán</p>
+        </div>
+      </div>
+      <div class="swiper-slide">
+        <div class="profile-card">
+          <div class="profile-image">
+        <img src="/images/gv4.png" alt="Lê Thị Hương">
+          </div>
+          <h2 class="profile-name">Lê Thị Hương</h2>
+          <p class="profile-title">Giáo viên Văn</p>
+        </div>
+      </div>
+      <div class="swiper-slide">
+        <div class="profile-card">
+          <div class="profile-image">
+        <img src="/images/gv5.png" alt="Phạm Quốc Anh">
+          </div>
+          <h2 class="profile-name">Phạm Quốc Anh</h2>
+          <p class="profile-title">Giáo viên SAT</p>
+        </div>
+      </div>
+      <div class="swiper-slide">
+        <div class="profile-card">
+          <div class="profile-image">
+        <img src="/images/gv6.png" alt="Ngô Thị Mai">
+          </div>
+          <h2 class="profile-name">Ngô Thị Mai</h2>
+          <p class="profile-title">Giáo viên Tiếng Anh</p>
+        </div>
+      </div>
+      <div class="swiper-slide">
+        <div class="profile-card">
+          <div class="profile-image">
+        <img src="/images/gv7.png" alt="Đặng Văn Sơn">
+          </div>
+          <h2 class="profile-name">Đặng Văn Sơn</h2>
+          <p class="profile-title">Trợ giảng</p>
+        </div>
+      </div>
+      <div class="swiper-slide">
+        <div class="profile-card">
+          <div class="profile-image">
+        <img src="/images/gv8.png" alt="Vũ Thị Thu">
+          </div>
+          <h2 class="profile-name">Vũ Thị Thu</h2>
+          <p class="profile-title">Nhân viên tư vấn</p>
+        </div>
+      </div>
+      <!-- ... -->
+    </div>
+  </div>
+  <button class="profile-slider-arrow right"><i class="fas fa-chevron-right"></i></button>
+</div>
 
   <div class="container-about">
     <div class="row">
@@ -224,17 +336,20 @@
         </p>
         <p>
           Trân trọng,<br>
+        </p>trong>Hoàng Long<br>Giám đốc Trung tâm Tiếng Anh TLE</strong>
+        <p>>
+          Trân trọng,<br>
           <strong>Hoàng Long<br>Giám đốc Trung tâm Tiếng Anh TLE</strong>
         </p>
-      </div>
-    </div>
+      </div>rc="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  <script src="/js/script.js"></script>
   </div>
-
-  <div class="slide-container swiper">
-    <div class="slide-content">
+  <div class="slide-container swiper">et/npm/swiper@11/swiper-bundle.min.js"></script>
+    <div class="slide-content">/script>
       <div class="card-wrapper  swiper-wrapper">
         <div class="card swiper-slide">
           <div class="image-content">
-            <spam class="overlay"></spam>
-
-            <div class="card-image
+            <spam class="overlay"></spam>apper">
+        <div class="card swiper-slide">
+            <div class="card-image"">            <spam class="overlay"></spam>            <div class="card-image
