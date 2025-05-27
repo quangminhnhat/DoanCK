@@ -13,9 +13,73 @@
   <link rel="stylesheet"
     href="https://demos.creative-tim.com/notus-js/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css">
   <!-- DataTables CSS -->
-  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.css">
   <link rel="stylesheet" type="text/css"
-    href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.dataTables.min.css">
+    href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
+    
+    <style>
+        #enrollmentsTable {
+            font-size: 11px;
+            width: 100% !important;
+            border-collapse: collapse;
+        }
+
+        #enrollmentsTable th,
+        #enrollmentsTable td {
+            padding: 3px 6px;
+            white-space: nowrap;
+            border: 1px solid #eee;
+            line-height: 1;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 8px;
+        }
+
+        .btn {
+            padding: 1px 4px;
+            font-size: 10px;
+            margin: 0;
+            border-radius: 2px;
+            line-height: 1;
+        }
+
+        .payment-status {
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+            transition: all 0.2s;
+            display: inline-block;
+            min-width: 60px;
+        }
+
+        .status-paid {
+            background-color: #10B981;
+            color: white;
+        }
+
+        .status-unpaid {
+            background-color: #EF4444;
+            color: white;
+        }
+
+        .payment-status:hover {
+            opacity: 0.8;
+        }
+
+        .amount {
+            text-align: right;
+            font-family: monospace;
+        }
+
+        .loading {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+    </style>
 </head>
 
 <body>
@@ -74,6 +138,11 @@
           <% } %>
           <a href="/notifications" class="nav-button"><i class="fas fa-bell"></i><span>Notifications</span></a>
           <a href="/profile" class="nav-button"><i class="fas fa-user"></i><span>Profile</span></a>
+          <% if (user.role === 'student') { %>
+          <a href="/available-courses" class="nav-button">
+            <i class="fas fa-book-reader"></i><span>Available Courses</span>
+          </a>
+          <% } %>
 
 
             <!-- Teacher & Admin only options -->
@@ -152,20 +221,22 @@
       </div>
 
       <div class="overflow-x-auto">
-        <table id="enrollmentTable" class="w-full table-auto display responsive nowrap">
+        <table id="enrollmentsTable" class="w-full table-auto display responsive nowrap">
           <thead>
             <tr class="bg-gray-50 text-gray-600 uppercase text-sm leading-normal">
               <th class="py-3 px-6 text-left">ID</th>
               <th class="py-3 px-6 text-left">Student</th>
               <th class="py-3 px-6 text-left">Class</th>
               <th class="py-3 px-6 text-left">Enrollment Date</th>
+              <th class="py-3 px-6 text-center">Payment Status</th>
+              <th class="py-3 px-6 text-center">Payment Date</th>
               <th class="py-3 px-6 text-center">Actions</th>
             </tr>
           </thead>
           <tbody class="text-gray-600 text-sm">
             <% if (enrollments.length === 0) { %>
             <tr>
-              <td colspan="5" class="py-4 px-6 text-center text-gray-500">
+              <td colspan="7" class="py-4 px-6 text-center text-gray-500">
                 No enrollments found
               </td>
             </tr>
@@ -177,6 +248,18 @@
               <td class="py-3 px-6"><%= enrollment.class_name %></td>
               <td class="py-3 px-6">
                 <%= enrollment.enrollment_date.toLocaleDateString() %>
+              </td>
+              <td class="py-3 px-6 text-center">
+                <span 
+                  class="payment-status <%= enrollment.payment_status ? 'status-paid' : 'status-unpaid' %>"
+                  data-id="<%= enrollment.id %>"
+                  onclick="togglePayment(this,<%= enrollment.id %>)"
+                >
+                  <%= enrollment.payment_status ? 'PAID' : 'UNPAID' %>
+                </span>
+              </td>
+              <td class="py-3 px-6 text-center">
+                <%= enrollment.payment_date ? new Date(enrollment.payment_date).toLocaleDateString() : '-' %>
               </td>
               <td class="py-3 px-6 text-center">
                 <div class="flex item-center justify-center gap-2">
@@ -262,29 +345,54 @@
     </div>
   </footer>
 
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script type="text/javascript" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
-  <script type="text/javascript"
-    src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
-
+  <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+  <script type="text/javascript" src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
   <script>
     $(document).ready(function () {
-      $('#enrollmentTable').DataTable({
+      $('#enrollmentsTable').DataTable({
         responsive: true,
-        pageLength: 10,
-        language: {
-          search: "Search enrollments:",
-          lengthMenu: "Show _MENU_ enrollments per page",
-          info: "Showing _START_ to _END_ of _TOTAL_ enrollments",
-          paginate: {
-            first: "First",
-            last: "Last",
-            next: "Next",
-            previous: "Previous"
+        pageLength: 25,
+        order: [[0, 'asc']],
+        columnDefs: [
+          {
+            targets: [4, 5, 6], // Payment Status, Payment Date, Actions columns
+            orderable: false
           }
-        }
+        ]
       });
     });
+
+    function togglePayment(element, id) {
+      element.classList.add('loading');
+      
+      fetch(`/enrollments/${id}/toggle-payment`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.json();
+      })
+      .then(() => {
+        const isPaid = element.classList.contains('status-unpaid');
+        element.classList.remove('status-paid', 'status-unpaid');
+        element.classList.add(isPaid ? 'status-paid' : 'status-unpaid');
+        element.textContent = isPaid ? 'PAID' : 'UNPAID';
+        
+        // Update payment date
+        const dateCell = element.parentElement.nextElementSibling;
+        dateCell.textContent = isPaid ? new Date().toLocaleDateString() : '-';
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to update payment status');
+      })
+      .finally(() => {
+        element.classList.remove('loading');
+      });
+    }
   </script>
 </body>
 

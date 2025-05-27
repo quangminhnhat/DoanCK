@@ -70,6 +70,11 @@
           <% } %>
           <a href="/notifications" class="nav-button"><i class="fas fa-bell"></i><span>Notifications</span></a>
           <a href="/profile" class="nav-button"><i class="fas fa-user"></i><span>Profile</span></a>
+          <% if (user.role === 'student') { %>
+          <a href="/available-courses" class="nav-button">
+            <i class="fas fa-book-reader"></i><span>Available Courses</span>
+          </a>
+          <% } %>
 
 
             <!-- Teacher & Admin only options -->
@@ -137,40 +142,56 @@
 
   <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl m-4 p-6">
     <h1 class="text-2xl font-bold mb-4 text-center">Edit Course</h1>
-    <form action="/courses/<%= course.id %>" method="POST" class="space-y-4">
-      <div class="flex flex-col">
-        <label class="text-gray-700 font-medium mb-1">Course Name:</label>
-        <input type="text" name="course_name" value="<%= course.course_name %>" required
-          class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+    <form method="POST" action="/courses/<%= course.id %>" class="space-y-4">
+      <div class="form-group">
+        <label for="course_name" class="block">Course Name:</label>
+        <input type="text" name="course_name" id="course_name" 
+               value="<%= course.course_name %>" required 
+               class="w-full border p-2 rounded">
       </div>
 
-      <div class="flex flex-col">
-        <label class="text-gray-700 font-medium mb-1">Description:</label>
-        <textarea name="description" rows="5"
-          class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"><%= course.description %></textarea>
+      <div class="form-group">
+        <label for="description" class="block">Description:</label>
+        <textarea name="description" id="description" rows="4"
+                  class="w-full border p-2 rounded"><%= course.description %></textarea>
       </div>
 
-      <div class="flex flex-col">
-        <label class="text-gray-700 font-medium mb-1">Start Date:</label>
-        <input type="date" name="start_date" value="<%= course.start_date.toISOString().slice(0, 10) %>" required
-          class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+      <div class="form-group">
+        <label for="tuition_fee" class="block">Tuition Fee:</label>
+        <input type="number" name="tuition_fee" id="tuition_fee"
+               value="<%= course.tuition_fee %>" min="0" step="1000" 
+               class="w-full border p-2 rounded">
       </div>
 
-      <div class="flex flex-col">
-        <label class="text-gray-700 font-medium mb-1">End Date:</label>
-        <input type="date" name="end_date" value="<%= course.end_date.toISOString().slice(0, 10) %>" required
-          class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+      <div class="form-group">
+        <label for="start_date" class="block">Start Date:</label>
+        <input type="date" name="start_date" id="start_date"
+               value="<%= course.start_date.toISOString().split('T')[0] %>" required
+               class="w-full border p-2 rounded">
       </div>
 
-      <div class="flex justify-between items-center mt-6">
-        <a href="/courses" class="text-blue-500 hover:text-blue-700 font-medium">
-          Back to courses
-        </a>
-        <button type="submit"
-          class="bg-blue-500 text-black px-4 py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-          Update Course
-        </button>
+      <div class="form-group">
+        <label for="end_date" class="block">End Date:</label>
+        <input type="date" name="end_date" id="end_date"
+               value="<%= course.end_date.toISOString().split('T')[0] %>" required
+               class="w-full border p-2 rounded">
       </div>
+
+      <script>
+        document.getElementById('scheduleForm').addEventListener('submit', function(e) {
+          const startDate = new Date(document.getElementById('start_date').value);
+          const endDate = new Date(document.getElementById('end_date').value);
+          
+          if (endDate <= startDate) {
+            e.preventDefault();
+            alert('End date must be after start date');
+          }
+        });
+      </script>
+
+      <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+        Update Course
+      </button>
     </form>
   </div>
 
