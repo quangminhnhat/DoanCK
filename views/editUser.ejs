@@ -71,6 +71,11 @@
                     <a href="/notifications" class="nav-button"><i
                             class="fas fa-bell"></i><span>Notifications</span></a>
                     <a href="/profile" class="nav-button"><i class="fas fa-user"></i><span>Profile</span></a>
+          <% if (user.role === 'student') { %>
+          <a href="/available-courses" class="nav-button">
+            <i class="fas fa-book-reader"></i><span>Available Courses</span>
+          </a>
+          <% } %>
 
 
 

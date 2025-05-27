@@ -98,16 +98,24 @@ CREATE TABLE classes (
     FOREIGN KEY (teacher_id) REFERENCES teachers(id) ON DELETE CASCADE
 );
 
+-- Drop existing table if it exists
+DROP TABLE IF EXISTS schedules;
+
+-- Recreate schedules table with modified constraints
 CREATE TABLE schedules (
     id INT PRIMARY KEY IDENTITY,
     class_id INT,
+    course_id INT,
     day_of_week NVARCHAR(20), 
     schedule_date DATE,        
     start_time TIME,
     end_time TIME,
-    FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE CASCADE
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE CASCADE,
+    FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE NO ACTION,
+    CONSTRAINT CHK_schedule_times CHECK (end_time > start_time)
 );
-
 
 CREATE TABLE enrollments (
     id INT PRIMARY KEY IDENTITY,
@@ -117,6 +125,7 @@ CREATE TABLE enrollments (
     payment_status BIT DEFAULT 0,
     payment_date DATETIME,
     updated_at DATETIME DEFAULT GETDATE(),
+    created_at DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE NO ACTION ON UPDATE NO ACTION,
     FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
@@ -133,6 +142,7 @@ CREATE INDEX idx_materials_course_id ON materials(course_id);
 CREATE INDEX idx_classes_course_id ON classes(course_id);
 CREATE INDEX idx_classes_teacher_id ON classes(teacher_id);
 CREATE INDEX idx_schedules_class_id ON schedules(class_id);
+CREATE INDEX idx_schedules_course_id ON schedules(course_id);
 CREATE INDEX idx_enrollments_student_id ON enrollments(student_id);
 CREATE INDEX idx_enrollments_class_id ON enrollments(class_id);
 
@@ -305,11 +315,17 @@ VALUES (N'Math A1', 1, 1, '08:00', '10:00', '2,4,6');  -- Tue, Thu, Sat
 
 
 -- Corrected schedule dates
-INSERT INTO schedules (class_id, day_of_week, schedule_date, start_time, end_time)
-VALUES 
-(1, 'Monday', '2025-06-03', '08:00', '10:00'),
-(1, 'Wednesday', '2025-06-05', '08:00', '10:00'),
-(1, 'Friday', '2025-06-07', '08:00', '10:00');
+-- Insert demo class schedule for class_id = 1 and course_id = 1
+
+INSERT INTO schedules (class_id, course_id, day_of_week, schedule_date, start_time, end_time)
+VALUES
+-- Monday
+(1, 1, N'Monday', '2025-06-02', '08:00', '10:00'),
+-- Wednesday
+(1, 1, N'Wednesday', '2025-06-04', '08:00', '10:00'),
+-- Friday
+(1, 1, N'Friday', '2025-06-06', '08:00', '10:00');
+
 
 
 -- Insert sample enrollment with unpaid status
@@ -478,4 +494,17 @@ SELECT
       JOIN classes cls ON e.class_id = cls.id
       JOIN courses co ON cls.course_id = co.id
       JOIN teachers t ON cls.teacher_id = t.id
-      LEFT JOIN schedules s ON cls.id = s.class_id 
+      LEFT JOIN schedules s ON cls.id = s.class_id
+
+-- First, clear existing schedule data
+DELETE FROM schedules WHERE class_id = 1;
+
+-- Insert corrected schedule dates based on weekly_schedule '2,4,6' (Tue, Thu, Sat)
+INSERT INTO schedules (class_id, course_id, day_of_week, schedule_date, start_time, end_time)
+VALUES
+-- Tuesday (2)
+(1, 1, N'Tuesday', '2025-06-03', '08:00', '10:00'),
+-- Thursday (4)
+(1, 1, N'Thursday', '2025-06-05', '08:00', '10:00'),
+-- Saturday (6)
+(1, 1, N'Saturday', '2025-06-07', '08:00', '10:00');

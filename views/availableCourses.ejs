@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trang Chủ</title>
+    <title>Available Courses</title>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://demos.creative-tim.com/notus-js/assets/styles/tailwind.css">
@@ -61,7 +61,6 @@
                     </label>
                     <hr>
                 </div>
-                <!-- Common nav section for all authenticated users -->
                 <div id="nav-content">
                     <a href="/" class="nav-button"><i class="fas fa-house"></i><span>Home</span></a>
 
@@ -74,24 +73,22 @@
                     <a href="/notifications" class="nav-button"><i
                             class="fas fa-bell"></i><span>Notifications</span></a>
                     <a href="/profile" class="nav-button"><i class="fas fa-user"></i><span>Profile</span></a>
-          <% if (user.role === 'student') { %>
-          <a href="/available-courses" class="nav-button">
-            <i class="fas fa-book-reader"></i><span>Available Courses</span>
-          </a>
-          <% } %>
-
-
+                    <% if (user.role === 'student') { %>
+                    <a href="/available-courses" class="nav-button">
+                        <i class="fas fa-book-reader"></i><span>Available Courses</span>
+                    </a>
+                    <% } %>
 
                     <!-- Teacher & Admin only options -->
-          <% if (user.role === 'admin' || user.role === 'teacher') { %>
-          <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
-          <a href="/materials" class="nav-button"><i class="fas fa-file"></i><span>Materials</span></a>
-          <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload Material</span></a>
-          <% } %>
-      
-        <!-- Admin only options -->
-          <% if (user.role === 'admin') { %>
-            <a href="/courses" class="nav-button"><i class="fas fa-book"></i><span>Courses</span></a>
+                    <% if (user.role === 'admin' || user.role === 'teacher') { %>
+                    <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
+                    <a href="/materials" class="nav-button"><i class="fas fa-file"></i><span>Materials</span></a>
+                    <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload Material</span></a>
+                    <% } %>
+
+                    <!-- Admin only options -->
+                    <% if (user.role === 'admin') { %>
+                    <a href="/courses" class="nav-button"><i class="fas fa-book"></i><span>Courses</span></a>
                     <a href="/users" class="nav-button"><i class="fas fa-user-cog"></i><span>User List</span></a>
                     <a href="/register" class="nav-button"><i class="fas fa-user-plus"></i><span>Register
                             User</span></a>
@@ -141,71 +138,133 @@
 
                     </div>
                 </div>
-            </div> <% } %>
+            </div>
+
+            <% } %>
 
 
 
         </div>
 
     </header>
-
-
-    <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl m-4 p-6">
-        <h1 class="text-2xl font-bold mb-4 text-center">Edit Class</h1>
-        <form method="POST" action="/classes/<%= classItem.id %>" class="space-y-4">
-            <div class="flex flex-col">
-                <label class="text-gray-700 font-medium mb-1">Class Name:</label>
-                <input type="text" name="class_name" value="<%= classItem.class_name %>" required
-                    class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-
-            <div class="flex flex-col">
-                <label class="text-gray-700 font-medium mb-1">Course:</label>
-                <select name="course_id" required
-                    class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <% courses.forEach(course => { %>
-                    <option value="<%= course.id %>" <% if (course.id === classItem.course_id) { %>selected<% } %>>
-                        <%= course.course_name %>
-                    </option>
-                    <% }) %>
+    <div class="container mx-auto px-4 py-8">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold">Available Courses</h1>
+            <div class="flex gap-4">
+                <div class="relative">
+                    <input type="text" id="searchInput" placeholder="Search courses..."
+                        class="px-4 py-2 border rounded-lg">
+                    <i class="fas fa-search absolute right-3 top-3 text-gray-400"></i>
+                </div>
+                <select id="sortSelect" class="px-4 py-2 border rounded-lg">
+                    <option value="name">Sort by Name</option>
+                    <option value="date">Sort by Start Date</option>
+                    <option value="price">Sort by Price</option>
                 </select>
             </div>
+        </div>
 
-            <div class="flex flex-col">
-                <label class="text-gray-700 font-medium mb-1">Teacher:</label>
-                <select name="teacher_id" required
-                    class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <% teachers.forEach(teacher => { %>
-                    <option value="<%= teacher.id %>" <% if (teacher.id === classItem.teacher_id) { %>selected<% } %>>
-                        <%= teacher.full_name %>
-                    </option>
-                    <% }) %>
-                </select>
-            </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="courseGrid">
+            <% if (courses && courses.length > 0) { %>
+            <% courses.forEach(course => { %>
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden course-card">
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <h2 class="text-xl font-semibold"><%= course.course_name %></h2>
+                        <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
+                            <%= new Date(course.start_date).toLocaleDateString() %>
+                        </span>
+                    </div>
 
-            <div class="flex flex-col">
-                <label class="text-gray-700 font-medium mb-1">Start Time:</label>
-                <input type="time" name="start_time" value="<%= classItem.start_time %>" required
-                    class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
+                    <p class="text-gray-600 mb-4 line-clamp-2"><%= course.description %></p>
 
-            <div class="flex flex-col">
-                <label class="text-gray-700 font-medium mb-1">End Time:</label>
-                <input type="time" name="end_time" value="<%= classItem.end_time %>" required
-                    class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
+                    <div class="space-y-2 mb-4">
+                        <p class="text-sm flex items-center">
+                            <i class="fas fa-user-tie w-5 mr-2 text-gray-500"></i>
+                            <span class="font-medium">Teacher:</span>
+                            <span class="ml-2"><%= course.teacher_name %></span>
+                        </p>
+                        <p class="text-sm flex items-center">
+                            <i class="fas fa-calendar w-5 mr-2 text-gray-500"></i>
+                            <span class="font-medium">Schedule:</span>
+                            <span class="ml-2"><%= course.weekly_schedule %></span>
+                        </p>
+                        <p class="text-sm flex items-center">
+                            <i class="fas fa-clock w-5 mr-2 text-gray-500"></i>
+                            <span class="font-medium">Time:</span>
+                            <span class="ml-2"><%= course.start_time %> - <%= course.end_time %></span>
+                        </p>
+                        <p class="text-sm flex items-center">
+                            <i class="fas fa-users w-5 mr-2 text-gray-500"></i>
+                            <span class="font-medium">Enrolled:</span>
+                            <span class="ml-2"><%= course.enrolled_count || 0 %> students</span>
+                        </p>
+                        <p class="text-sm flex items-center">
+                            <i class="fas fa-money-bill w-5 mr-2 text-gray-500"></i>
+                            <span class="font-medium">Tuition:</span>
+                            <span class="ml-2"><%= course.tuition_fee?.toLocaleString() %> VND</span>
+                        </p>
+                    </div>
 
-            <div class="flex justify-between items-center mt-6">
-                <a href="/classes" class="text-blue-500 hover:text-blue-700 font-medium">
-                    Back to class list
-                </a>
-                <button type="submit"
-                    class="bg-blue-500 text-black px-4 py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    Update Class
-                </button>
+                    <form action="/enroll-course" method="POST" class="mt-6">
+                        <input type="hidden" name="class_id" value="<%= course.class_id %>">
+                        <button type="submit" class="w-full bg-blue-500 text-black px-4 py-2 rounded-lg hover:bg-blue-600 
+                                               transition-colors flex items-center justify-center gap-2"
+                            onclick="return confirm('Are you sure you want to enroll in this course?')">
+                            <i class="fas fa-user-plus"></i>
+                            Enroll Now
+                        </button>
+                    </form>
+                </div>
             </div>
-        </form>
+            <% }) %>
+            <% } else { %>
+            <div class="col-span-full text-center py-12">
+                <i class="fas fa-book-open text-5xl text-gray-300 mb-4"></i>
+                <p class="text-xl text-gray-500">No courses available at the moment.</p>
+            </div>
+            <% } %>
+        </div>
     </div>
+
+    <script>
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function (e) {
+            const searchText = e.target.value.toLowerCase();
+            const cards = document.querySelectorAll('.course-card');
+
+            cards.forEach(card => {
+                const title = card.querySelector('h2').textContent.toLowerCase();
+                const desc = card.querySelector('p').textContent.toLowerCase();
+                card.style.display =
+                    title.includes(searchText) || desc.includes(searchText) ? 'block' : 'none';
+            });
+        });
+
+        // Sorting functionality
+        document.getElementById('sortSelect').addEventListener('change', function (e) {
+            const grid = document.getElementById('courseGrid');
+            const cards = Array.from(document.querySelectorAll('.course-card'));
+
+            cards.sort((a, b) => {
+                if (e.target.value === 'name') {
+                    return a.querySelector('h2').textContent.localeCompare(
+                        b.querySelector('h2').textContent
+                    );
+                } else if (e.target.value === 'date') {
+                    const dateA = new Date(a.querySelector('.bg-blue-100').textContent);
+                    const dateB = new Date(b.querySelector('.bg-blue-100').textContent);
+                    return dateA - dateB;
+                } else if (e.target.value === 'price') {
+                    const priceA = parseInt(a.querySelector('.fa-money-bill').nextElementSibling.textContent);
+                    const priceB = parseInt(b.querySelector('.fa-money-bill').nextElementSibling.textContent);
+                    return priceA - priceB;
+                }
+            });
+
+            cards.forEach(card => grid.appendChild(card));
+        });
+    </script>
 
     <footer class="relative bg-blueGray-200 pt-8 pb-6">
         <div class="container mx-auto px-4">
