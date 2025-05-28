@@ -148,15 +148,17 @@
 
     </header>
     <div class="container mx-auto px-4 py-8">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-bold">Available Courses</h1>
-            <div class="flex gap-4">
-                <div class="relative">
+        <!-- Search and Filter Section -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+            <h1 class="text-4xl font-bold text-gray-800">Available Courses</h1>
+            <div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+                <div class="relative w-full sm:w-64">
                     <input type="text" id="searchInput" placeholder="Search courses..."
-                        class="px-4 py-2 border rounded-lg">
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     <i class="fas fa-search absolute right-3 top-3 text-gray-400"></i>
                 </div>
-                <select id="sortSelect" class="px-4 py-2 border rounded-lg">
+                <select id="sortSelect"
+                    class="w-full sm:w-48 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white">
                     <option value="name">Sort by Name</option>
                     <option value="date">Sort by Start Date</option>
                     <option value="price">Sort by Price</option>
@@ -164,52 +166,60 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="courseGrid">
+        <!-- Course Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="courseGrid">
             <% if (courses && courses.length > 0) { %>
             <% courses.forEach(course => { %>
-            <div class="bg-white rounded-lg shadow-lg overflow-hidden course-card">
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden course-card hover:shadow-2xl transition-shadow duration-300">
                 <div class="p-6">
+                    <!-- Course Header -->
                     <div class="flex justify-between items-start mb-4">
-                        <h2 class="text-xl font-semibold"><%= course.course_name %></h2>
-                        <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
+                        <h2 class="text-2xl font-bold text-gray-800"><%= course.course_name %></h2>
+                        <span class="bg-blue-100 text-blue-800 text-sm font-semibold px-3 py-1 rounded-full">
                             <%= new Date(course.start_date).toLocaleDateString() %>
                         </span>
                     </div>
 
-                    <p class="text-gray-600 mb-4 line-clamp-2"><%= course.description %></p>
+                    <!-- Course Description -->
+                    <p class="text-gray-600 mb-6 line-clamp-2"><%= course.description %></p>
 
-                    <div class="space-y-2 mb-4">
-                        <p class="text-sm flex items-center">
-                            <i class="fas fa-user-tie w-5 mr-2 text-gray-500"></i>
-                            <span class="font-medium">Teacher:</span>
-                            <span class="ml-2"><%= course.teacher_name %></span>
-                        </p>
-                        <p class="text-sm flex items-center">
-                            <i class="fas fa-calendar w-5 mr-2 text-gray-500"></i>
-                            <span class="font-medium">Schedule:</span>
-                            <span class="ml-2"><%= course.weekly_schedule %></span>
-                        </p>
-                        <p class="text-sm flex items-center">
-                            <i class="fas fa-clock w-5 mr-2 text-gray-500"></i>
-                            <span class="font-medium">Time:</span>
-                            <span class="ml-2"><%= course.start_time %> - <%= course.end_time %></span>
-                        </p>
-                        <p class="text-sm flex items-center">
-                            <i class="fas fa-users w-5 mr-2 text-gray-500"></i>
-                            <span class="font-medium">Enrolled:</span>
-                            <span class="ml-2"><%= course.enrolled_count || 0 %> students</span>
-                        </p>
-                        <p class="text-sm flex items-center">
-                            <i class="fas fa-money-bill w-5 mr-2 text-gray-500"></i>
-                            <span class="font-medium">Tuition:</span>
-                            <span class="ml-2"><%= course.tuition_fee?.toLocaleString() %> VND</span>
-                        </p>
+                    <!-- Course Details -->
+                    <div class="space-y-3 mb-6">
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-user-tie w-6 text-blue-500"></i>
+                            <span class="font-medium w-20">Teacher:</span>
+                            <span class="flex-1"><%= course.teacher_name %></span>
+                        </div>
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-calendar w-6 text-blue-500"></i>
+                            <span class="font-medium w-20">Schedule:</span>
+                            <span class="flex-1"><%= course.weekly_schedule %></span>
+                        </div>
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-clock w-6 text-blue-500"></i>
+                            <span class="font-medium w-20">Time:</span>
+                            <span class="flex-1"><%= course.start_time %> - <%= course.end_time %></span>
+                        </div>
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-users w-6 text-blue-500"></i>
+                            <span class="font-medium w-20">Enrolled:</span>
+                            <span class="flex-1"><%= course.enrolled_count || 0 %> students</span>
+                        </div>
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-money-bill w-6 text-blue-500"></i>
+                            <span class="font-medium w-20">Tuition:</span>
+                            <span class="flex-1 font-semibold text-green-600">
+                                <%= course.tuition_fee?.toLocaleString() %> VND
+                            </span>
+                        </div>
                     </div>
 
-                    <form action="/enroll-course" method="POST" class="mt-6">
+                    <!-- Enroll Button -->
+                    <form action="/enroll-course" method="POST">
                         <input type="hidden" name="class_id" value="<%= course.class_id %>">
-                        <button type="submit" class="w-full bg-blue-500 text-black px-4 py-2 rounded-lg hover:bg-blue-600 
-                                               transition-colors flex items-center justify-center gap-2"
+                        <button type="submit"
+                            class="w-full bg-blue-500 text-black px-6 py-3 rounded-lg hover:bg-blue-600 
+                                   transition-colors duration-300 flex items-center justify-center gap-2 font-semibold"
                             onclick="return confirm('Are you sure you want to enroll in this course?')">
                             <i class="fas fa-user-plus"></i>
                             Enroll Now
@@ -219,9 +229,11 @@
             </div>
             <% }) %>
             <% } else { %>
-            <div class="col-span-full text-center py-12">
-                <i class="fas fa-book-open text-5xl text-gray-300 mb-4"></i>
-                <p class="text-xl text-gray-500">No courses available at the moment.</p>
+            <!-- Empty State -->
+            <div class="col-span-full text-center py-16">
+                <i class="fas fa-book-open text-6xl text-gray-300 mb-6"></i>
+                <h3 class="text-2xl font-semibold text-gray-600 mb-2">No Courses Available</h3>
+                <p class="text-gray-500">Check back later for new course offerings.</p>
             </div>
             <% } %>
         </div>
