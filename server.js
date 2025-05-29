@@ -1470,6 +1470,72 @@ app.get(
   }
 );
 
+
+app.delete(
+  "/enrollments/:id",
+  checkAuthenticated,
+  authenticateRole("admin"),
+  async (req, res) => {
+    try {
+      const enrollmentId = req.params.id;
+
+      // First check if enrollment exists
+      const checkQuery = `
+        SELECT e.id, e.student_id, s.full_name, c.class_name 
+        FROM enrollments e
+        JOIN students s ON e.student_id = s.id
+        JOIN classes c ON e.class_id = c.id
+        WHERE e.id = ?
+      `;
+
+      const enrollment = await executeQuery(checkQuery, [enrollmentId]);
+
+      if (!enrollment.length) {
+        return res.status(404).json({
+          error: "Enrollment not found",
+          code: "ENROLLMENT_NOT_FOUND",
+        });
+      }
+
+      // Log deletion attempt for audit
+      console.log("Deleting enrollment:", {
+        id: enrollmentId,
+        student: enrollment[0].full_name,
+        class: enrollment[0].class_name,
+      });
+
+      // Delete enrollment
+      const deleteQuery = "DELETE FROM enrollments WHERE id = ?";
+      await executeQuery(deleteQuery, [enrollmentId]);
+
+      // Add notification for student
+      const notifyQuery = `
+        INSERT INTO notifications (user_id, message, sent_at)
+        VALUES ((SELECT user_id FROM students WHERE id = ?), ?, GETDATE())
+      `;
+
+      await executeQuery(notifyQuery, [
+        enrollment[0].student_id,
+        `Your enrollment in ${enrollment[0].class_name} has been cancelled.`,
+      ]);
+
+      res.redirect("/enrollments");
+    } catch (error) {
+      console.error("Enrollment deletion error:", {
+        enrollmentId: req.params.id,
+        error: error.message,
+        stack: error.stack,
+      });
+
+      res.status(500).json({
+        error: "Failed to delete enrollment",
+        code: "DELETE_FAILED",
+        message: "An error occurred while deleting the enrollment",
+      });
+    }
+  }
+);
+
 // Add route to toggle payment status
 app.post(
   "/enrollments/:id/toggle-payment",
@@ -1513,33 +1579,67 @@ app.get(
   "/enrollments/:id/edit",
   checkAuthenticated,
   authenticateRole("admin"),
-  (req, res) => {
-    const id = req.params.id;
+  async (req, res) => {
+    try {
+      const id = req.params.id;
 
-    const enrollmentQuery = "SELECT * FROM enrollments WHERE id = ?";
-    const studentQuery = "SELECT id, full_name FROM students";
-    const classQuery = "SELECT id, class_name FROM classes";
+      // Get enrollment details with related info
+      const enrollmentQuery = `
+        SELECT 
+          e.*,
+          s.full_name AS student_name,
+          c.class_name,
+          co.course_name,
+          co.tuition_fee
+        FROM enrollments e
+        JOIN students s ON e.student_id = s.id
+        JOIN classes c ON e.class_id = c.id
+        JOIN courses co ON c.course_id = co.id
+        WHERE e.id = ?
+      `;
 
-    sql.query(connectionString, enrollmentQuery, [id], (err, result) => {
-      if (err || result.length === 0)
+      // Get available students and classes for dropdown
+      const studentQuery = `
+        SELECT s.id, s.full_name, s.email 
+        FROM students s
+        LEFT JOIN enrollments e ON s.id = e.student_id
+        GROUP BY s.id, s.full_name, s.email
+      `;
+
+      const classQuery = `
+        SELECT 
+          c.id, 
+          c.class_name,
+          co.course_name,
+          t.full_name AS teacher_name,
+          co.start_date,
+          co.end_date
+        FROM classes c
+        JOIN courses co ON c.course_id = co.id
+        JOIN teachers t ON c.teacher_id = t.id
+        WHERE co.end_date >= GETDATE()
+      `;
+
+      const [enrollment, students, classes] = await Promise.all([
+        executeQuery(enrollmentQuery, [id]),
+        executeQuery(studentQuery),
+        executeQuery(classQuery),
+      ]);
+
+      if (!enrollment.length) {
         return res.status(404).send("Enrollment not found");
+      }
 
-      const enrollment = result[0];
-      sql.query(connectionString, studentQuery, (err, students) => {
-        if (err) return res.status(500).send("Students fetch error");
-
-        sql.query(connectionString, classQuery, (err, classes) => {
-          if (err) return res.status(500).send("Classes fetch error");
-
-          res.render("editEnrollment.ejs", {
-            enrollment,
-            students,
-            classes,
-            user: req.user,
-          });
-        });
+      res.render("editEnrollment.ejs", {
+        enrollment: enrollment[0],
+        students,
+        classes,
+        user: req.user,
       });
-    });
+    } catch (err) {
+      console.error("Error loading enrollment edit form:", err);
+      res.status(500).send("Error loading enrollment edit form");
+    }
   }
 );
 
@@ -1547,8 +1647,199 @@ app.get(
   "/enrollments/new",
   checkAuthenticated,
   authenticateRole("admin"),
-  (req, res) => {
-    res.render("Addenrollments.ejs", { user: req.user });
+  async (req, res) => {
+    try {
+      // Get students with enrollment counts and payment status
+      const studentQuery = `
+        SELECT 
+          s.id, 
+          s.full_name, 
+          s.email,
+          s.phone_number,
+          COUNT(e.id) as enrolled_count,
+          SUM(CASE WHEN e.payment_status = 0 THEN 1 ELSE 0 END) as unpaid_enrollments
+        FROM students s
+        LEFT JOIN enrollments e ON s.id = e.student_id
+        GROUP BY 
+          s.id, 
+          s.full_name, 
+          s.email,
+          s.phone_number
+        ORDER BY s.full_name
+      `;
+
+      // Get active classes with detailed info and capacity
+      const classQuery = `
+        SELECT 
+          c.id,
+          c.class_name,
+          co.course_name,
+          co.tuition_fee,
+          t.full_name AS teacher_name,
+          co.start_date,
+          co.end_date,
+          c.weekly_schedule,
+          CONVERT(VARCHAR(5), c.start_time, 108) as start_time,
+          CONVERT(VARCHAR(5), c.end_time, 108) as end_time,
+          (SELECT COUNT(*) FROM enrollments WHERE class_id = c.id) as enrolled_count,
+          CASE 
+            WHEN co.end_date < GETDATE() THEN 'Ended'
+            WHEN co.start_date > GETDATE() THEN 'Upcoming'
+            ELSE 'Active'
+          END as status
+        FROM classes c
+        JOIN courses co ON c.course_id = co.id
+        JOIN teachers t ON c.teacher_id = t.id
+        WHERE co.end_date >= GETDATE()
+        ORDER BY co.start_date ASC, c.class_name
+      `;
+
+      const [students, classes] = await Promise.all([
+        executeQuery(studentQuery),
+        executeQuery(classQuery),
+      ]);
+
+      // Process class data to include availability info
+      const enhancedClasses = classes.map((cls) => ({
+        ...cls,
+        isAvailable: cls.status !== "Ended",
+        schedule: cls.weekly_schedule
+          .split(",")
+          .map((day) => {
+            const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+            return days[parseInt(day) - 1];
+          })
+          .join(", "),
+        timeSlot: `${cls.start_time} - ${cls.end_time}`,
+      }));
+
+      res.render("Addenrollments.ejs", {
+        students: students.map((s) => ({
+          ...s,
+          hasUnpaidFees: s.unpaid_enrollments > 0,
+        })),
+        classes: enhancedClasses,
+        user: req.user,
+        currentDate: new Date().toISOString().split("T")[0],
+        errors: req.flash("error"),
+        success: req.flash("success"),
+      });
+    } catch (err) {
+      console.error("Error loading enrollment form:", {
+        error: err.message,
+        stack: err.stack,
+        timestamp: new Date().toISOString(),
+      });
+
+      req.flash("error", "Failed to load enrollment form");
+      res.status(500).send("Error loading enrollment form");
+    }
+  }
+);
+
+app.post(
+  "/enrollments",
+  checkAuthenticated,
+  authenticateRole("admin"),
+  async (req, res) => {
+    const { student_id, class_id } = req.body;
+
+    try {
+      // 1. Validate input
+      if (!student_id || !class_id) {
+        return res.status(400).json({
+          error: "Missing required fields",
+          code: "INVALID_INPUT",
+        });
+      }
+
+      // 2. Check if student exists
+      const studentQuery = "SELECT id FROM students WHERE id = ?";
+      const student = await executeQuery(studentQuery, [student_id]);
+
+      if (!student.length) {
+        return res.status(404).json({
+          error: "Student not found",
+          code: "STUDENT_NOT_FOUND",
+        });
+      }
+
+      // 3. Check if class exists and is active
+      const classQuery = `
+      SELECT c.id, c.class_name, co.start_date, co.end_date 
+      FROM classes c
+      JOIN courses co ON c.course_id = co.id
+      WHERE c.id = ?`;
+      const classInfo = await executeQuery(classQuery, [class_id]);
+
+      if (!classInfo.length) {
+        return res.status(404).json({
+          error: "Class not found",
+          code: "CLASS_NOT_FOUND",
+        });
+      }
+
+      // 4. Check if enrollment already exists
+      const duplicateQuery = `
+      SELECT id FROM enrollments 
+      WHERE student_id = ? AND class_id = ?`;
+      const existing = await executeQuery(duplicateQuery, [
+        student_id,
+        class_id,
+      ]);
+
+      if (existing.length) {
+        return res.status(409).json({
+          error: "Student already enrolled in this class",
+          code: "DUPLICATE_ENROLLMENT",
+        });
+      }
+
+      // 5. Create enrollment
+      const insertQuery = `
+      INSERT INTO enrollments (
+        student_id, 
+        class_id, 
+        enrollment_date,
+        payment_status,
+        created_at,
+        updated_at
+      )
+      VALUES (?, ?, GETDATE(), 0, GETDATE(), GETDATE())`;
+
+      await executeQuery(insertQuery, [student_id, class_id]);
+
+      // 6. Add notification for student
+      const notifyQuery = `
+      INSERT INTO notifications (user_id, message, sent_at)
+      VALUES (
+        (SELECT user_id FROM students WHERE id = ?),
+        ?,
+        GETDATE()
+      )`;
+
+      await executeQuery(notifyQuery, [
+        student_id,
+        `You have been enrolled in ${classInfo[0].class_name}`,
+      ]);
+
+      req.flash("success", "Enrollment created successfully");
+      res.redirect("/enrollments");
+    } catch (error) {
+      console.error("Enrollment creation error:", {
+        error: error.message,
+        stack: error.stack,
+        student_id,
+        class_id,
+      });
+
+      req.flash("error", "Failed to create enrollment");
+      res.status(500).json({
+        error: "Failed to create enrollment",
+        code: "CREATE_FAILED",
+        message: error.message,
+      });
+    }
   }
 );
 
