@@ -48,9 +48,19 @@
             align-items: center;
         }
 
+        .course-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 8px 0;
+            padding: 4px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
         .course-fee {
-            font-size: 12px;
-            color: #2f855a;
+            font-size: 14px;
+            color: #4A5568;
+            font-weight: 500;
         }
 
         .course-details {
@@ -81,11 +91,12 @@
 
         .teacher-info {
             display: flex;
-            align-items: center;
-            gap: 8px;
+            align-items: flex-start;
+            gap: 12px;
         }
 
         .teacher-avatar {
+            flex-shrink: 0;
             width: 24px;
             height: 24px;
             border-radius: 50%;
@@ -115,6 +126,31 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+        }
+
+        .course-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .payment-badge {
+            font-size: 12px;
+            padding: 2px 12px;
+            border-radius: 16px;
+            font-weight: 500;
+            color: #fff;
+            display: inline-block;
+        }
+
+        .payment-badge.paid {
+            background-color: #C6F6D5;
+            color: #2F855A;
+        }
+        
+        .payment-badge.unpaid {
+            background-color: #FED7D7;
+            color: #C53030;
         }
     </style>
     <link rel="stylesheet" href="/css/style.css">
@@ -262,27 +298,36 @@
         
         <div id="coursesList">
             <% courses.forEach(course => { %>
-                <div class="course-card">
+                <div class="course-card <%= user.role === 'teacher' ? 'teacher-view' : '' %>">
                     <div class="course-header">
                         <div class="course-title">
                             <%= course.course_name %>
                             <% if (user.role === 'teacher') { %>
-                                <span class="student-count">
-                                    Students: <%= course.student_count %>
-                                </span>
-                            <% } else { %>
-                                <span class="course-fee">
-                                    Fee: <%= course.tuition_fee ? `$${course.tuition_fee.toLocaleString()}` : 'Not set' %>
-                                </span>
+                                <div class="student-count">
+                                    Students: <%= course.student_count %> (Paid: <%= course.paid_students %>)
+                                </div>
                             <% } %>
                         </div>
                     </div>
+
+                    <div class="course-info">
+                        <div class="course-fee">
+                            Fee: <%= course.tuition_fee ? `$${course.tuition_fee.toLocaleString()}` : 'Not set' %>
+                        </div>
+                        <% if (user.role === 'student') { %>
+                            <div class="payment-badge <%= course.payment_status ? 'paid' : 'unpaid' %>">
+                                <%= course.payment_status ? 'Paid' : 'Unpaid' %>
+                            </div>
+                        <% } %>
+                    </div>
+
                     <div class="course-details">
                         <div class="detail-group">
-                            <div class="detail-label">Course Duration</div>
+                            <div class="detail-label">Class Schedule</div>
                             <div class="detail-value">
-                                <%= new Date(course.course_start).toLocaleDateString() %> - 
-                                <%= new Date(course.course_end).toLocaleDateString() %>
+                                <%= course.class_name %><br>
+                                <%= course.class_start_time %> - <%= course.class_end_time %><br>
+                                Weekly: <%= course.weekly_schedule.split(',').map(day => ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][day-1]).join(', ') %>
                             </div>
                         </div>
 
@@ -291,31 +336,14 @@
                             <div class="detail-label">Teacher</div>
                             <div class="detail-value teacher-info">
                                 <div class="teacher-avatar"></div>
-                                <%= course.teacher_name %>
+                                <div>
+                                    <%= course.teacher_name %><br>
+                                    Email: <%= course.teacher_email %><br>
+                                    Phone: <%= course.teacher_phone %>
+                                </div>
                             </div>
                         </div>
                         <% } %>
-
-                        <div class="detail-group">
-                            <div class="detail-label">Class</div>
-                            <div class="detail-value">
-                                <%= course.class_name %><br>
-                                <%= course.class_start_time %> - <%= course.class_end_time %>
-                            </div>
-                        </div>
-
-                        <div class="detail-group">
-                            <div class="detail-label">Schedule</div>
-                            <div class="detail-value schedule-info">
-                                <% if (course.schedule_date) { %>
-                                    <%= course.day_of_week %><br>
-                                    <%= new Date(course.schedule_date).toLocaleDateString() %><br>
-                                    <%= course.schedule_start %> - <%= course.schedule_end %>
-                                <% } else { %>
-                                    Not scheduled
-                                <% } %>
-                            </div>
-                        </div>
 
                         <div class="detail-group">
                             <div class="detail-label">Description</div>

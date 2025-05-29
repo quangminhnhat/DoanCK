@@ -38,7 +38,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 const connectionString =
-  "Driver={ODBC Driver 17 for SQL Server};Server=DESKTOP-M7HENCK;Database=DOANCS;Trusted_Connection=Yes;";
+  "Driver={ODBC Driver 17 for SQL Server};Server=LAPTOP-ND7KAD0J;Database=DOANCS;Trusted_Connection=Yes;";
 const initalizePassport = require("./pass-config");
 const { time } = require("console");
 initalizePassport(
@@ -298,23 +298,19 @@ app.get("/my-courses", checkAuthenticated, async (req, res) => {
             t.full_name AS teacher_name,
             t.email AS teacher_email,
             t.phone_number AS teacher_phone,   
-            c.start_date AS course_start,
-            c.end_date AS course_end,
             cls.class_name,
             cls.start_time AS class_start_time,
             cls.end_time AS class_end_time,
-            s.day_of_week,
-            s.schedule_date,
-            s.start_time AS schedule_start,
-            s.end_time AS schedule_end
+            cls.weekly_schedule,
+            e.payment_status,
+            e.payment_date
           FROM enrollments e
           JOIN students st ON e.student_id = st.id
           JOIN classes cls ON e.class_id = cls.id
           JOIN teachers t ON cls.teacher_id = t.id
           JOIN courses c ON cls.course_id = c.id
-          LEFT JOIN schedules s ON cls.id = s.class_id
           WHERE st.user_id = ?
-          ORDER BY t.full_name, c.course_name, s.schedule_date
+          ORDER BY t.full_name, c.course_name
         `;
       params = [req.user.id];
     } else if (req.user.role === "teacher") {
@@ -326,22 +322,17 @@ app.get("/my-courses", checkAuthenticated, async (req, res) => {
             t.full_name AS teacher_name,
             t.email AS teacher_email,
             t.phone_number AS teacher_phone,   
-            c.start_date AS course_start,
-            c.end_date AS course_end,
             cls.class_name,
             cls.start_time AS class_start_time,
             cls.end_time AS class_end_time,
-            s.day_of_week,
-            s.schedule_date,
-            s.start_time AS schedule_start,
-            s.end_time AS schedule_end,
-            (SELECT COUNT(*) FROM enrollments e WHERE e.class_id = cls.id) as student_count
+            cls.weekly_schedule,
+            (SELECT COUNT(*) FROM enrollments e WHERE e.class_id = cls.id) as student_count,
+            (SELECT COUNT(*) FROM enrollments e WHERE e.class_id = cls.id AND e.payment_status = 1) as paid_students
           FROM teachers t
           JOIN classes cls ON t.id = cls.teacher_id
           JOIN courses c ON cls.course_id = c.id
-          LEFT JOIN schedules s ON cls.id = s.class_id
           WHERE t.user_id = ?
-          ORDER BY c.course_name, s.schedule_date
+          ORDER BY c.course_name
         `;
       params = [req.user.id];
     }
