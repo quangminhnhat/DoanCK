@@ -2182,6 +2182,10 @@ app.delete(
   }
 );
 
+app.get("/Toan,Ly,Hoaclass", (req, res) => {
+  res.render("Toan,Ly,Hoaclass.ejs", { user: req.user });
+});
+
 app.get(
   "/available-courses",
   checkAuthenticated,
