@@ -1682,3 +1682,107 @@ label[for="nav-footer-toggle"] {
 .index-slider .slider-wrapper .slider-item:nth-child(3)::before { background-image: url("/images/slide3.jpg"); }
 .index-slider .slider-wrapper .slider-item:nth-child(4)::before { background-image: url("/images/slide4.jpg"); }
 .index-slider .slider-wrapper .slider-item:nth-child(5)::before { background-image: url("/images/slide5.png"); }
+/* --- Custom Course Detail Page --- */
+.custom-course-detail {
+  max-width: 1100px;
+  margin: 40px auto 0 auto;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(44,62,80,0.08);
+  overflow: hidden;
+}
+
+.custom-banner {
+  position: relative;
+}
+
+.custom-banner-img {
+  width: 100%;
+  height: 320px;
+  object-fit: cover;
+}
+
+.custom-banner-titlebox {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  background: rgba(36, 117, 216, 0.85);
+  color: #fff;
+  padding: 32px 32px 24px 32px;
+}
+
+.custom-banner-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.custom-banner-desc {
+  font-size: 1.15rem;
+  margin-bottom: 0;
+}
+
+.custom-content {
+  padding: 36px 32px 32px 32px;
+}
+
+.custom-section-title {
+  color: #2375D8;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 18px;
+  border-left: 5px solid #076e03;
+  padding-left: 16px;
+}
+
+.custom-flex-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  margin-bottom: 24px;
+}
+
+.custom-flex-col {
+  flex: 1 1 260px;
+  min-width: 220px;
+}
+
+.custom-section {
+  margin-bottom: 24px;
+}
+
+.custom-link {
+  color: #2375D8;
+  text-decoration: underline;
+}
+
+.custom-btn-wrap {
+  text-align: center;
+}
+
+.custom-register-btn {
+  display: inline-block;
+  background: linear-gradient(90deg, #f62d4e 0%, #ff7e5f 100%);
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.15rem;
+  padding: 14px 38px;
+  border-radius: 30px;
+  box-shadow: 0 4px 16px rgba(246,45,78,0.15);
+  text-decoration: none;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.custom-register-btn:hover {
+  background: linear-gradient(90deg, #ff7e5f 0%, #f62d4e 100%);
+  transform: translateY(-2px) scale(1.05);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .custom-content { padding: 24px 10px; }
+  .custom-banner-titlebox { padding: 18px 10px 12px 10px; }
+  .custom-banner-img { height: 180px; }
+  .custom-flex-row { flex-direction: column; gap: 18px; }
+}
