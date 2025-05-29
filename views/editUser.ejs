@@ -94,14 +94,14 @@
                             User</span></a>
                     <a href="/enrollments" class="nav-button"><i
                             class="fas fa-user-plus"></i><span>Enrollments</span></a>
-                    <a href="/payments" class="nav-button"><i class="fas fa-money-bill"></i><span>Payments</span></a>
+                     
                     <a href="/schedules" class="nav-button"><i class="fas fa-money-bill"></i><span>schedules
                             list</span></a>
                     <a href="/courses/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Course</span></a>
                     <a href="/classes/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Class</span></a>
                     <a href="/enrollments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add
                             Enrollment</span></a>
-                    <a href="/payments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Payment</span></a>
+                     
                     <a href="/schedule/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Schedule</span></a>
                     <% } %>
 
@@ -150,32 +150,38 @@
 
     <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl m-4 p-6">
         <h1 class="text-2xl font-bold mb-4 text-center">Edit User</h1>
-        <form action="/users/<%= user.id %>?_method=PUT" method="POST" class="space-y-4">
+        <form action="/users/<%= editUser.id %>" method="POST" class="space-y-4">
             <div class="flex flex-col">
                 <label class="text-gray-700 font-medium mb-1">Username:</label>
-                <input type="text" name="username" value="<%= user.username %>" required
+                <input type="text" name="username" value="<%= editUser.username %>" required
                     class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
 
             <div class="flex flex-col">
                 <label class="text-gray-700 font-medium mb-1">Role:</label>
-                <select name="role"
+                <select name="role" 
                     class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="student" <%= user.role === 'student' ? 'selected' : '' %>>Student</option>
-                    <option value="teacher" <%= user.role === 'teacher' ? 'selected' : '' %>>Teacher</option>
-                    <option value="admin" <%= user.role === 'admin' ? 'selected' : '' %>>Admin</option>
+                    <option value="student" <%= editUser.role === 'student' ? 'selected' : '' %>>Student</option>
+                    <option value="teacher" <%= editUser.role === 'teacher' ? 'selected' : '' %>>Teacher</option>
+                    <option value="admin" <%= editUser.role === 'admin' ? 'selected' : '' %>>Admin</option>
                 </select>
             </div>
 
             <div class="flex flex-col">
                 <label class="text-gray-700 font-medium mb-1">Full Name:</label>
-                <input type="text" name="full_name" value="<%= user.full_name %>" required
+                <input type="text" name="full_name" value="<%= editUser.full_name %>" required
                     class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
 
             <div class="flex flex-col">
                 <label class="text-gray-700 font-medium mb-1">Email:</label>
-                <input type="email" name="email" value="<%= user.email %>" required
+                <input type="email" name="email" value="<%= editUser.email %>" required
+                    class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <div class="flex flex-col">
+                <label class="text-gray-700 font-medium mb-1">Phone Number:</label>
+                <input type="text" name="phone_number" value="<%= editUser.phone_number %>" required
                     class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
 
@@ -183,7 +189,7 @@
                 <a href="/users" class="text-blue-500 hover:text-blue-700 font-medium">
                     Back to users
                 </a>
-                <button type="submit"
+                <button type="submit" 
                     class="bg-blue-500 text-black px-4 py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     Save Changes
                 </button>

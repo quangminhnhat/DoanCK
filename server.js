@@ -41,6 +41,7 @@ const connectionString =
   "Driver={ODBC Driver 17 for SQL Server};Server=LAPTOP-ND7KAD0J;Database=DOANCS;Trusted_Connection=Yes;";
 const initalizePassport = require("./pass-config");
 const { time } = require("console");
+const e = require("express");
 initalizePassport(
   passport,
   (email) => {
@@ -457,19 +458,47 @@ app.get(
   "/materials/:id/edit",
   checkAuthenticated,
   authenticateRole(["admin", "teacher"]),
-  (req, res) => {
-    const materialId = req.params.id;
-    const query = `SELECT * FROM materials WHERE id = ?`;
+  async (req, res) => {
+    try {
+      const materialId = req.params.id;
 
-    sql.query(connectionString, query, [materialId], (err, result) => {
-      if (err) return res.status(500).send("Database error");
-      if (result.length === 0)
+      // Get material details with course info
+      const query = `
+        SELECT m.*, c.course_name
+        FROM materials m
+        JOIN courses c ON m.course_id = c.id
+        WHERE m.id = ?
+      `;
+
+      // Get available courses for dropdown
+      const courseQuery = `
+        SELECT id, course_name 
+        FROM courses 
+        WHERE end_date >= GETDATE()
+        ORDER BY course_name
+      `;
+
+      const [material, courses] = await Promise.all([
+        executeQuery(query, [materialId]),
+        executeQuery(courseQuery),
+      ]);
+
+      if (!material.length) {
         return res.status(404).send("Material not found");
+      }
 
-      res.render("editMaterial.ejs", { material: result[0], user: req.user });
-    });
+      res.render("editMaterial.ejs", {
+        material: material[0],
+        courses,
+        user: req.user,
+      });
+    } catch (error) {
+      console.error("Error loading material edit form:", error);
+      res.status(500).send("Error loading material edit form");
+    }
   }
 );
+
 
 app.get("/users", checkAuthenticated, authenticateRole("admin"), (req, res) => {
   const query = `
@@ -493,16 +522,35 @@ ORDER BY u.created_at DESC;
 app.get(
   "/users/:id/edit",
   checkAuthenticated,
-  /*authenticateRole("admin"),*/
-  (req, res) => {
-    const userId = req.params.id;
-    const query = "SELECT * FROM users WHERE id = ?";
+  async (req, res) => {
+    try {
+      const userId = req.params.id;
+      const query = `
+        SELECT u.id, u.username, u.role,
+          COALESCE(s.full_name, t.full_name, a.full_name) AS full_name,
+          COALESCE(s.email, t.email, a.email) AS email,
+          COALESCE(s.phone_number, t.phone_number, a.phone_number) AS phone_number
+        FROM users u
+        LEFT JOIN students s ON u.id = s.user_id
+        LEFT JOIN teachers t ON u.id = t.user_id
+        LEFT JOIN admins a ON u.id = a.user_id
+        WHERE u.id = ?
+      `;
 
-    sql.query(connectionString, query, [userId], (err, rows) => {
-      if (err || rows.length === 0)
-        return res.status(500).send("User not found");
-      res.render("editUser", { user: rows[0] });
-    });
+      const result = await executeQuery(query, [userId]);
+      
+      if (!result.length) {
+        return res.status(404).send("User not found");
+      }
+
+      res.render("editUser.ejs", { 
+        user: req.user,
+        editUser: result[0]
+      });
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).send("Error loading user data");
+    }
   }
 );
 
@@ -543,6 +591,252 @@ app.get(
     res.render("addCourse.ejs", { user: req.user });
   }
 );
+
+app.get(
+  "/schedule/new",
+  checkAuthenticated,
+  authenticateRole("admin"),
+  async (req, res) => {
+    try {
+      const query = `
+        SELECT 
+          c.id,
+          c.class_name,
+          c.course_id,
+          c.teacher_id,
+          CONVERT(varchar(5), c.start_time, 108) as start_time,
+          CONVERT(varchar(5), c.end_time, 108) as end_time,
+          c.weekly_schedule,
+          co.course_name,
+          CONVERT(varchar(10), co.start_date, 23) as start_date,
+          CONVERT(varchar(10), co.end_date, 23) as end_date,
+          t.full_name as teacher_name
+        FROM classes c
+        INNER JOIN courses co ON c.course_id = co.id
+        INNER JOIN teachers t ON c.teacher_id = t.id
+        WHERE co.end_date >= GETDATE()
+        ORDER BY co.start_date ASC, c.class_name
+      `;
+
+      let classes = await executeQuery(query);
+
+      // Process weekly schedule for display
+      const processedClasses = classes.map((cls) => ({
+        ...cls,
+        formattedStartTime: cls.start_time,
+        formattedEndTime: cls.end_time,
+        schedule: cls.weekly_schedule
+          ? cls.weekly_schedule
+              .split(",")
+              .map((day) => {
+                const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+                return days[parseInt(day) - 1];
+              })
+              .join(", ")
+          : "No schedule set",
+      }));
+
+      res.render("newSchedule.ejs", {
+        classes: processedClasses,
+        user: req.user,
+        currentDate: new Date().toISOString().split("T")[0],
+      });
+    } catch (err) {
+      console.error("Error loading schedule form:", err);
+      console.error(err.stack);
+      res.status(500).send("Error loading schedule form");
+    }
+  }
+);
+
+
+
+
+app.delete(
+  "/courses/:id",
+  checkAuthenticated,
+  authenticateRole("admin"),
+  async (req, res) => {
+    try {
+      const courseId = req.params.id;
+
+      // Check if course has any classes
+      const classCheckQuery = `
+      SELECT COUNT(*) as classCount 
+      FROM classes 
+      WHERE course_id = ?
+    `;
+      const classCheck = await executeQuery(classCheckQuery, [courseId]);
+
+      if (classCheck[0].classCount > 0) {
+        req.flash("error", "Cannot delete course that has classes");
+        return res.redirect("/courses");
+      }
+
+      // Check if course has any materials
+      const materialCheckQuery = `
+      SELECT COUNT(*) as materialCount 
+      FROM materials 
+      WHERE course_id = ?
+    `;
+      const materialCheck = await executeQuery(materialCheckQuery, [courseId]);
+
+      if (materialCheck[0].materialCount > 0) {
+        req.flash("error", "Cannot delete course that has materials");
+        return res.redirect("/courses");
+      }
+
+      // If no dependencies, delete the course
+      const deleteQuery = `DELETE FROM courses WHERE id = ?`;
+      await executeQuery(deleteQuery, [courseId]);
+
+      req.flash("success", "Course deleted successfully");
+      res.redirect("/courses");
+    } catch (error) {
+      console.error("Course deletion error:", error);
+      req.flash("error", "Failed to delete course");
+      res.redirect("/courses");
+    }
+  }
+);
+
+
+app.get("/courses/:id", checkAuthenticated, authenticateRole(["admin", "teacher"]), async (req, res) => {
+  try {
+    const courseId = req.params.id;
+    
+    // Get course details with class and material counts
+    const query = `
+      SELECT 
+        c.*,
+        CONVERT(varchar(10), c.start_date, 23) as formatted_start_date,
+        CONVERT(varchar(10), c.end_date, 23) as formatted_end_date,
+        (SELECT COUNT(*) FROM classes WHERE course_id = c.id) as class_count,
+        (SELECT COUNT(*) FROM materials WHERE course_id = c.id) as material_count,
+        (
+          SELECT STRING_AGG(CONCAT(t.full_name, ' (', cls.class_name, ')'), ', ')
+          FROM classes cls
+          JOIN teachers t ON cls.teacher_id = t.id
+          WHERE cls.course_id = c.id
+        ) as teachers_and_classes
+      FROM courses c
+      WHERE c.id = ?
+    `;
+
+    const courseResult = await executeQuery(query, [courseId]);
+
+    if (!courseResult.length) {
+      return res.status(404).send("Course not found");
+    }
+
+    // Get all classes for this course
+    const classesQuery = `
+      SELECT 
+        cls.id,
+        cls.class_name,
+        t.full_name as teacher_name,
+        CONVERT(varchar(5), cls.start_time, 108) as start_time,
+        CONVERT(varchar(5), cls.end_time, 108) as end_time,
+        cls.weekly_schedule,
+        (SELECT COUNT(*) FROM enrollments WHERE class_id = cls.id) as student_count
+      FROM classes cls
+      JOIN teachers t ON cls.teacher_id = t.id
+      WHERE cls.course_id = ?
+      ORDER BY cls.class_name
+    `;
+
+    const classesResult = await executeQuery(classesQuery, [courseId]);
+
+    // Get all materials for this course
+    const materialsQuery = `
+      SELECT id, file_name, uploaded_at
+      FROM materials
+      WHERE course_id = ?
+      ORDER BY uploaded_at DESC
+    `;
+
+    const materialsResult = await executeQuery(materialsQuery, [courseId]);
+
+    // Process the course data
+    const course = {
+      ...courseResult[0],
+      classes: classesResult.map(cls => ({
+        ...cls,
+        schedule: cls.weekly_schedule ? 
+          cls.weekly_schedule.split(',')
+            .map(day => ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][parseInt(day) - 1])
+            .join(', ') : 
+          'No schedule set'
+      })),
+      materials: materialsResult
+    };
+
+    res.render("courseDetail.ejs", {
+      course,
+      user: req.user,
+      messages: {
+        error: req.flash('error'),
+        success: req.flash('success')
+      }
+    });
+
+  } catch (error) {
+    console.error("Error fetching course details:", error);
+    res.status(500).send("Error loading course details");
+  }
+});
+
+
+app.get("/courses/:id/edit", checkAuthenticated, authenticateRole("admin"), async (req, res) => {
+  try {
+    const courseId = req.params.id;
+    
+    // Get course details
+    const query = `
+      SELECT 
+        c.*,
+        CONVERT(varchar(10), c.start_date, 23) as formatted_start_date,
+        CONVERT(varchar(10), c.end_date, 23) as formatted_end_date,
+        (SELECT COUNT(*) FROM classes WHERE course_id = c.id) as class_count,
+        (SELECT COUNT(*) FROM materials WHERE course_id = c.id) as material_count,
+        (
+          SELECT STRING_AGG(CONCAT(t.full_name, ' (', cls.class_name, ')'), ', ') 
+          FROM classes cls
+          JOIN teachers t ON cls.teacher_id = t.id
+          WHERE cls.course_id = c.id
+        ) as teachers_and_classes
+      FROM courses c
+      WHERE c.id = ?
+    `;
+
+    const courseResult = await executeQuery(query, [courseId]);
+
+    if (!courseResult.length) {
+      return res.status(404).send("Course not found");
+    }
+
+    const course = {
+      ...courseResult[0],
+      start_date: new Date(courseResult[0].start_date),
+      end_date: new Date(courseResult[0].end_date)
+    };
+
+    res.render("editCourse.ejs", {
+      course,
+      user: req.user,
+      messages: {
+        error: req.flash('error'),
+        success: req.flash('success')
+      }
+    });
+
+  } catch (error) {
+    console.error("Error loading course edit form:", error);
+    res.status(500).send("Error loading course edit form");
+  }
+});
+
+
 app.get(
   "/courses",
   checkAuthenticated,
@@ -552,32 +846,34 @@ app.get(
       const query = `
       SELECT 
         c.*,
-        cls.class_name,
-        t.full_name AS teacher_name,
-        t.email AS teacher_email,
-        t.phone_number AS teacher_phone,
-        s.day_of_week,
-        s.schedule_date,
-        CONVERT(VARCHAR(5), s.start_time, 108) as schedule_start,
-        CONVERT(VARCHAR(5), s.end_time, 108) as schedule_end,
-        COUNT(e.id) as enrolled_students
+        (SELECT COUNT(*) FROM classes WHERE course_id = c.id) as class_count,
+        (SELECT COUNT(*) FROM materials WHERE course_id = c.id) as material_count,
+        (
+          SELECT STRING_AGG(CONCAT(t.full_name, ' (', cls.class_name, ')'), ', ')
+          FROM classes cls
+          JOIN teachers t ON cls.teacher_id = t.id
+          WHERE cls.course_id = c.id
+        ) as teachers_and_classes
       FROM courses c
-      LEFT JOIN classes cls ON c.id = cls.course_id
-      LEFT JOIN teachers t ON cls.teacher_id = t.id
-      LEFT JOIN schedules s ON cls.id = s.class_id AND s.course_id = c.id
-      LEFT JOIN enrollments e ON cls.id = e.class_id
-      GROUP BY c.id, c.course_name, c.description, c.start_date, c.end_date, 
-               c.tuition_fee, c.created_at, c.updated_at,
-               cls.class_name, t.full_name, t.email, t.phone_number,
-               s.day_of_week, s.schedule_date, s.start_time, s.end_time
-      ORDER BY c.start_date DESC
+      ORDER BY c.created_at DESC
     `;
 
       const courses = await executeQuery(query);
-      res.render("courses.ejs", { courses: courses, user: req.user });
+
+      // Process the results
+      const processedCourses = courses.map((course) => ({
+        ...course,
+        hasClasses: course.class_count > 0,
+        teacherInfo: course.teachers_and_classes || "No classes assigned",
+      }));
+
+      res.render("courses.ejs", {
+        courses: processedCourses,
+        user: req.user,
+      });
     } catch (err) {
-      console.error("Course fetch error:", err);
-      res.status(500).send("Database error");
+      console.error("Fetch courses error:", err);
+      res.status(500).send("Error loading courses");
     }
   }
 );
@@ -745,36 +1041,7 @@ app.post(
   }
 );
 
-app.post(
-  "/schedules/:id",
-  checkAuthenticated,
-  authenticateRole("admin"),
-  (req, res) => {
-    const { class_id, day_of_week, schedule_date, start_time, end_time } =
-      req.body;
-    const query = `
-    UPDATE schedules
-    SET class_id = ?, day_of_week = ?, schedule_date = ?, start_time = ?, end_time = ?
-    WHERE id = ?
-  `;
 
-    const values = [
-      class_id,
-      day_of_week,
-      schedule_date,
-      start_time,
-      end_time,
-      req.params.id,
-    ];
-    sql.query(connectionString, query, values, (err) => {
-      if (err) {
-        console.error("Update schedule error:", err);
-        return res.status(500).send("Update failed");
-      }
-      res.redirect("/schedules");
-    });
-  }
-);
 
 app.delete(
   "/schedules/:id",
@@ -811,29 +1078,30 @@ app.get(
   authenticateRole("admin"),
   async (req, res) => {
     try {
-      // Get all schedules with class and course information
       const query = `
-        SELECT 
-          s.*,
-          c.class_name,
-          co.course_name,
-          co.start_date as course_start,
-          co.end_date as course_end
-        FROM schedules s
-        JOIN classes c ON s.class_id = c.id
-        JOIN courses co ON s.course_id = co.id
-        ORDER BY s.schedule_date DESC
-      `;
+      SELECT 
+        s.*,
+        c.class_name,
+        co.course_name,
+        t.full_name as teacher_name,
+        CONVERT(VARCHAR(5), s.start_time, 108) as formatted_start_time,
+        CONVERT(VARCHAR(5), s.end_time, 108) as formatted_end_time
+      FROM schedules s
+      JOIN classes c ON s.class_id = c.id
+      JOIN courses co ON c.course_id = co.id
+      JOIN teachers t ON c.teacher_id = t.id
+      ORDER BY s.schedule_date DESC, s.start_time ASC
+    `;
 
       const schedules = await executeQuery(query);
-      res.render("schedules.ejs", { schedules: schedules, user: req.user });
-
+      res.render("schedules.ejs", { schedules, user: req.user });
     } catch (err) {
       console.error("Fetch schedules error:", err);
-      res.status(500).send("Database error");
+      res.status(500).send("Error loading schedules");
     }
   }
 );
+
 
 // Add schedule validation middleware
 const validateSchedule = async (req, res, next) => {
@@ -873,80 +1141,186 @@ const validateSchedule = async (req, res, next) => {
 };
 
 // Post route with validation
-app.post("/schedules", checkAuthenticated, authenticateRole("admin"), validateSchedule, async (req, res) => {
-  try {
-    const { class_id, course_id, schedule_date, start_time, end_time, day_of_week } = req.body;
-
-    const query = `
-      INSERT INTO schedules (class_id, course_id, day_of_week, schedule_date, start_time, end_time)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `;
-
-    await executeQuery(query, [class_id, course_id, day_of_week, schedule_date, start_time, end_time]);
-    res.redirect("/schedules");
-
-  } catch (err) {
-    console.error("Insert schedule error:", err);
-    res.status(500).send("Failed to create schedule");
-  }
-});
-
-
-app.get(
-  "/schedules/:id/edit",
+app.post(
+  "/schedules",
   checkAuthenticated,
   authenticateRole("admin"),
   async (req, res) => {
-    const scheduleId = req.params.id;
-
     try {
-      // Get schedule with class and course info
-      const scheduleQuery = `
-        SELECT 
-          s.*,
-          c.class_name,
-          co.course_name,
-          co.start_date as course_start,
-          co.end_date as course_end
-        FROM schedules s
-        JOIN classes c ON s.class_id = c.id
-        JOIN courses co ON s.course_id = co.id
-        WHERE s.id = ?
-      `;
+      const { class_id, schedule_date, start_time, end_time, day_of_week } =
+        req.body;
 
-      // Get all available classes with course info
-      const classQuery = `
-        SELECT 
-          c.id,
-          c.class_name,
-          co.course_name,
-          co.start_date,
-          co.end_date
-        FROM classes c
-        JOIN courses co ON c.course_id = co.id
-      `;
-
-      const [scheduleResult, classList] = await Promise.all([
-        executeQuery(scheduleQuery, [scheduleId]),
-        executeQuery(classQuery)
-      ]);
-
-      if (!scheduleResult.length) {
-        return res.status(404).send("Schedule not found");
+      // Input validation
+      if (
+        !class_id ||
+        !schedule_date ||
+        !start_time ||
+        !end_time ||
+        !day_of_week
+      ) {
+        return res.status(400).send("Missing required fields");
       }
 
-      res.render("editSchedule.ejs", {
-        schedule: scheduleResult[0],
-        classes: classList,
-        user: req.user
-      });
+      // Get course_id for the class
+      const courseQuery = "SELECT course_id FROM classes WHERE id = ?";
+      const courseResult = await executeQuery(courseQuery, [class_id]);
 
+      if (!courseResult.length) {
+        return res.status(404).send("Class not found");
+      }
+
+      const course_id = courseResult[0].course_id;
+
+      // Check for schedule conflicts
+      const conflictQuery = `
+      SELECT id FROM schedules 
+      WHERE class_id = ? 
+      AND schedule_date = ? 
+      AND ((start_time <= ? AND end_time >= ?) 
+        OR (start_time <= ? AND end_time >= ?)
+        OR (start_time >= ? AND end_time <= ?))
+    `;
+
+      const conflicts = await executeQuery(conflictQuery, [
+        class_id,
+        schedule_date,
+        start_time,
+        start_time,
+        end_time,
+        end_time,
+        start_time,
+        end_time,
+      ]);
+
+      if (conflicts.length > 0) {
+        return res.status(409).send("Schedule conflict detected");
+      }
+
+      const insertQuery = `
+      INSERT INTO schedules (
+        class_id, 
+        course_id,
+        day_of_week, 
+        schedule_date, 
+        start_time, 
+        end_time,
+        created_at,
+        updated_at
+      )
+      VALUES (?, ?, ?, ?, ?, ?, GETDATE(), GETDATE())
+    `;
+
+      await executeQuery(insertQuery, [
+        class_id,
+        course_id,
+        day_of_week,
+        schedule_date,
+        start_time,
+        end_time,
+      ]);
+
+      res.redirect("/schedules");
     } catch (err) {
-      console.error("Schedule edit error:", err);
-      res.status(500).send("Error loading schedule edit form");
+      console.error("Create schedule error:", err);
+      res.status(500).send("Failed to create schedule");
     }
   }
 );
+
+
+
+
+app.get("/schedules/:id/edit", checkAuthenticated, authenticateRole("admin"), async (req, res) => {
+  try {
+    const scheduleId = req.params.id;
+
+    // Get schedule details with all related information
+    const scheduleQuery = `
+      SELECT 
+        s.*,
+        c.id as class_id,
+        c.class_name,
+        c.weekly_schedule,
+        co.id as course_id,
+        co.course_name,
+        co.start_date as course_start,
+        co.end_date as course_end,
+        t.full_name as teacher_name,
+        CONVERT(varchar(5), s.start_time, 108) as formatted_start_time,
+        CONVERT(varchar(5), s.end_time, 108) as formatted_end_time,
+        CONVERT(varchar(10), s.schedule_date, 23) as formatted_schedule_date
+      FROM schedules s
+      JOIN classes c ON s.class_id = c.id
+      JOIN courses co ON c.course_id = co.id
+      JOIN teachers t ON c.teacher_id = t.id
+      WHERE s.id = ?
+    `;
+
+    // Get all available classes for dropdown
+    const classesQuery = `
+      SELECT 
+        c.id,
+        c.class_name,
+        co.course_name,
+        t.full_name as teacher_name,
+        CONVERT(varchar(10), co.start_date, 23) as start_date,
+        CONVERT(varchar(10), co.end_date, 23) as end_date,
+        c.weekly_schedule
+      FROM classes c
+      JOIN courses co ON c.course_id = co.id
+      JOIN teachers t ON c.teacher_id = t.id
+      WHERE co.end_date >= GETDATE()
+      ORDER BY co.start_date ASC, c.class_name
+    `;
+
+    // Execute both queries concurrently
+    const [scheduleResults, classesResults] = await Promise.all([
+      executeQuery(scheduleQuery, [scheduleId]),
+      executeQuery(classesQuery)
+    ]);
+
+    if (!scheduleResults.length) {
+      console.error(`Schedule not found with ID: ${scheduleId}`);
+      return res.status(404).render('error.ejs', {
+        message: 'Schedule not found',
+        user: req.user
+      });
+    }
+
+    // Process weekly schedule for classes
+    const processedClasses = classesResults.map(cls => ({
+      ...cls,
+      schedule: cls.weekly_schedule ? 
+        cls.weekly_schedule.split(',')
+          .map(day => ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][parseInt(day) - 1])
+          .join(', ') : 
+        'No schedule set'
+    }));
+
+    res.render("editSchedule.ejs", {
+      schedule: {
+        ...scheduleResults[0],
+        day_name: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][
+          new Date(scheduleResults[0].schedule_date).getDay()
+        ]
+      },
+      classes: processedClasses,
+      user: req.user,
+      messages: {
+        error: req.flash('error'),
+        success: req.flash('success')
+      }
+    });
+
+  } catch (err) {
+    console.error("Schedule edit error:", err);
+    res.status(500).render('error.ejs', {
+      message: 'Error loading schedule edit form',
+      error: err,
+      user: req.user
+    });
+  }
+});
 
 
 //you gonna need to redo this part
@@ -1349,57 +1723,136 @@ app.get("/schedule", checkAuthenticated, (req, res) => {
 
 
 
-app.post(
-  "/classes",
-  checkAuthenticated,
-  authenticateRole(["admin", "teacher"]),
-  (req, res) => {
-    const { class_name, course_id, teacher_id, start_time, end_time } =
-      req.body;
-
-    if (!class_name || !course_id || !teacher_id || !start_time || !end_time) {
-      return res.status(400).send("Missing required fields");
-    }
-
-    const query = `
-    INSERT INTO classes (class_name, course_id, teacher_id, start_time, end_time)
-    VALUES (?, ?, ?, ?, ?);
-  `;
-
-    sql.query(
-      connectionString,
-      query,
-      [class_name, course_id, teacher_id, start_time, end_time],
-      (err) => {
-        if (err) {
-          console.error("Insert class error:", err);
-          return res.status(500).send("Database error");
-        }
-        res.redirect("/classes"); // or render a success page
-      }
-    );
-  }
-);
-
 app.get(
   "/classes",
   checkAuthenticated,
   authenticateRole(["admin", "teacher"]),
-  (req, res) => {
+  async (req, res) => {
+    try {
+      const query = `
+      SELECT 
+        c.id, 
+        c.class_name,
+        c.weekly_schedule,
+        co.course_name,
+        t.full_name AS teacher_name,
+        CONVERT(VARCHAR(5), c.start_time, 108) as formatted_start_time,
+        CONVERT(VARCHAR(5), c.end_time, 108) as formatted_end_time,
+        (SELECT COUNT(*) FROM enrollments WHERE class_id = c.id) as student_count
+      FROM classes c
+      JOIN courses co ON c.course_id = co.id
+      JOIN teachers t ON c.teacher_id = t.id
+      ORDER BY c.created_at DESC
+    `;
+
+      const classes = await executeQuery(query);
+
+      // Process weekly schedule for display
+      classes.forEach((cls) => {
+        if (cls.weekly_schedule) {
+          const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+          cls.scheduleDisplay = cls.weekly_schedule
+            .split(",")
+            .map((day) => days[parseInt(day) - 1])
+            .join(", ");
+        } else {
+          cls.scheduleDisplay = "No schedule set";
+        }
+      });
+
+      res.render("classes.ejs", { classes, user: req.user });
+    } catch (err) {
+      console.error("Fetch classes error:", err);
+      res.status(500).send("Error loading classes");
+    }
+  }
+);
+
+
+// Edit this section in server.js
+app.get("/classes", checkAuthenticated, authenticateRole(["admin", "teacher"]), async (req, res) => {
+  try {
     const query = `
-    SELECT c.*, co.course_name, t.full_name AS teacher_name
-    FROM classes c
-    JOIN courses co ON c.course_id = co.id
-    JOIN teachers t ON c.teacher_id = t.id
-    ORDER BY c.created_at DESC
-  `;
-    sql.query(connectionString, query, (err, rows) => {
-      if (err) {
-        console.error("Fetch classes error:", err);
-        return res.status(500).send("Database error");
+      SELECT 
+        c.*, 
+        co.course_name,
+        t.full_name AS teacher_name,
+        CONVERT(VARCHAR(5), c.start_time, 108) as formatted_start_time,
+        CONVERT(VARCHAR(5), c.end_time, 108) as formatted_end_time
+      FROM classes c
+      JOIN courses co ON c.course_id = co.id
+      JOIN teachers t ON c.teacher_id = t.id
+      ORDER BY c.created_at DESC
+    `;
+
+    const classes = await executeQuery(query);
+    res.render("classes.ejs", { classes, user: req.user });
+  } catch (err) {
+    console.error("Fetch classes error:", err);
+    res.status(500).send("Error loading classes");
+  }
+});
+
+app.post(
+  "/classes/:id",
+  checkAuthenticated,
+  authenticateRole(["admin", "teacher"]),
+  async (req, res) => {
+    try {
+      const {
+        class_name,
+        course_id,
+        teacher_id,
+        start_time,
+        end_time,
+        weekly_days,
+      } = req.body;
+      const classId = req.params.id;
+
+      // Input validation
+      if (
+        !class_name ||
+        !course_id ||
+        !teacher_id ||
+        !start_time ||
+        !end_time ||
+        !weekly_days
+      ) {
+        return res.status(400).send("Missing required fields");
       }
-      res.render("classes.ejs", { classes: rows, user: req.user });
-    });
+
+      // Convert weekly_days array to comma-separated string
+      const weekly_schedule = Array.isArray(weekly_days)
+        ? weekly_days.join(",")
+        : weekly_days;
+
+      const updateQuery = `
+      UPDATE classes 
+      SET class_name = ?,
+          course_id = ?,
+          teacher_id = ?,
+          start_time = ?,
+          end_time = ?,
+          weekly_schedule = ?,
+          updated_at = GETDATE()
+      WHERE id = ?
+    `;
+
+      await executeQuery(updateQuery, [
+        class_name,
+        course_id,
+        teacher_id,
+        start_time,
+        end_time,
+        weekly_schedule,
+        classId,
+      ]);
+
+      res.redirect("/classes");
+    } catch (error) {
+      console.error("Error updating class:", error);
+      res.status(500).send("Failed to update class");
+    }
   }
 );
 
@@ -1407,35 +1860,229 @@ app.get(
   "/classes/:id/edit",
   checkAuthenticated,
   authenticateRole(["admin", "teacher"]),
-  (req, res) => {
-    const classId = req.params.id;
+  async (req, res) => {
+    try {
+      const classId = req.params.id;
 
-    const classQuery = "SELECT * FROM classes WHERE id = ?";
-    const courseQuery = "SELECT id, course_name FROM courses";
-    const teacherQuery = "SELECT id, full_name FROM teachers";
+      // Get class details with related info
+      const classQuery = `
+        SELECT 
+          c.*,
+          co.id as course_id,
+          co.course_name,
+          t.id as teacher_id,
+          t.full_name as teacher_name,
+          CONVERT(VARCHAR(5), c.start_time, 108) as formatted_start_time,
+          CONVERT(VARCHAR(5), c.end_time, 108) as formatted_end_time
+        FROM classes c
+        JOIN courses co ON c.course_id = co.id
+        JOIN teachers t ON c.teacher_id = t.id
+        WHERE c.id = ?
+      `;
 
-    sql.query(connectionString, classQuery, [classId], (err, classResult) => {
-      if (err || classResult.length === 0)
-        return res.status(500).send("Class not found");
+      // Get available courses and teachers for dropdowns
+      const courseQuery = `
+        SELECT id, course_name, start_date, end_date 
+        FROM courses 
+        WHERE end_date >= GETDATE()
+        ORDER BY course_name
+      `;
 
-      sql.query(connectionString, courseQuery, (err, courses) => {
-        if (err) return res.status(500).send("Course fetch error");
+      const teacherQuery = `
+        SELECT t.id, t.full_name, t.email 
+        FROM teachers t
+        ORDER BY t.full_name
+      `;
 
-        sql.query(connectionString, teacherQuery, (err, teachers) => {
-          if (err) return res.status(500).send("Teacher fetch error");
+      const [classResult, courses, teachers] = await Promise.all([
+        executeQuery(classQuery, [classId]),
+        executeQuery(courseQuery),
+        executeQuery(teacherQuery),
+      ]);
 
-          res.render("editClass.ejs", {
-            classItem: classResult[0],
-            courses,
-            teachers,
-            user: req.user,
-          });
-        });
+      if (!classResult.length) {
+        return res.status(404).send("Class not found");
+      }
+
+      res.render("editClass.ejs", {
+        classItem: classResult[0],
+        courses,
+        teachers,
+        user: req.user,
       });
-    });
+    } catch (error) {
+      console.error("Error loading class edit form:", error);
+      res.status(500).send("Error loading class edit form");
+    }
   }
 );
 
+app.delete(
+  "/classes/:id",
+  checkAuthenticated,
+  authenticateRole(["admin", "teacher"]),
+  async (req, res) => {
+    try {
+      const classId = req.params.id;
+
+      // Check if class exists and get related info
+      const checkQuery = `
+        SELECT c.id, c.class_name, COUNT(e.id) as enrollment_count
+        FROM classes c
+        LEFT JOIN enrollments e ON c.id = e.class_id
+        WHERE c.id = ?
+        GROUP BY c.id, c.class_name
+      `;
+
+      const classInfo = await executeQuery(checkQuery, [classId]);
+
+      if (!classInfo.length) {
+        return res.status(404).json({
+          error: "Class not found",
+          code: "CLASS_NOT_FOUND",
+        });
+      }
+
+      // Check for existing enrollments
+      if (classInfo[0].enrollment_count > 0) {
+        return res.status(400).json({
+          error: "Cannot delete class with active enrollments",
+          code: "HAS_ENROLLMENTS",
+          details: {
+            className: classInfo[0].class_name,
+            enrollmentCount: classInfo[0].enrollment_count,
+          },
+        });
+      }
+
+      // First delete related schedules
+      await executeQuery("DELETE FROM schedules WHERE class_id = ?", [classId]);
+
+      // Then delete the class
+      await executeQuery("DELETE FROM classes WHERE id = ?", [classId]);
+
+      // Send success response
+      res.redirect("/classes");
+    } catch (error) {
+      console.error("Class deletion error:", {
+        classId: req.params.id,
+        error: error.message,
+        stack: error.stack,
+      });
+
+      res.status(500).json({
+        error: "Failed to delete class",
+        code: "DELETE_FAILED",
+        message: error.message,
+      });
+    }
+  }
+);
+
+app.post(
+  "/classes",
+  checkAuthenticated,
+  authenticateRole(["admin", "teacher"]),
+  async (req, res) => {
+    try {
+      const {
+        class_name,
+        course_id,
+        teacher_id,
+        start_time,
+        end_time,
+        weekly_days,
+      } = req.body;
+
+      // Input validation
+      if (
+        !class_name ||
+        !course_id ||
+        !teacher_id ||
+        !start_time ||
+        !end_time ||
+        !weekly_days
+      ) {
+        req.flash("error", "Missing required fields");
+        return res.redirect("/classes/new");
+      }
+
+      // Convert weekly_days array to comma-separated string
+      const weekly_schedule = Array.isArray(weekly_days)
+        ? weekly_days.join(",")
+        : weekly_days;
+
+      // Validate course dates
+      const courseQuery = `
+      SELECT start_date, end_date 
+      FROM courses 
+      WHERE id = ?
+    `;
+      const courseResult = await executeQuery(courseQuery, [course_id]);
+
+      if (!courseResult.length) {
+        req.flash("error", "Course not found");
+        return res.redirect("/classes/new");
+      }
+
+      // Check teacher availability
+      const teacherQuery = `
+      SELECT id FROM classes 
+      WHERE teacher_id = ? 
+      AND ((start_time <= ? AND end_time >= ?) 
+        OR (start_time <= ? AND end_time >= ?))
+      AND weekly_schedule LIKE ?
+    `;
+
+      const teacherConflicts = await executeQuery(teacherQuery, [
+        teacher_id,
+        start_time,
+        start_time,
+        end_time,
+        end_time,
+        `%${weekly_schedule}%`,
+      ]);
+
+      if (teacherConflicts.length > 0) {
+        req.flash(
+          "error",
+          "Teacher has conflicting classes during these times"
+        );
+        return res.redirect("/classes/new");
+      }
+
+      const query = `
+      INSERT INTO classes (
+        class_name, 
+        course_id, 
+        teacher_id, 
+        start_time, 
+        end_time, 
+        weekly_schedule,
+        created_at, 
+        updated_at
+      )
+      VALUES (?, ?, ?, ?, ?, ?, GETDATE(), GETDATE())
+    `;
+
+      await executeQuery(query, [
+        class_name,
+        course_id,
+        teacher_id,
+        start_time,
+        end_time,
+        weekly_schedule,
+      ]);
+
+      req.flash("success", "Class created successfully");
+      res.redirect("/classes");
+    } catch (err) {
+      console.error("Create class error:", err);
+      req.flash("error", "Failed to create class");
+      res.redirect("/classes/new");
+    }
+  }
+);
 app.get(
   "/enrollments",
   checkAuthenticated,
@@ -1925,32 +2572,65 @@ app.get("/profile", checkAuthenticated, (req, res) => {
   });
 });
 
+
 app.post(
   "/materials/:id",
   checkAuthenticated,
   authenticateRole(["admin", "teacher"]),
-  (req, res) => {
-    const { course_id, file_name } = req.body;
-    const query = `
-    UPDATE materials
-    SET course_id = ?, 
-        file_name = ?, 
-        uploaded_at = GETDATE()
-    WHERE id = ?
-  `;
+  upload.single("material"),
+  async (req, res) => {
+    try {
+      const materialId = req.params.id;
+      const { course_id } = req.body;
+      const file = req.file;
 
-    sql.query(
-      connectionString,
-      query,
-      [course_id, file_name, req.params.id],
-      (err) => {
-        if (err) {
-          console.error("Update material error:", err);
-          return res.status(500).send("Database error");
-        }
-        res.redirect("/materials");
+      // Get current material info
+      const currentMaterial = await executeQuery(
+        "SELECT * FROM materials WHERE id = ?",
+        [materialId]
+      );
+
+      if (!currentMaterial.length) {
+        return res.status(404).send("Material not found");
       }
-    );
+
+      let updateQuery = "UPDATE materials SET course_id = ?";
+      let queryParams = [course_id];
+
+      // If new file uploaded, update file info
+      if (file) {
+        // Delete old file
+        const oldFilePath = path.join(__dirname, currentMaterial[0].file_path);
+        fs.unlink(oldFilePath, (err) => {
+          if (err) console.error("Error deleting old file:", err);
+        });
+
+        // Update with new file info
+        updateQuery += ", file_name = ?, file_path = ?";
+        queryParams.push(
+          file.originalname,
+          path.join("uploads", file.filename)
+        );
+      }
+
+      updateQuery += ", updated_at = GETDATE() WHERE id = ?";
+      queryParams.push(materialId);
+
+      await executeQuery(updateQuery, queryParams);
+      res.redirect("/materials");
+    } catch (error) {
+      console.error("Error updating material:", error);
+
+      // Delete uploaded file if there was an error
+      if (req.file) {
+        const filePath = path.join(__dirname, "uploads", req.file.filename);
+        fs.unlink(filePath, (err) => {
+          if (err) console.error("Error deleting file:", err);
+        });
+      }
+
+      res.status(500).send("Failed to update material");
+    }
   }
 );
 
@@ -2198,33 +2878,110 @@ app.post(
 app.post(
   "/users/:id",
   checkAuthenticated,
-  authenticateRole("admin"),
-  (req, res) => {
-    const { username, role } = req.body;
-    const query = `
-    UPDATE users SET username = ?, role = ?, updated_at = GETDATE()
-    WHERE id = ?
-  `;
+  async (req, res) => {
+    try {
+     
 
-    sql.query(
-      connectionString,
-      query,
-      [username, role, req.params.id],
-      (err) => {
-        try {
+      const { username, role, full_name, email, phone_number } = req.body;
+      const userId = req.params.id;
+
+      const updateQuery = `
+        BEGIN TRY
+          BEGIN TRANSACTION;
+          
+          UPDATE users 
+          SET username = ?, 
+              role = ?, 
+              updated_at = GETDATE()
+          WHERE id = ?;
+
+          IF ? = 'student'
+          BEGIN
+            DELETE FROM teachers WHERE user_id = ?;
+            DELETE FROM admins WHERE user_id = ?;
+            
+            IF EXISTS (SELECT 1 FROM students WHERE user_id = ?)
+              UPDATE students 
+              SET full_name = ?, email = ?, phone_number = ?, updated_at = GETDATE()
+              WHERE user_id = ?
+            ELSE
+              INSERT INTO students (user_id, full_name, email, phone_number, created_at, updated_at)
+              VALUES (?, ?, ?, ?, GETDATE(), GETDATE());
+          END
+          ELSE IF ? = 'teacher'
+          BEGIN
+            DELETE FROM students WHERE user_id = ?;
+            DELETE FROM admins WHERE user_id = ?;
+            
+            IF EXISTS (SELECT 1 FROM teachers WHERE user_id = ?)
+              UPDATE teachers 
+              SET full_name = ?, email = ?, phone_number = ?, updated_at = GETDATE()
+              WHERE user_id = ?
+            ELSE
+              INSERT INTO teachers (user_id, full_name, email, phone_number, created_at, updated_at)
+              VALUES (?, ?, ?, ?, GETDATE(), GETDATE());
+          END
+          ELSE IF ? = 'admin'
+          BEGIN
+            DELETE FROM students WHERE user_id = ?;
+            DELETE FROM teachers WHERE user_id = ?;
+            
+            IF EXISTS (SELECT 1 FROM admins WHERE user_id = ?)
+              UPDATE admins 
+              SET full_name = ?, email = ?, phone_number = ?, updated_at = GETDATE()
+              WHERE user_id = ?
+            ELSE
+              INSERT INTO admins (user_id, full_name, email, phone_number, created_at, updated_at)
+              VALUES (?, ?, ?, ?, GETDATE(), GETDATE());
+          END
+
+          COMMIT TRANSACTION;
+        END TRY
+        BEGIN CATCH
+          IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+          THROW;
+        END CATCH
+      `;
+
+      const values = [
+        // Update users values
+        username, role, userId,
+        // Student check
+        role, userId, userId, userId,
+        // Student update/insert values
+        full_name, email, phone_number, userId,
+        userId, full_name, email, phone_number,
+        // Teacher check
+        role, userId, userId, userId,
+        // Teacher update/insert values
+        full_name, email, phone_number, userId,
+        userId, full_name, email, phone_number,
+        // Admin check
+        role, userId, userId, userId,
+        // Admin update/insert values
+        full_name, email, phone_number, userId,
+        userId, full_name, email, phone_number
+      ];
+
+      await new Promise((resolve, reject) => {
+        sql.query(connectionString, updateQuery, values, (err, result) => {
           if (err) {
-            console.error("Update error:", err);
-            return res.status(500).send("Update error");
+            console.error("SQL Error:", err);
+            reject(err);
+          } else {
+            resolve(result);
           }
-          res.redirect("/users");
-        } catch (error) {
-          // Ignore headers already sent error
-          if (error.code !== "ERR_HTTP_HEADERS_SENT") {
-            console.error("Unhandled error:", error);
-          }
-        }
-      }
-    );
+        });
+      });
+      if (req.user.role !== "admin") {
+        return res.redirect("/profile");
+      }else {
+      res.redirect("/users");}
+    } catch (error) {
+      console.error("Error updating user:", error);
+      res.status(500).send("Failed to update user. Error: " + error.message);
+    }
   }
 );
 
@@ -2409,30 +3166,117 @@ app.post(
   "/schedules/:id",
   checkAuthenticated,
   authenticateRole("admin"),
-  (req, res) => {
-    const { class_id, day_of_week, schedule_date, start_time, end_time } =
-      req.body;
-    const query = `
-    UPDATE schedules
-    SET class_id = ?, day_of_week = ?, schedule_date = ?, start_time = ?, end_time = ?
-    WHERE id = ?
-  `;
+  async (req, res) => {
+    try {
+      const scheduleId = req.params.id;
+      const { class_id, schedule_date, start_time, end_time, day_of_week } =
+        req.body;
 
-    const values = [
-      class_id,
-      day_of_week,
-      schedule_date,
-      start_time,
-      end_time,
-      req.params.id,
-    ];
-    sql.query(connectionString, query, values, (err) => {
-      if (err) {
-        console.error("Update schedule error:", err);
-        return res.status(500).send("Update failed");
+      // Debug log
+      console.log("Received data:", {
+        scheduleId,
+        class_id,
+        schedule_date,
+        start_time,
+        end_time,
+        day_of_week,
+      });
+
+      // Input validation with specific error messages
+      const missingFields = [];
+      if (!class_id) missingFields.push("Class");
+      if (!schedule_date) missingFields.push("Schedule date");
+      if (!start_time) missingFields.push("Start time");
+      if (!end_time) missingFields.push("End time");
+      if (!day_of_week) missingFields.push("Day of week");
+
+      if (missingFields.length > 0) {
+        req.flash(
+          "error",
+          `Missing required fields: ${missingFields.join(", ")}`
+        );
+        return res.redirect(`/schedules/${scheduleId}/edit`);
       }
+
+      // Get course_id for the class
+      const courseQuery = "SELECT course_id FROM classes WHERE id = ?";
+      const courseResult = await executeQuery(courseQuery, [class_id]);
+
+      if (!courseResult.length) {
+        req.flash("error", "Class not found");
+        return res.redirect(`/schedules/${scheduleId}/edit`);
+      }
+
+      const course_id = courseResult[0].course_id;
+
+      // Update schedule
+      const updateQuery = `
+      UPDATE schedules 
+      SET class_id = ?,
+          course_id = ?,
+          day_of_week = ?,
+          schedule_date = ?,
+          start_time = ?,
+          end_time = ?,
+          updated_at = GETDATE()
+      WHERE id = ?
+    `;
+
+      await executeQuery(updateQuery, [
+        class_id,
+        course_id,
+        day_of_week,
+        schedule_date,
+        start_time,
+        end_time,
+        scheduleId,
+      ]);
+
+      req.flash("success", "Schedule updated successfully");
       res.redirect("/schedules");
-    });
+    } catch (err) {
+      console.error("Update schedule error:", err);
+      req.flash("error", "Failed to update schedule");
+      res.redirect(`/schedules/${req.params.id}/edit`);
+    }
+  }
+);
+
+
+app.get(
+  "/schedules/new",
+  checkAuthenticated,
+  authenticateRole("admin"),
+  async (req, res) => {
+    try {
+      // Get active classes with course and teacher info
+      const query = `
+      SELECT 
+        c.id,
+        c.class_name,
+        co.id as course_id, 
+        co.course_name,
+        t.full_name as teacher_name,
+        co.start_date,
+        co.end_date
+      FROM classes c
+      JOIN courses co ON c.course_id = co.id
+      JOIN teachers t ON c.teacher_id = t.id
+      WHERE co.end_date >= GETDATE()
+      ORDER BY co.start_date ASC, c.class_name
+    `;
+
+      const classes = await executeQuery(query);
+
+      res.render("newSchedule.ejs", {
+        user: req.user,
+        classes: classes,
+        currentDate: new Date().toISOString().split("T")[0],
+      });
+    } catch (err) {
+      console.error("Error loading schedule form:", err);
+      res.status(500).send("Error loading schedule form");
+    }
   }
 );
 
@@ -2443,19 +3287,18 @@ app.delete(
   async (req, res) => {
     try {
       const scheduleId = req.params.id;
-      
+
       // Check if schedule exists
       const checkQuery = "SELECT id FROM schedules WHERE id = ?";
       const schedule = await executeQuery(checkQuery, [scheduleId]);
-      
+
       if (!schedule.length) {
         return res.status(404).send("Schedule not found");
       }
 
       // Delete schedule
-      const deleteQuery = "DELETE FROM schedules WHERE id = ?";
-      await executeQuery(deleteQuery, [scheduleId]);
-      
+      await executeQuery("DELETE FROM schedules WHERE id = ?", [scheduleId]);
+
       res.redirect("/schedules");
     } catch (err) {
       console.error("Delete schedule error:", err);

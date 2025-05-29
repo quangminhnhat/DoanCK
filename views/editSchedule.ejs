@@ -97,14 +97,14 @@
                             User</span></a>
                     <a href="/enrollments" class="nav-button"><i
                             class="fas fa-user-plus"></i><span>Enrollments</span></a>
-                    <a href="/payments" class="nav-button"><i class="fas fa-money-bill"></i><span>Payments</span></a>
+                     
                     <a href="/schedules" class="nav-button"><i class="fas fa-money-bill"></i><span>schedules
                             list</span></a>
                     <a href="/courses/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Course</span></a>
                     <a href="/classes/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Class</span></a>
                     <a href="/enrollments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add
                             Enrollment</span></a>
-                    <a href="/payments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Payment</span></a>
+                     
                     <a href="/schedule/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Schedule</span></a>
                     <% } %>
 
@@ -150,56 +150,115 @@
     </header>
 
 
-    <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl m-4 p-6">
-        <h1 class="text-2xl font-bold mb-4 text-center">Edit Schedule</h1>
-        <form method="POST" action="/schedules/<%= schedule.id %>" class="space-y-4">
-            <div class="flex flex-col">
-                <label class="text-gray-700 font-medium mb-1">Class:</label>
-                <select name="class_id" required
-                    class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <% classes.forEach(cls => { %>
-                    <option value="<%= cls.id %>" <% if (cls.id === schedule.class_id) { %>selected<% } %>>
-                        <%= cls.class_name %>
-                    </option>
-                    <% }) %>
-                </select>
+    <div class="container mx-auto px-4 py-8">
+      <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
+        <h1 class="text-2xl font-bold mb-6">Edit Schedule</h1>
+
+        <% if (messages.error) { %>
+          <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <%= messages.error %>
+          </div>
+        <% } %>
+
+        <form method="POST" action="/schedules/<%= schedule.id %>" class="space-y-6">
+          <div class="form-group">
+            <label for="class_id" class="block text-sm font-medium text-gray-700">Class:</label>
+            <select id="class_id" name="class_id" class="mt-1 block w-full rounded-md border-gray-300" required>
+              <% classes.forEach(cls => { %>
+                <option value="<%= cls.id %>" 
+                        <%= cls.id === schedule.class_id ? 'selected' : '' %>
+                        data-course-start="<%= cls.start_date %>"
+                        data-course-end="<%= cls.end_date %>">
+                  <%= cls.class_name %> - <%= cls.course_name %> (<%= cls.teacher_name %>)
+                </option>
+              <% }) %>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="schedule_date" class="block text-sm font-medium text-gray-700">Date:</label>
+            <input type="date" 
+                   id="schedule_date" 
+                   name="schedule_date" 
+                   value="<%= schedule.formatted_schedule_date %>"
+                   class="mt-1 block w-full rounded-md border-gray-300" 
+                   required>
+          </div>
+
+          <div class="form-group">
+            <label for="day_of_week" class="block text-sm font-medium text-gray-700">Day of Week:</label>
+            <select id="day_of_week" name="day_of_week" class="mt-1 block w-full rounded-md border-gray-300" required>
+              <option value="Monday" <%= schedule.day_of_week === 'Monday' ? 'selected' : '' %>>Monday</option>
+              <option value="Tuesday" <%= schedule.day_of_week === 'Tuesday' ? 'selected' : '' %>>Tuesday</option>
+              <option value="Wednesday" <%= schedule.day_of_week === 'Wednesday' ? 'selected' : '' %>>Wednesday</option>
+              <option value="Thursday" <%= schedule.day_of_week === 'Thursday' ? 'selected' : '' %>>Thursday</option>
+              <option value="Friday" <%= schedule.day_of_week === 'Friday' ? 'selected' : '' %>>Friday</option>
+              <option value="Saturday" <%= schedule.day_of_week === 'Saturday' ? 'selected' : '' %>>Saturday</option>
+              <option value="Sunday" <%= schedule.day_of_week === 'Sunday' ? 'selected' : '' %>>Sunday</option>
+            </select>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="form-group">
+              <label for="start_time" class="block text-sm font-medium text-gray-700">Start Time:</label>
+              <input type="time" 
+                     id="start_time" 
+                     name="start_time" 
+                     value="<%= schedule.formatted_start_time %>"
+                     class="mt-1 block w-full rounded-md border-gray-300" 
+                     required>
             </div>
 
-            <div class="flex flex-col">
-                <label class="text-gray-700 font-medium mb-1">Day of Week:</label>
-                <input type="text" name="day_of_week" value="<%= schedule.day_of_week %>" required
-                    class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <div class="form-group">
+              <label for="end_time" class="block text-sm font-medium text-gray-700">End Time:</label>
+              <input type="time" 
+                     id="end_time" 
+                     name="end_time" 
+                     value="<%= schedule.formatted_end_time %>"
+                     class="mt-1 block w-full rounded-md border-gray-300" 
+                     required>
             </div>
+          </div>
 
-            <div class="flex flex-col">
-                <label class="text-gray-700 font-medium mb-1">Date:</label>
-                <input type="date" name="schedule_date"
-                    value="<%= schedule.schedule_date.toISOString().split('T')[0] %>" required
-                    class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-
-            <div class="flex flex-col">
-                <label class="text-gray-700 font-medium mb-1">Start Time:</label>
-                <input type="time" name="start_time" value="<%= schedule.start_time %>" required
-                    class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-
-            <div class="flex flex-col">
-                <label class="text-gray-700 font-medium mb-1">End Time:</label>
-                <input type="time" name="end_time" value="<%= schedule.end_time %>" required
-                    class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-
-            <div class="flex justify-between items-center mt-6">
-                <a href="/schedules" class="text-blue-500 hover:text-blue-700 font-medium">
-                    Back to schedules
-                </a>
-                <button type="submit"
-                    class="bg-blue-500 text-black px-4 py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    Update Schedule
-                </button>
-            </div>
+          <div class="flex justify-end space-x-4">
+            <a href="/schedules" class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
+              Cancel
+            </a>
+            <button type="submit" class="px-4 py-2 bg-blue-500 text-black rounded hover:bg-blue-600">
+              Update Schedule
+            </button>
+          </div>
         </form>
+      </div>
+
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          const form = document.querySelector('form');
+          const classSelect = document.getElementById('class_id');
+          const dateInput = document.getElementById('schedule_date');
+          const startTimeInput = document.getElementById('start_time');
+          const endTimeInput = document.getElementById('end_time');
+
+          form.addEventListener('submit', function(e) {
+            const selected = classSelect.options[classSelect.selectedIndex];
+            const scheduleDate = new Date(dateInput.value);
+            const courseStart = new Date(selected.dataset.courseStart);
+            const courseEnd = new Date(selected.dataset.courseEnd);
+            
+            if (scheduleDate < courseStart || scheduleDate > courseEnd) {
+              e.preventDefault();
+              alert('Schedule date must be within the course dates');
+              return;
+            }
+
+            if (startTimeInput.value >= endTimeInput.value) {
+              e.preventDefault();
+              alert('End time must be after start time');
+              return;
+            }
+          });
+        });
+      </script>
     </div>
 
     <footer class="relative bg-blueGray-200 pt-8 pb-6">

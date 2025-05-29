@@ -97,14 +97,14 @@
                             User</span></a>
                     <a href="/enrollments" class="nav-button"><i
                             class="fas fa-user-plus"></i><span>Enrollments</span></a>
-                    <a href="/payments" class="nav-button"><i class="fas fa-money-bill"></i><span>Payments</span></a>
+                     
                     <a href="/schedules" class="nav-button"><i class="fas fa-money-bill"></i><span>schedules
                             list</span></a>
                     <a href="/courses/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Course</span></a>
                     <a href="/classes/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Class</span></a>
                     <a href="/enrollments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add
                             Enrollment</span></a>
-                    <a href="/payments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Payment</span></a>
+                     
                     <a href="/schedule/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Schedule</span></a>
                     <% } %>
 
@@ -150,62 +150,83 @@
     </header>
 
 
-    <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl m-4 p-6">
-        <h1 class="text-2xl font-bold mb-4 text-center">Edit Class</h1>
+
+    <div class="container mx-auto px-4 py-6">
+      <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
+        <h1 class="text-2xl font-bold mb-6 text-center">Edit Class</h1>
+
         <form method="POST" action="/classes/<%= classItem.id %>" class="space-y-4">
-            <div class="flex flex-col">
-                <label class="text-gray-700 font-medium mb-1">Class Name:</label>
-                <input type="text" name="class_name" value="<%= classItem.class_name %>" required
-                    class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Class Name</label>
+            <input type="text" name="class_name" value="<%= classItem.class_name %>" required
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Course</label>
+            <select name="course_id" required
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+              <% courses.forEach(course => { %>
+                <option value="<%= course.id %>" <%= course.id === classItem.course_id ? 'selected' : '' %>>
+                  <%= course.course_name %>
+                </option>
+              <% }) %>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Teacher</label>
+            <select name="teacher_id" required
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+              <% teachers.forEach(teacher => { %>
+                <option value="<%= teacher.id %>" <%= teacher.id === classItem.teacher_id ? 'selected' : '' %>>
+                  <%= teacher.full_name %>
+                </option>
+              <% }) %>
+            </select>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Start Time</label>
+              <input type="time" name="start_time" value="<%= classItem.formatted_start_time %>" required
+                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
             </div>
 
-            <div class="flex flex-col">
-                <label class="text-gray-700 font-medium mb-1">Course:</label>
-                <select name="course_id" required
-                    class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <% courses.forEach(course => { %>
-                    <option value="<%= course.id %>" <% if (course.id === classItem.course_id) { %>selected<% } %>>
-                        <%= course.course_name %>
-                    </option>
-                    <% }) %>
-                </select>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">End Time</label>
+              <input type="time" name="end_time" value="<%= classItem.formatted_end_time %>" required
+                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
             </div>
+          </div>
 
-            <div class="flex flex-col">
-                <label class="text-gray-700 font-medium mb-1">Teacher:</label>
-                <select name="teacher_id" required
-                    class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <% teachers.forEach(teacher => { %>
-                    <option value="<%= teacher.id %>" <% if (teacher.id === classItem.teacher_id) { %>selected<% } %>>
-                        <%= teacher.full_name %>
-                    </option>
-                    <% }) %>
-                </select>
+          <div class="form-group">
+            <label>Weekly Schedule</label>
+            <div class="grid grid-cols-7 gap-2">
+                <% const selectedDays = classItem.weekly_schedule ? classItem.weekly_schedule.split(',').map(Number) : []; %>
+                <% ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].forEach((day, index) => { %>
+                <div class="flex items-center">
+                    <input type="checkbox" name="weekly_days" value="<%= index + 1 %>"
+                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        <%= selectedDays.includes(index + 1) ? 'checked' : '' %>>
+                    <label class="ml-2 text-sm text-gray-600"><%= day %></label>
+                </div>
+                <% }) %>
             </div>
+          </div>
 
-            <div class="flex flex-col">
-                <label class="text-gray-700 font-medium mb-1">Start Time:</label>
-                <input type="time" name="start_time" value="<%= classItem.start_time %>" required
-                    class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-
-            <div class="flex flex-col">
-                <label class="text-gray-700 font-medium mb-1">End Time:</label>
-                <input type="time" name="end_time" value="<%= classItem.end_time %>" required
-                    class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-
-            <div class="flex justify-between items-center mt-6">
-                <a href="/classes" class="text-blue-500 hover:text-blue-700 font-medium">
-                    Back to class list
-                </a>
-                <button type="submit"
-                    class="bg-blue-500 text-black px-4 py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    Update Class
-                </button>
-            </div>
+          <div class="mt-6 flex justify-between">
+            <a href="/classes" class="bg-gray-500 text-black px-4 py-2 rounded hover:bg-gray-600">
+              Back
+            </a>
+            <button type="submit" class="bg-blue-500 text-black px-4 py-2 rounded hover:bg-blue-600">
+              Save Changes
+            </button>
+          </div>
         </form>
+      </div>
     </div>
+
 
     <footer class="relative bg-blueGray-200 pt-8 pb-6">
         <div class="container mx-auto px-4">

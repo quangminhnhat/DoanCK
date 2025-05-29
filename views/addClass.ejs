@@ -183,14 +183,14 @@
                             User</span></a>
                     <a href="/enrollments" class="nav-button"><i
                             class="fas fa-user-plus"></i><span>Enrollments</span></a>
-                    <a href="/payments" class="nav-button"><i class="fas fa-money-bill"></i><span>Payments</span></a>
+                     
                     <a href="/schedules" class="nav-button"><i class="fas fa-money-bill"></i><span>schedules
                             list</span></a>
                     <a href="/courses/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Course</span></a>
                     <a href="/classes/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Class</span></a>
                     <a href="/enrollments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add
                             Enrollment</span></a>
-                    <a href="/payments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Payment</span></a>
+                     
                     <a href="/schedule/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Schedule</span></a>
                     <% } %>
 
@@ -240,61 +240,183 @@
         <div class="form-container">
             <h1 class="form-title">Add New Class</h1>
 
-            <form action="/classes" method="POST">
+            <form action="/classes" method="POST" class="space-y-6">
                 <div class="form-group">
-                    <label for="class_name">Class Name</label>
-                    <input type="text" id="class_name" name="class_name" class="form-control" required>
+                    <label for="class_name" class="block text-sm font-medium text-gray-700">Class Name</label>
+                    <input type="text" 
+                           id="class_name" 
+                           name="class_name" 
+                           class="mt-1 block w-full rounded-md border-gray-300" 
+                           required>
                 </div>
 
                 <div class="form-group">
-                    <label for="course_id">Course</label>
-                    <select id="course_id" name="course_id" class="form-control" required>
+                    <label for="course_id" class="block text-sm font-medium text-gray-700">Course</label>
+                    <select id="course_id" 
+                            name="course_id" 
+                            class="mt-1 block w-full rounded-md border-gray-300" 
+                            required>
                         <option value="">Select Course</option>
                         <% courses.forEach(course => { %>
-                        <option value="<%= course.id %>">
-                            <%= course.course_name %>
-                        </option>
+                            <option value="<%= course.id %>"
+                                    data-start="<%= course.start_date %>"
+                                    data-end="<%= course.end_date %>">
+                                <%= course.course_name %>
+                            </option>
                         <% }) %>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label for="teacher_id">Teacher</label>
-                    <select id="teacher_id" name="teacher_id" class="form-control" required>
+                    <label for="teacher_id" class="block text-sm font-medium text-gray-700">Teacher</label>
+                    <select id="teacher_id" 
+                            name="teacher_id" 
+                            class="mt-1 block w-full rounded-md border-gray-300" 
+                            required>
                         <option value="">Select Teacher</option>
                         <% teachers.forEach(teacher => { %>
-                        <option value="<%= teacher.id %>">
-                            <%= teacher.full_name %>
-                        </option>
+                            <option value="<%= teacher.id %>">
+                                <%= teacher.full_name %>
+                            </option>
                         <% }) %>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label>Class Time</label>
-                    <div class="time-inputs">
-                        <div>
-                            <label for="start_time">Start Time</label>
-                            <input type="time" id="start_time" name="start_time" class="form-control" required>
-                        </div>
-                        <div>
-                            <label for="end_time">End Time</label>
-                            <input type="time" id="end_time" name="end_time" class="form-control" required>
-                        </div>
+                    <label class="block text-sm font-medium text-gray-700">Weekly Schedule</label>
+                    <div class="grid grid-cols-7 gap-2 mt-1">
+                        <% ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].forEach((day, index) => { %>
+                            <div class="flex items-center">
+                                <input type="checkbox" 
+                                       name="weekly_days" 
+                                       value="<%= index + 1 %>"
+                                       class="h-4 w-4 text-blue-600 rounded border-gray-300">
+                                <label class="ml-2 text-sm text-gray-600"><%= day %></label>
+                            </div>
+                        <% }) %>
                     </div>
                 </div>
 
-                <div class="button-group">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Add Class
-                    </button>
-                    <a href="/classes" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left"></i> Back
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label for="start_time" class="block text-sm font-medium text-gray-700">Start Time</label>
+                        <input type="time" 
+                               id="start_time" 
+                               name="start_time" 
+                               class="mt-1 block w-full rounded-md border-gray-300" 
+                               required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="end_time" class="block text-sm font-medium text-gray-700">End Time</label>
+                        <input type="time" 
+                               id="end_time" 
+                               name="end_time" 
+                               class="mt-1 block w-full rounded-md border-gray-300" 
+                               required>
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-4">
+                    <a href="/classes" 
+                       class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
+                        Cancel
                     </a>
+                    <button type="submit" 
+                            class="px-4 py-2 bg-blue-500 text-black rounded hover:bg-blue-600">
+                        Create Class
+                    </button>
                 </div>
             </form>
         </div>
     </main>
+
+
+    <footer class="relative bg-blueGray-200 pt-8 pb-6">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-wrap text-left lg:text-left">
+                <div class="w-full lg:w-6/12 px-4">
+                    <h4 class="text-3xl fonat-semibold text-blueGray-700">Liên hệ với chúng tôi!</h4>
+                    <h5 class="text-lg mt-0 mb-2 text-blueGray-600">
+                        Tìm kiếm chúng tôi trên bất kỳ mạng xã hội nào và gửi cho chúng tôi một tin nhắn! Chúng tôi sẽ trả
+                        lời bạn
+                        ngay khi có thể.
+                    </h5>
+                    <div class="mt-6 lg:mb-0 mb-6">
+                        <button
+                            class="bg-white text-lightBlue-400 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
+                            type="button">
+                            <i class="fab fa-twitter"></i></button><button
+                            class="bg-white text-lightBlue-600 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
+                            type="button">
+                            <i class="fab fa-facebook-square"></i></button><button
+                            class="bg-white text-pink-400 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
+                            type="button">
+                            <i class="fab fa-dribbble"></i></button><button
+                            class="bg-white text-blueGray-800 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
+                            type="button">
+                            <i class="fab fa-github"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="w-full lg:w-6/12 px-4">
+                    <div class="flex flex-wrap items-top mb-6">
+                        <div class="w-full lg:w-4/12 px-4 ml-auto">
+                            <span class="block uppercase text-blueGray-500 text-sm font-semibold mb-2">Bạn Đang Tìm
+                                Kiếm</span>
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm"
+                                        href="">Liên
+                                        Hệ</a>
+                                </li>
+                                <li>
+                                    <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm"
+                                        href="">Thông
+                                        Tin Mới</a>
+                                </li>
+                                <li>
+                                    <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm"
+                                        href="">Tuyển
+                                        Dụng</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-6 border-blueGray-300">
+            <div class="flex flex-wrap items-center md:justify-between justify-center">
+                <div class="w-full md:w-4/12 px-4 mx-auto text-center">
+                    <div class="text-sm text-blueGray-500 font-semibold py-1">
+                        Copyright © <span id="get-current-year">2025</span><a href="https://www.facebook.com/ttgdvpttnht"
+                            class="text-blueGray-500 hover:text-gray-800" target="_blank"> Talent Education</a>. Made by
+                        <a href="https://github.com/Rin-0808" class="text-blueGray-500 hover:text-blueGray-800">Rin</a>.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script>
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const startTime = document.getElementById('start_time').value;
+        const endTime = document.getElementById('end_time').value;
+        const weeklyDays = document.querySelectorAll('input[name="weekly_days"]:checked');
+        
+        if (weeklyDays.length === 0) {
+            e.preventDefault();
+            alert('Please select at least one day for the weekly schedule');
+            return;
+        }
+
+        if (startTime >= endTime) {
+            e.preventDefault();
+            alert('End time must be after start time');
+            return;
+        }
+    });
+    </script>
+
 </body>
 
 </html>

@@ -106,14 +106,14 @@
                             User</span></a>
                     <a href="/enrollments" class="nav-button"><i
                             class="fas fa-user-plus"></i><span>Enrollments</span></a>
-                    <a href="/payments" class="nav-button"><i class="fas fa-money-bill"></i><span>Payments</span></a>
+                     
                     <a href="/schedules" class="nav-button"><i class="fas fa-money-bill"></i><span>schedules
                             list</span></a>
                     <a href="/courses/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Course</span></a>
                     <a href="/classes/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Class</span></a>
                     <a href="/enrollments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add
                             Enrollment</span></a>
-                    <a href="/payments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Payment</span></a>
+                     
                     <a href="/schedule/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Schedule</span></a>
                     <% } %>
 
@@ -170,7 +170,6 @@
 
             <div class="overflow-x-auto">
                 <table id="materialsTable" class="display w-full table-auto">
-
                     <thead>
                         <tr class="bg-gray-50 text-gray-600 uppercase text-sm leading-normal">
                             <th class="py-3 px-6 text-left">ID</th>
@@ -181,44 +180,15 @@
                         </tr>
                     </thead>
                     <tbody class="text-gray-600 text-sm">
-                        <% if (materials.length === 0) { %>
-                        <tr>
-                            <td colspan="5" class="py-4 px-6 text-center text-gray-500">
-                                No materials found
-                            </td>
-                        </tr>
-                        <% } else { %>
                         <% materials.forEach(material => { %>
-                        <tr class="border-b border-gray-200 hover:bg-gray-50">
-                            <td class="py-3 px-6"><%= material.id %></td>
-                            <td class="py-3 px-6"><%= material.course_id %></td>
-                            <td class="py-3 px-6">
-                                <a href="/<%= material.file_path %>" target="_blank"
-                                    class="text-blue-600 hover:text-blue-900 hover:underline">
-                                    <%= material.file_name %>
-                                </a>
-                            </td>
-                            <td class="py-3 px-6">
-                                <%= material.uploaded_at.toLocaleDateString() %>
-                            </td>
-                            <td class="py-3 px-6 text-center">
-                                <div class="flex item-center justify-center gap-2">
-                                    <a href="/materials/<%= material.id %>/edit"
-                                        class="text-blue-600 hover:text-blue-900" title="Edit">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <form action="/materials/<%= material.id %>?_method=DELETE" method="POST"
-                                        class="inline-block"
-                                        onsubmit="return confirm('Are you sure you want to delete this file?')">
-                                        <button type="submit" class="text-red-600 hover:text-red-900" title="Delete">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
+                        <tr data-id="<%= material.id %>">
+                            <td><%= material.id %></td>
+                            <td><%= material.course_id %></td>
+                            <td data-file-path="<%= material.file_path %>"><%= material.file_name %></td>
+                            <td><%= material.uploaded_at %></td>
+                            <td class="text-center"></td>
                         </tr>
                         <% }) %>
-                        <% } %>
                     </tbody>
                 </table>
             </div>
@@ -296,6 +266,49 @@
         $(document).ready(function () {
             $('#materialsTable').DataTable({
                 responsive: true,
+                columns: [
+                    { data: 'id' },
+                    { data: 'course_id' },
+                    { 
+                        data: 'file_name',
+                        render: function(data, type, row) {
+                            return `<a href="/${row.file_path}" target="_blank" 
+                                      class="text-blue-600 hover:text-blue-900 hover:underline">
+                                    ${data}
+                                   </a>`;
+                        }
+                    },
+                    { 
+                        data: 'uploaded_at',
+                        render: function(data) {
+                            return new Date(data).toLocaleDateString();
+                        }
+                    },
+                    {
+                        data: null,
+                        orderable: false,
+                        render: function(data, type, row) {
+                            return `
+                                <div class="flex item-center justify-center gap-2">
+                                    <a href="/materials/${row.id}/edit" 
+                                       class="text-blue-600 hover:text-blue-900" 
+                                       title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form action="/materials/${row.id}?_method=DELETE" 
+                                          method="POST"
+                                          class="inline-block"
+                                          onsubmit="return confirm('Are you sure you want to delete this file?')">
+                                    <button type="submit" 
+                                            class="text-red-600 hover:text-red-900" 
+                                            title="Delete">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                            </div>`;
+                        }
+                    }
+                ],
                 language: {
                     search: "Tìm kiếm:",
                     lengthMenu: "Hiển thị _MENU_ tài liệu",

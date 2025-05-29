@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,7 +21,7 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        .form-title {
+        .form-title { 
             font-size: 1.8rem;
             color: #2d3748;
             margin-bottom: 2rem;
@@ -56,7 +55,6 @@
             font-weight: 500;
             color: #4a5568;
         }
-
         .form-control {
             padding: 0.5rem;
             border: 1px solid #e2e8f0;
@@ -107,7 +105,6 @@
         }
     </style>
 </head>
-
 <body>
     <header>
         <div class="header-container">
@@ -191,14 +188,14 @@
                             User</span></a>
                     <a href="/enrollments" class="nav-button"><i
                             class="fas fa-user-plus"></i><span>Enrollments</span></a>
-                    <a href="/payments" class="nav-button"><i class="fas fa-money-bill"></i><span>Payments</span></a>
+                     
                     <a href="/schedules" class="nav-button"><i class="fas fa-money-bill"></i><span>schedules
                             list</span></a>
                     <a href="/courses/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Course</span></a>
                     <a href="/classes/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Class</span></a>
                     <a href="/enrollments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add
                             Enrollment</span></a>
-                    <a href="/payments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Payment</span></a>
+                     
                     <a href="/schedule/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Schedule</span></a>
                     <% } %>
 
@@ -243,18 +240,23 @@
 
     </header>
     <div class="form-container">
-        <h1 class="form-title">Add New Schedule</h1>
-        <form method="POST" action="/schedules" class="schedule-form" id="scheduleForm">
+        <h2 class="text-2xl font-bold mb-4">Add New Schedule</h2>
+        
+        <form method="POST" action="/schedules" id="scheduleForm">
             <div class="form-group">
-                <label for="class_id">course:</label>
+                <label for="class_id">Class:</label>
                 <select id="class_id" name="class_id" class="form-control" required>
+                    <option value="">Select a class</option>
                     <% classes.forEach(cls => { %>
-                    <option value="<%= cls.id %>" 
-                            data-course-id="<%= cls.course_id %>"
-                            data-course-start="<%= cls.start_date %>"
-                            data-course-end="<%= cls.end_date %>">
-                        <%= cls.class_name %> - <%= cls.course_name %>
-                    </option>
+                        <option value="<%= cls.id %>"
+                                data-course-id="<%= cls.course_id %>"
+                                data-course-start="<%= cls.start_date %>"
+                                data-course-end="<%= cls.end_date %>"
+                                data-class-start="<%= cls.formattedStartTime %>"
+                                data-class-end="<%= cls.formattedEndTime %>">
+                            <%= cls.class_name %> - <%= cls.course_name %> 
+                            (<%= cls.teacher_name %>) - <%= cls.schedule %>
+                        </option>
                     <% }) %>
                 </select>
             </div>
@@ -262,13 +264,13 @@
             <div class="form-group">
                 <label for="day_of_week">Day of Week:</label>
                 <select id="day_of_week" name="day_of_week" class="form-control" required>
-                    <option value="Monday">Monday (2)</option>
-                    <option value="Tuesday">Tuesday (3)</option>
-                    <option value="Wednesday">Wednesday (4)</option>
-                    <option value="Thursday">Thursday (5)</option>
-                    <option value="Friday">Friday (6)</option>
-                    <option value="Saturday">Saturday (7)</option>
-                    <option value="Sunday">Sunday (1)</option>
+                    <option value="Monday">Monday</option>
+                    <option value="Tuesday">Tuesday</option>
+                    <option value="Wednesday">Wednesday</option>
+                    <option value="Thursday">Thursday</option>
+                    <option value="Friday">Friday</option>
+                    <option value="Saturday">Saturday</option>
+                    <option value="Sunday">Sunday</option>
                 </select>
             </div>
 
@@ -278,24 +280,25 @@
                        class="form-control" required>
             </div>
 
-            <div class="form-row">
-                <div class="form-group half">
-                    <label for="start_time">Start Time:</label>
-                    <input type="time" id="start_time" name="start_time" 
-                           class="form-control" required>
-                </div>
-                <div class="form-group half">
-                    <label for="end_time">End Time:</label>
-                    <input type="time" id="end_time" name="end_time" 
-                           class="form-control" required>
-                </div>
+            <div class="form-group">
+                <label for="start_time">Start Time:</label>
+                <input type="time" id="start_time" name="start_time" 
+                       class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label for="end_time">End Time:</label>
+                <input type="time" id="end_time" name="end_time" 
+                       class="form-control" required>
             </div>
 
             <input type="hidden" id="course_id" name="course_id">
 
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Add Schedule</button>
-                <a href="/schedules" class="btn btn-secondary">Back</a>
+            <div class="flex justify-between mt-4">
+                <a href="/schedules" class="bg-gray-500 text-black px-4 py-2 rounded">Back</a>
+                <button type="submit" class="bg-blue-500 text-black px-4 py-2 rounded">
+                    Create Schedule
+                </button>
             </div>
         </form>
     </div>
@@ -367,45 +370,44 @@
         </div>
     </footer>
     <script>
-document.getElementById('scheduleForm').addEventListener('submit', function(e) {
-    const classSelect = document.getElementById('class_id');
-    const selectedOption = classSelect.options[classSelect.selectedIndex];
-    
-    // Set course_id from selected class
-    document.getElementById('course_id').value = selectedOption.dataset.courseId;
-    
-    // Validate schedule date against course dates
-    const scheduleDate = new Date(document.getElementById('schedule_date').value);
-    const courseStart = new Date(selectedOption.dataset.courseStart);
-    const courseEnd = new Date(selectedOption.dataset.courseEnd);
-    
-    if (scheduleDate < courseStart || scheduleDate > courseEnd) {
-        e.preventDefault();
-        alert('Schedule date must be within the course dates: ' + 
-              courseStart.toLocaleDateString() + ' to ' + 
-              courseEnd.toLocaleDateString());
-        return;
-    }
+        // Add client-side validation
+        document.getElementById('scheduleForm').addEventListener('submit', function(e) {
+            const classSelect = document.getElementById('class_id');
+            const selectedOption = classSelect.options[classSelect.selectedIndex];
+            
+            // Set course_id from selected class
+            document.getElementById('course_id').value = selectedOption.dataset.courseId;
+            
+            // Validate schedule date against course dates
+            const scheduleDate = new Date(document.getElementById('schedule_date').value);
+            const courseStart = new Date(selectedOption.dataset.courseStart);
+            const courseEnd = new Date(selectedOption.dataset.courseEnd);
+            
+            if (scheduleDate < courseStart || scheduleDate > courseEnd) {
+                e.preventDefault();
+                alert('Schedule date must be within the course dates: ' + 
+                      courseStart.toLocaleDateString() + ' to ' + 
+                      courseEnd.toLocaleDateString());
+            }
 
-    // Validate times
-    const startTime = document.getElementById('start_time').value;
-    const endTime = document.getElementById('end_time').value;
-    
-    if (startTime >= endTime) {
-        e.preventDefault();
-        alert('End time must be after start time');
-        return;
-    }
-});
+            // Validate times
+            const startTime = document.getElementById('start_time').value;
+            const endTime = document.getElementById('end_time').value;
+            
+            if (startTime >= endTime) {
+                e.preventDefault();
+                alert('End time must be after start time');
+            }
+        });
 
-// Set min/max dates when class is selected
-document.getElementById('class_id').addEventListener('change', function() {
-    const selectedOption = this.options[this.selectedIndex];
-    const dateInput = document.getElementById('schedule_date');
-    dateInput.min = selectedOption.dataset.courseStart;
-    dateInput.max = selectedOption.dataset.courseEnd;
-});
-</script>
+        // Update date restrictions when class is selected
+        document.getElementById('class_id').addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const dateInput = document.getElementById('schedule_date');
+            dateInput.min = selectedOption.dataset.courseStart;
+            dateInput.max = selectedOption.dataset.courseEnd;
+        });
+    </script>
+
 </body>
-
 </html>
