@@ -71,7 +71,8 @@ CREATE TABLE courses (
     end_date DATE,
     tuition_fee int,
     created_at DATETIME DEFAULT GETDATE(),
-    updated_at DATETIME DEFAULT GETDATE()
+    updated_at DATETIME DEFAULT GETDATE(),
+    image_path NVARCHAR(500) 
 );
 
 
@@ -299,9 +300,11 @@ VALUES
  VALUES 
  (3, 'vvvvvvvvvv', 'test3@gmail.com', '5646456363', '2025-05-12 09:37:00.567');
 
--- Insert courses
-INSERT INTO courses (course_name, description, start_date, end_date, tuition_fee)
-VALUES (N'Math 101', N'Basic math course', '2025-06-01', '2025-08-30', 2000000);
+-- Insert courses (with image_path)
+INSERT INTO courses (course_name, description, start_date, end_date, tuition_fee, image_path)
+VALUES 
+(N'Math 101', N'Basic math course', '2025-08-01', '2025-08-30', 2000000, 'uploads\image\course-1748752260981-882327646.jpg');
+
 
 
 -- Insert materials

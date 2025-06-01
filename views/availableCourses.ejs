@@ -229,90 +229,148 @@
 
     </div>
 
-  </header>
-  <% if (messages && messages.error) { %>
-    <div id="loginPopup" class="fixed inset-0 flex items-center justify-center z-50">
-      <div class="fixed inset-0 bg-black opacity-50"></div>
-      <div class="bg-white rounded-lg p-8 relative z-10">
-        <div class="flex flex-col items-center">
-          <div class="text-xl font-bold text-red-600 mb-4">
-            <i class="fas fa-exclamation-circle mr-2"></i>
-            Authentication Required
-          </div>
-          <p class="text-gray-700 mb-4"><%= messages.error %></p>
-          <button onclick="closePopup()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
-            OK
-          </button>
-        </div>
+    </header>
+ 
+<% if (messages.error) { %>
+<div id="loginPopup" class="fixed inset-0 flex items-center justify-center z-50">
+  <div class="fixed inset-0 bg-black opacity-50"></div>
+  <div class="bg-white rounded-lg p-8 relative z-10">
+    <div class="flex flex-col items-center">
+      <div class="text-xl font-bold text-red-600 mb-4">
+        <i class="fas fa-exclamation-circle mr-2"></i>
+        Authentication Required
       </div>
+      <p class="text-gray-700 mb-4"><%= messages.error %></p>
+      <button onclick="closePopup()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+        OK
+      </button>
     </div>
-    <script>
-      function closePopup() {
-        const popup = document.getElementById('loginPopup');
-        if (popup) {
-          popup.classList.add('fade-out');
-          setTimeout(() => {
-            popup.remove();
-          }, 300);
-        }
-      }
-      setTimeout(closePopup, 3000);
-    </script>
-    <style>
-      @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-      @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
-      #loginPopup { animation: fadeIn 0.3s ease-in; }
-      #loginPopup.fade-out { animation: fadeOut 0.3s ease-out; }
-    </style>
-  <% } %>
-  <main>
-    <div class="modern-table-container">
-      <div class="modern-table-title">
-        <i class="fas fa-book-reader"></i> Available Courses
-      </div>
-      <div class="modern-search-sort">
-        <input type="text" id="searchInput" placeholder="Search courses..."
-          class="w-full md:w-80 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-        <select id="sortSelect"
-          class="w-full md:w-48 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white">
-          <option value="name">Sort by Name</option>
-          <option value="date">Sort by Start Date</option>
-          <option value="price">Sort by Price</option>
-        </select>
-      </div>
-      <div class="overflow-x-auto">
-        <table class="modern-table" id="courseTable">
-          <thead>
-            <tr>
-              <th>Course</th>
-              <th>Class</th>
-              <th>Teacher</th>
-              <th>Schedule</th>
-              <th>Time</th>
-              <th>Enrolled</th>
-              <th>Tuition</th>
-              <th>Description</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="courseTableBody">
+  </div>
+</div>
+
+<script>
+  function closePopup() {
+    const popup = document.getElementById('loginPopup');
+    if (popup) {
+      popup.classList.add('fade-out');
+      setTimeout(() => {
+        popup.remove();
+      }, 300);
+    }
+  }
+
+  // Auto close after 3 seconds
+  setTimeout(closePopup, 3000);
+</script>
+
+<style>
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+    }
+
+    to {
+      opacity: 0;
+    }
+  }
+
+  #loginPopup {
+    animation: fadeIn 0.3s ease-in;
+  }
+
+  #loginPopup.fade-out {
+    animation: fadeOut 0.3s ease-out;
+  }
+</style>
+<% } %>
+
+    <div class="container mx-auto px-4 py-8">
+        <!-- Search and Filter Section -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+            <h1 class="text-4xl font-bold text-gray-800">Available Courses</h1>
+            <div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+                <div class="relative w-full sm:w-64">
+                    <input type="text" id="searchInput" placeholder="Search courses..."
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <i class="fas fa-search absolute right-3 top-3 text-gray-400"></i>
+                </div>
+                <select id="sortSelect"
+                    class="w-full sm:w-48 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white">
+                    <option value="name">Sort by Name</option>
+                    <option value="date">Sort by Start Date</option>
+                    <option value="price">Sort by Price</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Course Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="courseGrid">
             <% if (courses && courses.length > 0) { %>
-              <% courses.forEach(course => { %>
-                <tr class="course-row">
-                  <td><%= course.course_name %></td>
-                  <td><%= course.class_name %></td>
-                  <td><%= course.teacher_name %></td>
-                  <td><%= course.weekly_schedule %></td>
-                  <td><%= course.start_time %> - <%= course.end_time %></td>
-                  <td><%= course.enrolled_count || 0 %></td>
-                  <td>$<%= course.tuition_fee ? course.tuition_fee.toLocaleString() : 'N/A' %></td>
-                  <td><%= course.description %></td>
-                  <td>
+            <% courses.forEach(course => { %>
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden course-card hover:shadow-2xl transition-shadow duration-300">
+                <div class="p-6">
+                    <!-- Course Header -->
+                    <div class="flex justify-between items-start mb-4">
+                        <h2 class="text-2xl font-bold text-gray-800"><%= course.course_name %></h2>
+                        <span class="bg-blue-100 text-blue-800 text-sm font-semibold px-3 py-1 rounded-full">
+                            <%= new Date(course.start_date).toLocaleDateString() %>
+                        </span>
+                    </div>
+
+                    <!-- Course Description -->
+                    <p class="text-gray-600 mb-6 line-clamp-2"><%= course.description %></p>
+
+                    <!-- Course Details -->
+                    <div class="space-y-3 mb-6">
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-user-tie w-6 text-blue-500"></i>
+                            <span class="font-medium w-20">Teacher:</span>
+                            <span class="flex-1"><%= course.teacher_name %></span>
+                        </div>
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-calendar w-6 text-blue-500"></i>
+                            <span class="font-medium w-20">Schedule:</span>
+                            <span class="flex-1"><%= course.weekly_schedule %></span>
+                        </div>
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-clock w-6 text-blue-500"></i>
+                            <span class="font-medium w-20">Time:</span>
+                            <span class="flex-1"><%= course.start_time %> - <%= course.end_time %></span>
+                        </div>
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-users w-6 text-blue-500"></i>
+                            <span class="font-medium w-20">Enrolled:</span>
+                            <span class="flex-1"><%= course.enrolled_count || 0 %> students</span>
+                        </div>
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-money-bill w-6 text-blue-500"></i>
+                            <span class="font-medium w-20">Tuition:</span>
+                            <span class="flex-1 font-semibold text-green-600">
+                                <%= course.tuition_fee?.toLocaleString() %> VND
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Enroll Button -->
                     <form action="/enroll-course" method="POST">
-                      <input type="hidden" name="class_id" value="<%= course.class_id %>">
-                      <button type="submit" class="modern-btn-primary">
-                        <i class="fas fa-user-plus"></i> Enroll
-                      </button>
+                        <input type="hidden" name="class_id" value="<%= course.class_id %>">
+                        <button type="submit"
+                            class="w-full bg-blue-500 text-black px-6 py-3 rounded-lg hover:bg-blue-600 
+                                   transition-colors duration-300 flex items-center justify-center gap-2 font-semibold"
+                            onclick="return confirm('Are you sure you want to enroll in this course?')">
+                            <i class="fas fa-user-plus"></i>
+                            Enroll Now
+                        </button>
                     </form>
                   </td>
                 </tr>
