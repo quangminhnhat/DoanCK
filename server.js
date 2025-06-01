@@ -118,6 +118,37 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
+// 1. First, add the image upload configuration at the top with other configurations
+const courseImageStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = path.join(__dirname, 'uploads', 'image');
+    // Create directory if it doesn't exist
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E9)}`;
+    cb(null, `course-${uniqueSuffix}${path.extname(file.originalname)}`);
+  }
+});
+
+const courseImageUpload = multer({
+  storage: courseImageStorage,
+  fileFilter: (req, file, cb) => {
+    // Allow only images
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed!'), false);
+    }
+  },
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB limit
+  }
+});
+
 //routing
 app.post(
   "/upload-material",
@@ -296,15 +327,17 @@ app.get("/my-courses", checkAuthenticated, async (req, res) => {
             c.course_name,
             c.description AS course_description,
             c.tuition_fee,
+            c.image_path,
             t.full_name AS teacher_name,
             t.email AS teacher_email,
             t.phone_number AS teacher_phone,   
             cls.class_name,
-            cls.start_time AS class_start_time,
-            cls.end_time AS class_end_time,
+            CONVERT(VARCHAR(5), cls.start_time, 108) as class_start_time,
+            CONVERT(VARCHAR(5), cls.end_time, 108) as class_end_time,
             cls.weekly_schedule,
             e.payment_status,
-            e.payment_date
+            e.payment_date,
+            CONVERT(VARCHAR(10), e.enrollment_date, 23) as formatted_enrollment_date
           FROM enrollments e
           JOIN students st ON e.student_id = st.id
           JOIN classes cls ON e.class_id = cls.id
@@ -320,12 +353,13 @@ app.get("/my-courses", checkAuthenticated, async (req, res) => {
             c.course_name,
             c.description AS course_description,
             c.tuition_fee,
+            c.image_path,
             t.full_name AS teacher_name,
             t.email AS teacher_email,
             t.phone_number AS teacher_phone,   
             cls.class_name,
-            cls.start_time AS class_start_time,
-            cls.end_time AS class_end_time,
+            CONVERT(VARCHAR(5), cls.start_time, 108) as class_start_time,
+            CONVERT(VARCHAR(5), cls.end_time, 108) as class_end_time,
             cls.weekly_schedule,
             (SELECT COUNT(*) FROM enrollments e WHERE e.class_id = cls.id) as student_count,
             (SELECT COUNT(*) FROM enrollments e WHERE e.class_id = cls.id AND e.payment_status = 1) as paid_students
@@ -339,9 +373,36 @@ app.get("/my-courses", checkAuthenticated, async (req, res) => {
     }
 
     const courses = await executeQuery(query, params);
+
+    // Process weekly schedule for display
+    const processedCourses = courses.map((course) => ({
+      ...course,
+      schedule: course.weekly_schedule
+        ? course.weekly_schedule
+            .split(",")
+            .map(
+              (day) =>
+                ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][
+                  parseInt(day) - 1
+                ]
+            )
+            .join(", ")
+        : "No schedule set",
+      formatted_tuition: course.tuition_fee
+        ? course.tuition_fee.toLocaleString("vi-VN", {
+            style: "currency",
+            currency: "VND",
+          })
+        : "Not set",
+    }));
+
     res.render("my-courses.ejs", {
       user: req.user,
-      courses: courses,
+      courses: processedCourses,
+      messages: {
+        error: req.flash("error"),
+        success: req.flash("success"),
+      },
     });
   } catch (error) {
     console.error("Error fetching courses:", error);
@@ -878,18 +939,31 @@ app.get(
   }
 );
 
-app.post("/courses", checkAuthenticated, authenticateRole("admin"), async (req, res) => {
+// 2. Update the course creation route
+app.post("/courses", 
+  checkAuthenticated, 
+  authenticateRole("admin"),
+  courseImageUpload.single('course_image'),
+  async (req, res) => {
   try {
     const { course_name, description, start_date, end_date, tuition_fee } = req.body;
 
-    // Validate input
-    if (!course_name || !start_date || !end_date) {
-      return res.status(400).send("Missing required fields");
-    }
+      // Handle image path
+      const image_path = req.file ? 
+        path.join('uploads', 'image', req.file.filename) : null;
 
     const query = `
-      INSERT INTO courses (course_name, description, start_date, end_date, tuition_fee, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, GETDATE(), GETDATE())
+        INSERT INTO courses (
+          course_name, 
+          description, 
+          start_date, 
+          end_date, 
+          tuition_fee,
+          image_path,
+          created_at, 
+          updated_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, GETDATE(), GETDATE())
     `;
 
     await executeQuery(query, [
@@ -897,35 +971,56 @@ app.post("/courses", checkAuthenticated, authenticateRole("admin"), async (req, 
       description,
       start_date,
       end_date,
-      tuition_fee || null
+        tuition_fee || null,
+        image_path
     ]);
 
     res.redirect("/courses");
   } catch (err) {
+      // Clean up uploaded file if query fails
+      if (req.file) {
+        fs.unlink(req.file.path, (unlinkErr) => {
+          if (unlinkErr) console.error('Error deleting file:', unlinkErr);
+        });
+      }
     console.error("Course creation error:", err);
     res.status(500).send("Failed to create course");
   }
-});
+  }
+);
 
-app.post("/courses/:id", checkAuthenticated, authenticateRole("admin"), async (req, res) => {
+// 3. Update the course edit route
+app.post("/courses/:id", 
+  checkAuthenticated, 
+  authenticateRole("admin"),
+  courseImageUpload.single('course_image'),
+  async (req, res) => {
   try {
+      const courseId = req.params.id;
     const { course_name, description, start_date, end_date, tuition_fee } = req.body;
-    const courseId = req.params.id;
 
-    // Validate input
-    if (!course_name || !start_date || !end_date) {
-      return res.status(400).send("Missing required fields");
-    }
-
-    // Check if course exists
-    const courseExists = await executeQuery(
-      "SELECT id FROM courses WHERE id = ?", 
+      // Get current course info
+      const currentCourse = await executeQuery(
+        "SELECT image_path FROM courses WHERE id = ?", 
       [courseId]
     );
 
-    if (!courseExists.length) {
+      if (!currentCourse.length) {
       return res.status(404).send("Course not found");
     }
+
+      let image_path = currentCourse[0].image_path;
+
+      // If new image uploaded, update path and delete old image
+      if (req.file) {
+        if (image_path) {
+          const oldImagePath = path.join(__dirname, image_path);
+          fs.unlink(oldImagePath, err => {
+            if (err) console.error("Error deleting old image:", err);
+          });
+        }
+        image_path = path.join('uploads', 'image', req.file.filename);
+      }
 
     const query = `
       UPDATE courses 
@@ -934,6 +1029,7 @@ app.post("/courses/:id", checkAuthenticated, authenticateRole("admin"), async (r
           start_date = ?,
           end_date = ?,
           tuition_fee = ?,
+            image_path = ?,
           updated_at = GETDATE()
       WHERE id = ?
     `;
@@ -944,34 +1040,49 @@ app.post("/courses/:id", checkAuthenticated, authenticateRole("admin"), async (r
       start_date,
       end_date,
       tuition_fee || null,
+        image_path,
       courseId
     ]);
 
     res.redirect("/courses");
   } catch (err) {
+      // Clean up uploaded file if query fails
+      if (req.file) {
+        fs.unlink(req.file.path, (unlinkErr) => {
+          if (unlinkErr) console.error('Error deleting file:', unlinkErr);
+        });
+      }
     console.error("Course update error:", err);
     res.status(500).send("Failed to update course");
   }
-});
+  }
+);
 
-app.delete("/courses/:id", checkAuthenticated, authenticateRole("admin"), async (req, res) => {
+// 4. Update the course delete route to handle image deletion
+app.delete("/courses/:id", 
+  checkAuthenticated, 
+  authenticateRole("admin"), 
+  async (req, res) => {
   try {
     const courseId = req.params.id;
 
-    // Check for existing enrollments
-    const enrollmentCheck = await executeQuery(`
-      SELECT e.id 
-      FROM enrollments e
-      JOIN classes c ON e.class_id = c.id
-      WHERE c.course_id = ?
-      LIMIT 1
-    `, [courseId]);
+      // Get course info for image deletion
+      const course = await executeQuery(
+        "SELECT image_path FROM courses WHERE id = ?", 
+        [courseId]
+      );
 
-    if (enrollmentCheck.length > 0) {
-      return res.status(400).send("Cannot delete course with active enrollments");
-    }
+      // Delete image file if exists
+      if (course[0]?.image_path) {
+        const imagePath = path.join(__dirname, course[0].image_path);
+        fs.unlink(imagePath, err => {
+          if (err) console.error("Error deleting course image:", err);
+        });
+      }
 
+      // Delete course record
     await executeQuery("DELETE FROM courses WHERE id = ?", [courseId]);
+      
     res.redirect("/courses");
   } catch (err) {
     console.error("Course deletion error:", err);
@@ -2668,44 +2779,7 @@ app.delete(
   }
 );
 
-app.post(
-  "/courses",
-  checkAuthenticated,
-  authenticateRole("admin"),
-  (req, res) => {
-    const { course_name, description, start_date, end_date } = req.body;
-    const role = req.user.role;
-    console.log("test");
 
-    // Only staff can add courses
-    if (role !== "admin" && role !== "teacher") {
-      return res.status(403).send("Unauthorized access");
-    }
-
-    if (!course_name || !start_date || !end_date) {
-      return res.status(400).send("Missing required fields");
-    }
-
-    const insertQuery = `
-    INSERT INTO courses (course_name, description, start_date, end_date)
-    VALUES (?, ?, ?, ?)
-  `;
-
-    sql.query(
-      connectionString,
-      insertQuery,
-      [course_name, description, start_date, end_date],
-      (err, result) => {
-        if (err) {
-          console.error("Insert course error:", err);
-          return res.status(500).send("Database error");
-        }
-        console.log("Course added:", result);
-        res.redirect("/courses"); // or res.send() if not using a view
-      }
-    );
-  }
-);
 
 app.post(
   "/register",
@@ -3343,10 +3417,11 @@ app.get(
           c.start_date,
           c.end_date,
           c.tuition_fee,
+        c.image_path,
           cls.id as class_id,
           cls.class_name,
-          cls.start_time,
-          cls.end_time,
+        CONVERT(VARCHAR(5), cls.start_time, 108) as formatted_start_time,
+        CONVERT(VARCHAR(5), cls.end_time, 108) as formatted_end_time,
           cls.weekly_schedule,
           t.full_name as teacher_name,
           (SELECT COUNT(*) FROM enrollments WHERE class_id = cls.id) as enrolled_count
@@ -3374,10 +3449,42 @@ app.get(
       `;
       const studentInfo = await executeQuery(studentQuery, [req.user.id]);
 
+      // Process weekly schedule and format dates/times
+      const processedCourses = courses.map((course) => ({
+        ...course,
+        schedule: course.weekly_schedule
+          ? course.weekly_schedule
+              .split(",")
+              .map(
+                (day) =>
+                  ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][
+                    parseInt(day) - 1
+                  ]
+              )
+              .join(", ")
+          : "No schedule set",
+        formatted_tuition: course.tuition_fee
+          ? course.tuition_fee.toLocaleString("vi-VN", {
+              style: "currency",
+              currency: "VND",
+            })
+          : "Not set",
+        formatted_start_date: new Date(course.start_date).toLocaleDateString(
+          "vi-VN"
+        ),
+        formatted_end_date: new Date(course.end_date).toLocaleDateString(
+          "vi-VN"
+        ),
+      }));
+
       res.render("availableCourses.ejs", {
-        courses: courses,
+        courses: processedCourses,
         student: studentInfo[0],
-        user: req.user
+        user: req.user,
+        messages: {
+          error: req.flash("error"),
+          success: req.flash("success"),
+        },
       });
     } catch (err) {
       console.error("Error fetching available courses:", err);
@@ -3477,8 +3584,8 @@ function checkAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {
     return next();
   }
-  // Set flash message
-  req.flash("error", "Please log in to access this page");
+  
+
   res.redirect("/login");
 }
 
