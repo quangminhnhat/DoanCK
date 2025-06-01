@@ -4,11 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trang Chủ</title>
+    <title>Schedule List | Learning Management System</title>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://demos.creative-tim.com/notus-js/assets/styles/tailwind.css">
-    <!-- link swiper-->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <link rel="stylesheet"
         href="https://demos.creative-tim.com/notus-js/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css">
@@ -16,89 +15,208 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.css">
     <link rel="stylesheet" type="text/css"
         href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
-
-    <!-- jQuery -->
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.7.0.js"></script>
-    <!-- DataTables JS -->
     <script type="text/javascript" src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <script type="text/javascript"
         src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
     <style>
-        #scheduleTable {
-            font-size: 11px;
-            width: 100% !important;
-            border-collapse: collapse;
-        }
-
-        #scheduleTable th,
-        #scheduleTable td {
-            padding: 3px 6px;
-            white-space: nowrap;
-            border: 1px solid #eee;
-            line-height: 1;
-        }
-
-        .btn {
-            padding: 1px 4px;
-            font-size: 10px;
+        html,
+        body {
+            height: 100%;
+            min-height: 100%;
             margin: 0;
-            border-radius: 2px;
-            line-height: 1;
+            padding: 0;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .main-content {
+            flex: 1 0 auto;
+        }
+
+        footer {
+            flex-shrink: 0;
+            width: 100%;
+        }
+
+        .modern-table-container {
+            max-width: 1100px;
+            margin: 40px auto 0 auto;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px rgba(44, 62, 80, 0.10);
+            border: 1px solid #e3e6ed;
+            padding: 2.5rem 2rem 2rem 2rem;
+            animation: fadeIn 0.5s;
+        }
+
+        .modern-table-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2375D8;
+            text-align: center;
+            margin-bottom: 2rem;
+            letter-spacing: 1px;
+        }
+
+        #scheduleTable {
+            font-size: 1rem;
+            width: 100% !important;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        #scheduleTable th {
+            background: linear-gradient(90deg, #2375D8 0%, #0c9083 100%);
+            color: #fff;
+            font-weight: 700;
+            border: none;
+            padding: 12px 8px;
+        }
+
+        #scheduleTable td {
+            background: #f9fafb;
+            border: none;
+            padding: 10px 8px;
+            color: #22223b;
+        }
+
+        #scheduleTable tr {
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        #scheduleTable tr:last-child {
+            border-bottom: none;
+        }
+
+        .modern-btn-primary {
+            background: linear-gradient(90deg, #2375D8 0%, #0c9083 100%);
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 16px rgba(36, 117, 216, 0.10);
+            transition: background 0.2s, transform 0.15s;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.7rem;
+            margin-bottom: 10px;
+        }
+
+        .modern-btn-primary:hover {
+            background: linear-gradient(90deg, #0c9083 0%, #2375D8 100%);
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 8px 24px rgba(36, 117, 216, 0.18);
+        }
+
+        .modern-btn-secondary {
+            background: #e5e7eb;
+            color: #2375D8;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            margin-left: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.7rem;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .modern-btn-secondary:hover {
+            background: #d1d5db;
+            color: #0c9083;
         }
 
         .btn-edit,
         .btn-delete {
-            min-width: 35px;
-            display: inline-block;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 1rem;
+            margin: 0 2px;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .btn-edit {
+            background: #e0f2fe;
+            color: #2375D8;
+        }
+
+        .btn-edit:hover {
+            background: #bae6fd;
+            color: #0c9083;
+        }
+
+        .btn-delete {
+            background: #fee2e2;
+            color: #ef4444;
+        }
+
+        .btn-delete:hover {
+            background: #fecaca;
+            color: #b91c1c;
         }
 
         .dataTables_wrapper .dataTables_length,
         .dataTables_wrapper .dataTables_filter {
-            margin-bottom: 5px;
-            font-size: 11px;
-            line-height: 1;
+            margin-bottom: 10px;
+            font-size: 1rem;
         }
 
         .dataTables_wrapper .dataTables_length select,
         .dataTables_wrapper .dataTables_filter input {
-            height: 20px;
-            padding: 1px 4px;
-            font-size: 11px;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 8px;
-        }
-
-        .table-controls {
-            margin-bottom: 8px;
-            font-size: 11px;
-            line-height: 1;
+            height: 32px;
+            padding: 4px 10px;
+            font-size: 1rem;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
         }
 
         .dataTables_info,
         .dataTables_paginate {
-            font-size: 11px;
-            margin-top: 5px;
-            line-height: 1;
-        }
-
-        h1 {
-            font-size: 16px;
-            margin-bottom: 8px;
-            line-height: 1;
+            font-size: 1rem;
+            margin-top: 10px;
         }
 
         .paginate_button {
-            padding: 2px 6px !important;
-            font-size: 11px !important;
-            line-height: 1 !important;
+            padding: 6px 14px !important;
+            font-size: 1rem !important;
+            border-radius: 6px !important;
+            margin: 0 2px !important;
+            background: #f3f4f6 !important;
+            color: #2375D8 !important;
+            border: none !important;
         }
 
-        .dataTables_length select {
-            padding-right: 15px !important;
+        .paginate_button.current {
+            background: linear-gradient(90deg, #2375D8 0%, #0c9083 100%) !important;
+            color: #fff !important;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
@@ -240,7 +358,61 @@
         </div>
 
     </header>
- 
+
+    <div class="main-content">
+        <div class="modern-table-container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <div class="modern-table-title">
+                    <i class="fas fa-calendar-alt"></i> Schedule List
+                </div>
+                <div>
+                    <a href="/schedules/new" class="modern-btn-primary">
+                        <i class="fas fa-plus-circle"></i> Add New Schedule
+                    </a>
+                    <a href="/" class="modern-btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </a>
+                </div>
+            </div>
+            <table id="scheduleTable" class="display responsive nowrap" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Class</th>
+                        <th>Course</th>
+                        <th>Day</th>
+                        <th>Date</th>
+                        <th>Start</th>
+                        <th>End</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% schedules.forEach(s => { %>
+                    <tr>
+                        <td><%= s.id %></td>
+                        <td><%= s.class_name %></td>
+                        <td><%= s.course_name %></td>
+                        <td><%= s.day_of_week %></td>
+                        <td><%= s.schedule_date.toISOString().split('T')[0] %></td>
+                        <td><%= s.start_time %></td>
+                        <td><%= s.end_time %></td>
+                        <td>
+                            <a href="/schedules/<%= s.id %>/edit" class="btn-edit" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <form method="POST" action="/schedules/<%= s.id %>?_method=DELETE" style="display:inline;">
+                                <button type="submit" class="btn-delete" title="Delete"
+                                    onclick="return confirm('Are you sure you want to delete this schedule?')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+
 <% if (messages.error) { %>
 <div id="loginPopup" class="fixed inset-0 flex items-center justify-center z-50">
   <div class="fixed inset-0 bg-black opacity-50"></div>
@@ -304,118 +476,8 @@
 </style>
 <% } %>
 
-    <div class="container" style="margin: 20px;">
-        <h1>Schedule List</h1>
-        <div class="table-controls" style="margin-bottom: 20px;">
-            <a href="/schedules/new" class="btn btn-primary">Add New Schedule</a> | <a href="/" class="btn">Back</a>
-        </div>
 
-        <table id="scheduleTable" class="display responsive nowrap" style="width:100%">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Class</th>
-                    <th>Course</th>
-                    <th>Day</th>
-                    <th>Date</th>
-                    <th>Start</th>
-                    <th>End</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% schedules.forEach(s => { %>
-                <tr>
-                    <td><%= s.id %></td>
-                    <td><%= s.class_name %></td>
-                    <td><%= s.course_name %></td>
-                    <td><%= s.day_of_week %></td>
-                    <td><%= s.schedule_date.toISOString().split('T')[0] %></td>
-                    <td><%= s.start_time %></td>
-                    <td><%= s.end_time %></td>
-                    <td>
-                        <a href="/schedules/<%= s.id %>/edit" class="btn btn-edit">
-                          <i class="fas fa-edit"></i>
-                        </a>
-                        <form method="POST" action="/schedules/<%= s.id %>?_method=DELETE" style="display:inline;">
-                          <button type="submit" class="btn btn-delete" 
-                                  onclick="return confirm('Are you sure you want to delete this schedule?')">
-                            <i class="fas fa-trash"></i>
-                          </button>
-                        </form>
-                    </td>
-                </tr>
-                <% }) %>
-            </tbody>
-        </table>
-    </div>
-    <footer class="relative bg-blueGray-200 pt-8 pb-6">
-        <div class="container mx-auto px-4">
-            <div class="flex flex-wrap text-left lg:text-left">
-                <div class="w-full lg:w-6/12 px-4">
-                    <h4 class="text-3xl fonat-semibold text-blueGray-700">Liên hệ với chúng tôi!</h4>
-                    <h5 class="text-lg mt-0 mb-2 text-blueGray-600">
-                        Tìm kiếm chúng tôi trên bất kỳ mạng xã hội nào và gửi cho chúng tôi một tin nhắn! Chúng tôi sẽ
-                        trả
-                        lời bạn
-                        ngay khi có thể.
-                    </h5>
-                    <div class="mt-6 lg:mb-0 mb-6">
-                        <button
-                            class="bg-white text-lightBlue-400 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
-                            type="button">
-                            <i class="fab fa-twitter"></i></button><button
-                            class="bg-white text-lightBlue-600 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
-                            type="button">
-                            <i class="fab fa-facebook-square"></i></button><button
-                            class="bg-white text-pink-400 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
-                            type="button">
-                            <i class="fab fa-dribbble"></i></button><button
-                            class="bg-white text-blueGray-800 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
-                            type="button">
-                            <i class="fab fa-github"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="w-full lg:w-6/12 px-4">
-                    <div class="flex flex-wrap items-top mb-6">
-                        <div class="w-full lg:w-4/12 px-4 ml-auto">
-                            <span class="block uppercase text-blueGray-500 text-sm font-semibold mb-2">Bạn Đang Tìm
-                                Kiếm</span>
-                            <ul class="list-unstyled">
-                                <li>
-                                    <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm"
-                                        href="">Liên
-                                        Hệ</a>
-                                </li>
-                                <li>
-                                    <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm"
-                                        href="">Thông
-                                        Tin Mới</a>
-                                </li>
-                                <li>
-                                    <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm"
-                                        href="">Tuyển
-                                        Dụng</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <hr class="my-6 border-blueGray-300">
-            <div class="flex flex-wrap items-center md:justify-between justify-center">
-                <div class="w-full md:w-4/12 px-4 mx-auto text-center">
-                    <div class="text-sm text-blueGray-500 font-semibold py-1">
-                        Copyright © <span id="get-current-year">2025</span><a
-                            href="https://www.facebook.com/ttgdvpttnht" class="text-blueGray-500 hover:text-gray-800"
-                            target="_blank"> Talent Education</a>. Made by
-                        <a href="https://github.com/Rin-0808" class="text-blueGray-500 hover:text-blueGray-800">Rin</a>.
-                    </div>
-                </div>
-            </div>
-        </div>
-    </footer>
+   
     <script>
         $(document).ready(function () {
             $('#scheduleTable').DataTable({
@@ -427,7 +489,7 @@
                         targets: -1,
                         orderable: false,
                         searchable: false,
-                        width: '70px'
+                        width: '110px'
                     },
                     {
                         targets: '_all',
@@ -435,11 +497,11 @@
                     },
                     {
                         targets: [0], // ID column
-                        width: '30px'
+                        width: '40px'
                     },
                     {
                         targets: [2, 4, 5], // Day, Start, End columns
-                        width: '50px'
+                        width: '70px'
                     }
                 ],
                 dom: '<"top"lf>rt<"bottom"ip>',
@@ -452,6 +514,56 @@
             });
         });
     </script>
-</body>
+</div> <!-- end of .modern-table-container -->
+</div> <!-- end of .main-content -->
 
+<footer class="relative bg-blueGray-200 pt-8 pb-6">
+    <div class="container mx-auto px-4">
+        <div class="flex flex-wrap text-left lg:text-left">
+            <div class="w-full lg:w-6/12 px-4">
+                <h4 class="text-3xl fonat-semibold text-blueGray-700">Liên hệ với chúng tôi!</h4>
+                <h5 class="text-lg mt-0 mb-2 text-blueGray-600">
+                    Tìm kiếm chúng tôi trên bất kỳ mạng xã hội nào và gửi cho chúng tôi một tin nhắn! Chúng tôi sẽ
+                    trả lời bạn ngay khi có thể.
+                </h5>
+                <div class="mt-6 lg:mb-0 mb-6">
+                    <button class="bg-white text-lightBlue-400 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2" type="button">
+                        <i class="fab fa-twitter"></i></button><button class="bg-white text-lightBlue-600 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2" type="button">
+                        <i class="fab fa-facebook-square"></i></button><button class="bg-white text-pink-400 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2" type="button">
+                        <i class="fab fa-dribbble"></i></button><button class="bg-white text-blueGray-800 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2" type="button">
+                        <i class="fab fa-github"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="w-full lg:w-6/12 px-4">
+                <div class="flex flex-wrap items-top mb-6">
+                    <div class="w-full lg:w-4/12 px-4 ml-auto">
+                        <span class="block uppercase text-blueGray-500 text-sm font-semibold mb-2">Bạn Đang Tìm Kiếm</span>
+                        <ul class="list-unstyled">
+                            <li>
+                                <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm" href="">Liên Hệ</a>
+                            </li>
+                            <li>
+                                <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm" href="">Thông Tin Mới</a>
+                            </li>
+                            <li>
+                                <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm" href="">Tuyển Dụng</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr class="my-6 border-blueGray-300">
+        <div class="flex flex-wrap items-center md:justify-between justify-center">
+            <div class="w-full md:w-4/12 px-4 mx-auto text-center">
+                <div class="text-sm text-blueGray-500 font-semibold py-1">
+                    Copyright © <span id="get-current-year">2025</span><a href="https://www.facebook.com/ttgdvpttnht" class="text-blueGray-500 hover:text-gray-800" target="_blank"> Talent Education</a>. Made by
+                    <a href="https://github.com/Rin-0808" class="text-blueGray-500 hover:text-blueGray-800">Rin</a>.
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+</body>
 </html>

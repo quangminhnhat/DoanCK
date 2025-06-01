@@ -40,3 +40,13 @@ const profileSwiper = new Swiper('.profile-swiper', {
     prevEl: '.profile-slider-arrow.left',
   }
 });
+
+const kn2Swiper = new Swiper('.kn2-swiper', {
+  slidesPerView: 'auto',
+  spaceBetween: 16,
+  loop: true,
+  navigation: {
+    nextEl: '.news-slider-arrow.right',
+    prevEl: '.news-slider-arrow.left',
+  }
+});

@@ -131,6 +131,25 @@
   #loginPopup.fade-out {
     animation: fadeOut 0.3s ease-out;
   }
+
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #fffbe6; /* màu nền chính của trang */
+  }
+  .container-login {
+    flex: 1 0 auto;
+  }
+  footer {
+    flex-shrink: 0;
+    background: #e2e8f0; /* màu nền của footer */
+  }
 </style>
 <% } %>
 
@@ -174,11 +193,12 @@
 						<div class="form-group mt-3">
 							<input type="submit" value="Login" class="btn float-right login_btn">
 						</div>
+						<div class="forgot-password-link text-center mt-2">
+							<a href="#">Forgot your password?</a>
+						</div>
 					</form>
 
-					<div class="d-flex justify-content-center">
-						<a href="#" style="color: #7200F4;">Forgot your password?</a>
-					</div>
+					
 				</div>
 			</div>
 

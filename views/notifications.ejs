@@ -18,6 +18,28 @@
         href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
 
     <style>
+        /* Đảm bảo body chiếm toàn bộ chiều cao và dùng flexbox */
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        main {
+            flex: 1 0 auto;
+        }
+
+        footer {
+            flex-shrink: 0;
+        }
+
         #notificationsTable {
             font-size: 11px;
             width: 100% !important;
@@ -61,6 +83,178 @@
 
         .unread-notification:hover {
             text-decoration: underline;
+        }
+
+        .modern-container {
+            max-width: 1100px;
+            margin: 48px auto 0 auto;
+            padding: 2.5rem 2rem 2rem 2rem;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px rgba(44, 62, 80, 0.10);
+            border: 1px solid #e3e6ed;
+            animation: fadeIn 0.5s;
+        }
+
+        .modern-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2375D8;
+            text-align: center;
+            margin-bottom: 2rem;
+            letter-spacing: 1px;
+        }
+
+        .modern-btn-primary {
+            background: linear-gradient(90deg, #2375D8 0%, #0c9083 100%);
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 16px rgba(36, 117, 216, 0.10);
+            transition: background 0.2s, transform 0.15s;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.7rem;
+            text-decoration: none;
+        }
+
+        .modern-btn-primary:hover {
+            background: linear-gradient(90deg, #0c9083 0%, #2375D8 100%);
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 8px 24px rgba(36, 117, 216, 0.18);
+        }
+
+        .modern-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+            background: #f9fafb;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(44, 62, 80, 0.06);
+        }
+
+        .modern-table th,
+        .modern-table td {
+            padding: 1rem 1.2rem;
+            text-align: left;
+        }
+
+        .modern-table th {
+            background: #2375D8;
+            color: #fff;
+            font-weight: 600;
+            font-size: 1rem;
+            border-bottom: 2px solid #e3e6ed;
+        }
+
+        .modern-table tbody tr {
+            background: #fff;
+            transition: background 0.2s;
+        }
+
+        .modern-table tbody tr:hover {
+            background: #e6f0fa;
+        }
+
+        .modern-table td {
+            border-bottom: 1px solid #e3e6ed;
+            font-size: 1rem;
+            color: #374151;
+        }
+
+        .modern-table .actions button,
+        .modern-table .actions form button {
+            color: #2375D8;
+            margin-right: 0.5rem;
+            font-size: 1.1rem;
+            transition: color 0.2s;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0 0.3rem;
+        }
+
+        .modern-table .actions button.delete,
+        .modern-table .actions form button.delete {
+            color: #ef4444;
+        }
+
+        .modern-table .actions button.delete:hover,
+        .modern-table .actions form button.delete.delete:hover {
+            color: #b91c1c;
+        }
+
+        .modern-table .actions button:hover,
+        .modern-table .actions form button:hover {
+            color: #0c9083;
+        }
+
+        .modern-section-title {
+            font-size: 1.25rem;
+            color: #4a5568;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .modern-card {
+            background: #f7fafc;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(44, 62, 80, 0.06);
+            padding: 2rem 1.5rem 1.5rem 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .modern-form-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 1.2rem 2rem;
+            align-items: end;
+        }
+
+        .modern-info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .modern-info-label {
+            font-size: 0.95rem;
+            color: #718096;
+            font-weight: 500;
+            margin-bottom: 0.2rem;
+        }
+
+        .modern-info-value {
+            font-size: 1rem;
+            color: #2d3748;
+            font-weight: 600;
+            border: 1px solid #e3e6ed;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            background: #fff;
+            transition: border 0.2s;
+        }
+
+        .modern-info-value:focus {
+            border: 1.5px solid #2375D8;
+            outline: none;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
@@ -264,94 +458,82 @@
 </style>
 <% } %>
 
-    <div class="card shadow-lg rounded-lg mx-auto max-w-2xl my-8 bg-white">
-        <div class="card-header px-6 py-4 bg-gray-50 border-b">
-            <h5 class="text-xl font-semibold text-gray-700">Send Notification</h5>
-        </div>
-        <div class="card-body p-6">
-            <form action="/notifications" method="POST" class="space-y-6">
-                <div class="form-group">
-                    <label for="userId" class="block text-sm font-medium text-gray-700 mb-2">
-                        Send to User ID
-                    </label>
-                    <input type="number" name="userId" id="userId"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        required placeholder="Enter user ID" />
-                </div>
-
-                <div class="form-group">
-                    <label for="message" class="block text-sm font-medium text-gray-700 mb-2">
-                        Message
-                    </label>
-                    <textarea name="message" id="message" rows="4"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        required placeholder="Type your message here..."></textarea>
-                </div>
-
-                <div class="flex justify-end">
-                    <button type="submit"
-                        class="px-6 py-2 bg-blue-600 text-black rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
-                        Send Notification
-                    </button>
-                </div>
-            </form>
-        </div>
+    <main>
+  <div class="modern-container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+      <div class="modern-title">
+        <i class="fas fa-bell"></i> Notifications
+      </div>
+      <% if (user.role === 'admin' || user.role === 'teacher') { %>
+      <a href="#sendNotification" class="modern-btn-primary" onclick="document.getElementById('sendNotificationCard').scrollIntoView({behavior:'smooth'});return false;">
+        <i class="fas fa-paper-plane"></i> Send Notification
+      </a>
+      <% } %>
     </div>
-    <div class="container">
-        <h2>Notifications</h2>
-
-        <% if (user.role === 'admin' || user.role === 'teacher') { %>
-        <div class="mb-4">
-            <form action="/notifications" method="POST" class="notification-form">
-                <select name="userId" required>
-                    <option value="">Select User</option>
-                    <% users.forEach(user => { %>
-                    <option value="<%= user.id %>"><%= user.full_name %></option>
-                    <% }) %>
-                </select>
-                <input type="text" name="message" placeholder="Notification message" required>
-                <button type="submit" class="btn">Send Notification</button>
-            </form>
+    <% if (user.role === 'admin' || user.role === 'teacher') { %>
+    <div id="sendNotificationCard" class="modern-card mb-8">
+      <div class="modern-section-title" style="margin-bottom:1rem;">
+        <i class="fas fa-paper-plane"></i> Send Notification
+      </div>
+      <form action="/notifications" method="POST" class="modern-form-grid">
+        <div class="modern-info-item">
+          <label for="userId" class="modern-info-label">To User</label>
+          <select name="userId" id="userId" class="modern-info-value" required>
+            <option value="">Select User</option>
+            <% users && users.forEach(user => { %>
+              <option value="<%= user.id %>"><%= user.full_name %></option>
+            <% }) %>
+          </select>
         </div>
-        <% } %>
-
-        <table id="notificationsTable">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>From</th>
-                    <th>To</th>
-                    <th>Message</th>
-                    <th>Date</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-
-                </tr>
-            </thead>
-            <tbody>
-                <% notifications.forEach(notification => { %>
-                <tr>
-                    <td><%= notification.id %></td>
-                    <td><%= notification.sender_name %></td>
-                    <td><%= notification.receiver_name %></td>
-                    <td><%= notification.message %></td>
-                    <td><%= notification.created_at.toLocaleString() %></td>
-                    <td class="notification-status <%= !notification.read ? 'unread-notification' : '' %>"
-                        data-id="<%= notification.id %>">
-                        <%= notification.read ? 'Read' : 'Unread' %>
-                    </td>
-                    <td>
-                        <form method="POST" action="/notifications/<%= notification.id %>?_method=DELETE"
-                            style="display:inline;">
-                            <button type="submit" class="btn btn-delete"
-                                onclick="return confirm('Delete this notification?')">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-                <% }) %>
-            </tbody>
-        </table>
+        <div class="modern-info-item" style="grid-column:span 2;">
+          <label for="message" class="modern-info-label">Message</label>
+          <input type="text" name="message" id="message" class="modern-info-value" required placeholder="Notification message">
+        </div>
+        <div style="grid-column:span 2;text-align:right;">
+          <button type="submit" class="modern-btn-primary"><i class="fas fa-paper-plane"></i> Send</button>
+        </div>
+      </form>
     </div>
+    <% } %>
+    <div class="overflow-x-auto">
+      <table class="modern-table" id="notificationsTable">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Message</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% notifications.forEach(notification => { %>
+          <tr>
+            <td><%= notification.id %></td>
+            <td><%= notification.sender_name %></td>
+            <td><%= notification.receiver_name %></td>
+            <td><%= notification.message %></td>
+            <td><%= notification.created_at.toLocaleString() %></td>
+            <td class="notification-status <%= !notification.read ? 'unread-notification' : '' %>" data-id="<%= notification.id %>">
+              <%= notification.read ? 'Read' : 'Unread' %>
+            </td>
+            <td class="actions">
+              <form method="POST" action="/notifications/<%= notification.id %>?_method=DELETE" style="display:inline;">
+                <button type="submit" class="delete" title="Delete" onclick="return confirm('Delete this notification?')">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </form>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
     <footer class="relative bg-blueGray-200 pt-8 pb-6">
         <div class="container mx-auto px-4">
             <div class="flex flex-wrap text-left lg:text-left">

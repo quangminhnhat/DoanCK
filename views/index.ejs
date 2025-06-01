@@ -259,110 +259,189 @@
 
       <ul class="slider-pagination">
         <div class="slider-indicator"></div>
-        <li class="slider-tab">CS1</li>
-        <li class="slider-tab">CS2</li>
-        <li class="slider-tab">CS3</li>
-        <li class="slider-tab">CS4</li>
-        <li class="slider-tab">CS5</li>
+        <li class="slider-tab"></li>
+        <li class="slider-tab"></li>
+        <li class="slider-tab"></li>
+        <li class="slider-tab"></li>
+        <li class="slider-tab"></li>
       </ul>
     </div>
   </div>
 
+<div class="slider-title" style="
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #2563eb;
+  text-align: center;
+  margin: 40px 0 30px 0;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 8px rgba(37,99,235,0.08), 0 1px 0 #fff;
+  font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+  position: relative;
+  display: inline-block;
+  width: 100%;
+">
+  <span style="
+    background: linear-gradient(90deg, #2563eb 60%, #60a5fa 100%);
+    color: #fff;
+    padding: 8px 36px;
+    border-radius: 32px;
+    box-shadow: 0 2px 12px rgba(37,99,235,0.10);
+    display: inline-block;
+    position: relative;
+    z-index: 1;
+  ">
+    <i class="fas fa-star" style="color:#facc15;margin-right:12px;"></i>
+    Khóa học nổi bật
+    <i class="fas fa-star" style="color:#facc15;margin-left:12px;"></i>
+  </span>
+</div>
 
-        
     <div class="news-slider-container">
       <button class="news-slider-arrow left"><i class="fas fa-chevron-left"></i></button>
       <div class="news-section swiper news-swiper">
         <div class="swiper-wrapper">
-          <div class="news-item2 swiper-slide">
-            <img src="/images/slide1.jpg" alt="News Image 1">
-            <div class="news-content">
-              <div class="news-title">
-                <a href="/Toan,Ly,Hoaclass">Khoá học Toán, Lý, Hoá, Anh</a>
-              </div>
-              <div class="news-description">
-                Các khoá học Toán, Lý, Hoá, Anh được thiết kế phù hợp với từng trình độ, giúp học sinh củng cố kiến thức nền tảng, phát triển tư duy logic và nâng cao kỹ năng ngoại ngữ. Đội ngũ giáo viên chuyên môn, phương pháp giảng dạy hiện đại, hỗ trợ học sinh đạt kết quả cao trong học tập.
-              </div>
+          <% const newsList = [
+        {
+          img: "/images/slide1.jpg",
+          link: "/Toan,Ly,Hoaclass",
+          title: "Khoá học Toán, Lý, Hoá, Anh",
+          desc: "Các khoá học Toán, Lý, Hoá, Anh được thiết kế phù hợp với từng trình độ, giúp học sinh củng cố kiến thức nền tảng, phát triển tư duy logic và nâng cao kỹ năng ngoại ngữ. Đội ngũ giáo viên chuyên môn, phương pháp giảng dạy hiện đại, hỗ trợ học sinh đạt kết quả cao trong học tập."
+        },
+        {
+          img: "/images/slide2.jpg",
+          link: "/AnhVanClass",
+          title: "Khoá học Anh Văn",
+          desc: "Chương trình Anh văn giúp học sinh phát triển toàn diện các kỹ năng nghe, nói, đọc, viết với giáo viên giàu kinh nghiệm và phương pháp hiện đại."
+        },
+        {
+          img: "/images/slide3.jpg",
+          link: "/VanClass",
+          title: "Khoá học Văn",
+          desc: "Khoá học Văn giúp học sinh nâng cao khả năng cảm thụ, phân tích tác phẩm và phát triển kỹ năng viết, trình bày ý tưởng một cách logic, sáng tạo."
+        },
+        {
+          img: "/images/slide4.jpg",
+          link: "/ToanClass",
+          title: "Khoá học Toán",
+          desc: "Khoá học Toán xây dựng nền tảng vững chắc, phát triển tư duy logic và khả năng giải quyết vấn đề cho học sinh ở mọi cấp độ."
+        },
+        {
+          img: "/images/slide5.png",
+          link: "/LyClass",
+          title: "Khoá học Lý",
+          desc: "Khoá học Vật lý giúp học sinh hiểu sâu các khái niệm, vận dụng kiến thức vào thực tiễn và đạt kết quả cao trong các kỳ thi."
+        },
+        {
+          img: "/images/slide6.png",
+          link: "/HoaClass",
+          title: "Khoá học Hoá",
+          desc: "Chương trình Hoá học chú trọng thực hành, giúp học sinh nắm vững lý thuyết và ứng dụng vào các bài tập, thí nghiệm thực tế."
+        },
+        {
+          img: "/images/slide7.jpg",
+          link: "/SuClass",
+          title: "Khoá học Sử",
+          desc: "Khoá học Lịch sử giúp học sinh hiểu rõ các sự kiện, nhân vật lịch sử và phát triển tư duy phản biện, phân tích."
+        }
+      ]; %>
+      <% newsList.forEach(function(news) { %>
+        <div class="news-item2 swiper-slide">
+          <img src="<%= news.img %>" alt="News Image">
+          <div class="news-content">
+            <div class="news-title">
+              <a href="<%= news.link %>"><%= news.title %></a>
             </div>
-          </div>
-
-          <div class="news-item2 swiper-slide">
-            <img src="/images/slide2.jpg" alt="News Image 2">
-            <div class="news-content">
-              <div class="news-title">
-                <a href="/AnhVanClass">Khoá học Anh Văn</a>
-              </div>
-              <div class="news-description">
-                Chương trình Anh văn giúp học sinh phát triển toàn diện các kỹ năng nghe, nói, đọc, viết với giáo viên giàu kinh nghiệm và phương pháp hiện đại.
-              </div>
-            </div>
-          </div>
-
-          <div class="news-item2 swiper-slide">
-            <img src="/images/slide3.jpg" alt="News Image 3">
-            <div class="news-content">
-              <div class="news-title">
-                <a href="/VanClass">Khoá học Văn</a>
-              </div>
-              <div class="news-description">
-                Khoá học Văn giúp học sinh nâng cao khả năng cảm thụ, phân tích tác phẩm và phát triển kỹ năng viết, trình bày ý tưởng một cách logic, sáng tạo.
-              </div>
-            </div>
-          </div>
-
-          <div class="news-item2 swiper-slide">
-            <img src="/images/slide4.jpg" alt="News Image 4">
-            <div class="news-content">
-              <div class="news-title">
-                <a href="/ToanClass">Khoá học Toán</a>
-              </div>
-              <div class="news-description">
-                Khoá học Toán xây dựng nền tảng vững chắc, phát triển tư duy logic và khả năng giải quyết vấn đề cho học sinh ở mọi cấp độ.
-              </div>
-            </div>
-          </div>
-
-          <div class="news-item2 swiper-slide">
-            <img src="/images/slide5.png" alt="News Image 5">
-            <div class="news-content">
-              <div class="news-title">
-                <a href="/LyClass">Khoá học Lý</a>
-              </div>
-              <div class="news-description">
-                Khoá học Vật lý giúp học sinh hiểu sâu các khái niệm, vận dụng kiến thức vào thực tiễn và đạt kết quả cao trong các kỳ thi.
-              </div>
-            </div>
-          </div>
-
-          <div class="news-item2 swiper-slide">
-            <img src="/images/slide6.png" alt="News Image 6">
-            <div class="news-content">
-              <div class="news-title">
-                <a href="/HoaClass">Khoá học Hoá</a>
-              </div>
-              <div class="news-description">
-                Chương trình Hoá học chú trọng thực hành, giúp học sinh nắm vững lý thuyết và ứng dụng vào các bài tập, thí nghiệm thực tế.
-              </div>
-            </div>
-          </div>
-
-          <div class="news-item2 swiper-slide">
-            <img src="/images/slide7.jpg" alt="News Image 7">
-            <div class="news-content">
-              <div class="news-title">
-                <a href="/SuClass">Khoá học Sử</a>
-              </div>
-              <div class="news-description">
-                Khoá học Lịch sử giúp học sinh hiểu rõ các sự kiện, nhân vật lịch sử và phát triển tư duy phản biện, phân tích.
-              </div>
+            <div class="news-description">
+              <%= news.desc %>
             </div>
           </div>
         </div>
-      </div>
-      <button class="news-slider-arrow right"><i class="fas fa-chevron-right"></i></button>
+      <% }); %>
     </div>
+  </div>
+  <button class="news-slider-arrow right"><i class="fas fa-chevron-right"></i></button>
+</div>
 
+<div class="slider-title" style="
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #2563eb;
+  text-align: center;
+  margin: 40px 0 30px 0;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 8px rgba(37,99,235,0.08), 0 1px 0 #fff;
+  font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+  position: relative;
+  display: inline-block;
+  width: 100%;
+">
+  <span style="
+    background: linear-gradient(90deg, #2563eb 60%, #60a5fa 100%);
+    color: #fff;
+    padding: 8px 36px;
+    border-radius: 32px;
+    box-shadow: 0 2px 12px rgba(37,99,235,0.10);
+    display: inline-block;
+    position: relative;
+    z-index: 1;
+  ">
+    <i class="fas fa-star" style="color:#facc15;margin-right:12px;"></i>
+    Khoá học kỹ năng
+    <i class="fas fa-star" style="color:#facc15;margin-left:12px;"></i>
+  </span>
+</div>
   
+<!-- news-slider-container dưới khoá học kỹ năng -->
+<% 
+  const skillList2 = [
+  { img: "/images/kn1.jpg", title: "Khoá Học Giao Tiếp", desc: "Khoá học giúp học viên phát triển kỹ năng giao tiếp hiệu quả, tự tin trong các tình huống hàng ngày và môi trường học tập, làm việc." },
+  { img: "/images/kn2.png", title: "Khoá Học Thuyết Trình", desc: "Trang bị cho học viên kỹ năng thuyết trình chuyên nghiệp, diễn đạt ý tưởng rõ ràng, thuyết phục trước đám đông." },
+  { img: "/images/kn3.jpg", title: "Khoá Học MC", desc: "Đào tạo kỹ năng dẫn chương trình, xử lý tình huống linh hoạt, nâng cao sự tự tin và khả năng giao tiếp trước công chúng." },
+  { img: "/images/kn4.jpg", title: "Khoá Học Hát", desc: "Giúp học viên rèn luyện kỹ thuật thanh nhạc, cảm âm, phát triển giọng hát và thể hiện cảm xúc qua âm nhạc." },
+  { img: "/images/kn5.jpg", title: "Khoá Học Vẽ Tranh", desc: "Khơi dậy khả năng sáng tạo, hướng dẫn các kỹ thuật vẽ cơ bản đến nâng cao, phát triển tư duy nghệ thuật cho học viên." },
+  { img: "/images/kn6.jpg", title: "Khoá Học Guitar", desc: "Cung cấp kiến thức nhạc lý, kỹ thuật chơi guitar từ cơ bản đến nâng cao, giúp học viên tự tin biểu diễn các bản nhạc yêu thích." },
+  { img: "/images/kn7.jpg", title: "Khoá Học Piano", desc: "Hướng dẫn kỹ thuật chơi piano, đọc bản nhạc, phát triển khả năng cảm thụ âm nhạc và biểu diễn tự tin." }
+  ];
+%>
+<div class="news-slider-container">
+  <button class="news-slider-arrow left"><i class="fas fa-chevron-left"></i></button>
+  <div class="news-section swiper kn2-swiper">
+    <div class="swiper-wrapper">
+      <% skillList2.forEach(function(skill) { %>
+        <div class="news-item2 swiper-slide">
+          <img src="<%= skill.img %>" alt="Skill Image">
+          <div class="news-content">
+            <div class="news-title">
+              <% if (skill.title === "Khoá Học Giao Tiếp") { %>
+                <a href="/GiaoTiepClass"><%= skill.title %></a>
+              <% } else if (skill.title === "Khoá Học Thuyết Trình") { %>
+                <a href="/ThuyetTrinhClass"><%= skill.title %></a>
+              <% } else if (skill.title === "Khoá Học MC") { %>
+                <a href="/MCClass"><%= skill.title %></a>
+              <% } else if (skill.title === "Khoá Học Hát") { %>
+                <a href="/HatClass"><%= skill.title %></a>
+              <% } else if (skill.title === "Khoá Học Vẽ Tranh") { %>
+                <a href="/VeTranhClass"><%= skill.title %></a>
+              <% } else if (skill.title === "Khoá Học Guitar") { %>
+                <a href="/GuitarClass"><%= skill.title %></a>
+              <% } else if (skill.title === "Khoá Học Piano") { %>
+                <a href="/PianoClass"><%= skill.title %></a>
+              <% } else { %>
+                <%= skill.title %>
+              <% } %>
+            </div>
+            <div class="news-description">
+              <%= skill.desc %>
+            </div>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+  <button class="news-slider-arrow right"><i class="fas fa-chevron-right"></i></button>
+</div>
+
   <footer class="relative bg-blueGray-200 pt-8 pb-6">
     <div class="container mx-auto px-4">
       <div class="flex flex-wrap text-left lg:text-left">

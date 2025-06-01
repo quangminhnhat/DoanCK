@@ -4,39 +4,141 @@
 <head>
   <meta charset="UTF-8">
   <title>Courses</title>
-  <style>
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      margin-top: 20px;
-    }
-
-    th,
-    td {
-      padding: 12px;
-      border: 1px solid #ccc;
-      text-align: left;
-    }
-
-    th {
-      background-color: #f4f4f4;
-    }
-
-    h1 {
-      margin-bottom: 10px;
-    }
-  </style>
-
-  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trang Chủ</title>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="https://demos.creative-tim.com/notus-js/assets/styles/tailwind.css">
-  <!-- link swiper-->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
   <link rel="stylesheet"
     href="https://demos.creative-tim.com/notus-js/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css">
+  <style>
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    main,
+    .modern-container {
+      flex: 1 0 auto;
+    }
+
+    footer {
+      flex-shrink: 0;
+    }
+
+    .modern-container {
+      max-width: 1100px;
+      margin: 48px auto 0 auto;
+      padding: 2.5rem 2rem 2rem 2rem;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 4px 24px rgba(44, 62, 80, 0.10);
+      border: 1px solid #e3e6ed;
+      animation: fadeIn 0.5s;
+    }
+
+    .modern-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #2375D8;
+      text-align: center;
+      margin-bottom: 2rem;
+      letter-spacing: 1px;
+    }
+
+    .modern-btn-primary {
+      background: linear-gradient(90deg, #2375D8 0%, #0c9083 100%);
+      color: #fff;
+      font-weight: 700;
+      font-size: 1.1rem;
+      padding: 0.7rem 1.5rem;
+      border: none;
+      border-radius: 10px;
+      box-shadow: 0 4px 16px rgba(36, 117, 216, 0.10);
+      transition: background 0.2s, transform 0.15s;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.7rem;
+      text-decoration: none;
+    }
+
+    .modern-btn-primary:hover {
+      background: linear-gradient(90deg, #0c9083 0%, #2375D8 100%);
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 8px 24px rgba(36, 117, 216, 0.18);
+    }
+
+    .modern-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1.5rem;
+      background: #f9fafb;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(44, 62, 80, 0.06);
+    }
+
+    .modern-table th,
+    .modern-table td {
+      padding: 1rem 1.2rem;
+      text-align: left;
+    }
+
+    .modern-table th {
+      background: #2375D8;
+      color: #fff;
+      font-weight: 600;
+      font-size: 1rem;
+      border-bottom: 2px solid #e3e6ed;
+    }
+
+    .modern-table tbody tr {
+      background: #fff;
+      transition: background 0.2s;
+    }
+
+    .modern-table tbody tr:hover {
+      background: #e6f0fa;
+    }
+
+    .modern-table td {
+      border-bottom: 1px solid #e3e6ed;
+      font-size: 1rem;
+      color: #374151;
+    }
+
+    .modern-table .actions a {
+      color: #2375D8;
+      margin-right: 0.5rem;
+      font-size: 1.1rem;
+      transition: color 0.2s;
+    }
+
+    .modern-table .actions a:hover {
+      color: #0c9083;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -228,244 +330,65 @@
 <% } %>
 
 
-  <main class="container mx-auto px-4 py-6">
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">Course List</h1>
-      <% if (user && user.role === 'admin') { %>
-      <a href="/courses/new" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
-        <i class="fas fa-plus"></i> Add New Course
-      </a>
-      <% } %>
-    </div>
-
-    <div class="bg-white rounded-lg shadow overflow-hidden">
+  <main>
+    <div class="modern-container">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <div class="modern-title">
+          <i class="fas fa-book"></i> Course List
+        </div>
+        <% if (user && user.role === 'admin') { %>
+        <a href="/courses/new" class="modern-btn-primary">
+          <i class="fas fa-plus"></i> Add New Course
+        </a>
+        <% } %>
+      </div>
       <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
+        <table class="modern-table">
+          <thead>
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start Date</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">End Date</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tuition Fee (VND)</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th>Tuition Fee (VND)</th>
+              <th>Actions</th>
             </tr>
           </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
+          <tbody>
+            <% if (courses.length === 0) { %>
+            <tr>
+              <td colspan="7" style="text-align:center; color:#888; padding:2rem;">No courses found</td>
+            </tr>
+            <% } else { %>
             <% courses.forEach(course => { %>
             <tr>
-              <td class="px-6 py-4 whitespace-nowrap"><%= course.id %></td>
-              <td class="px-6 py-4 whitespace-nowrap"><%= course.course_name %></td>
-              <td class="px-6 py-4">
-                <div class="text-sm text-gray-900 line-clamp-2"><%= course.description %></div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <%= new Date(course.start_date).toLocaleDateString() %>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <%= new Date(course.end_date).toLocaleDateString() %>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <%= course.tuition_fee ? course.tuition_fee.toLocaleString() : 'Not set' %>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="flex space-x-2">
-                  <a href="/courses/<%= course.id %>/edit" 
-                     class="text-blue-600 hover:text-blue-900">
-                    <i class="fas fa-edit"></i> Edit
-                  </a>
-                  <form action="/courses/<%= course.id %>?_method=DELETE" 
-                        method="POST" 
-                        class="inline delete-form"
-                        onsubmit="return confirm('Are you sure you want to delete this course? This cannot be undone.')">
-                    <button type="submit" class="text-red-600 hover:text-red-900 ml-2">
-                      <i class="fas fa-trash"></i> Delete
-                    </button>
-                  </form>
+              <td><%= course.id %></td>
+              <td><%= course.course_name %></td>
+              <td>
+                <div style="max-width: 320px; white-space: pre-line; overflow: hidden; text-overflow: ellipsis;">
+                  <%= course.description %>
                 </div>
+              </td>
+              <td><%= new Date(course.start_date).toLocaleDateString() %></td>
+              <td><%= new Date(course.end_date).toLocaleDateString() %></td>
+              <td><%= course.tuition_fee ? course.tuition_fee.toLocaleString() : 'Not set' %></td>
+              <td class="actions">
+                <a href="/courses/<%= course.id %>/edit" title="Edit"><i class="fas fa-edit"></i></a>
+                <form action="/courses/<%= course.id %>?_method=DELETE" method="POST" style="display:inline;">
+                  <button type="submit" title="Delete" onclick="return confirm('Are you sure you want to delete this course?');" style="background:none;border:none;color:#ef4444;font-size:1.1rem;cursor:pointer;padding:0 0.3rem;">
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </form>
               </td>
             </tr>
             <% }) %>
+            <% } %>
           </tbody>
         </table>
       </div>
     </div>
   </main>
-
-  <!-- Add DataTables initialization -->
-  <script>
-      $(document).ready(function () {
-          $('table').DataTable({
-              responsive: true,
-              language: {
-                  search: "Tìm kiếm:",
-                  lengthMenu: "Hiển thị _MENU_ khóa học",
-                  info: "Hiển thị _START_ đến _END_ của _TOTAL_ khóa học",
-                  paginate: {
-                      previous: "Trước",
-                      next: "Sau"
-                  }
-              }
-          });
-      });
-  </script>
-
-  <style>
-    .course-container {
-      max-width: 1200px;
-      margin: 2rem auto;
-      padding: 0 1rem;
-    }
-
-    .page-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 2rem;
-    }
-
-    .page-title {
-      font-size: 2rem;
-      color: #2d3748;
-    }
-
-    .add-button {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.75rem 1.5rem;
-      background-color: #4299e1;
-      color: white;
-      border-radius: 0.5rem;
-      text-decoration: none;
-      transition: background-color 0.2s;
-    }
-
-    .add-button:hover {
-      background-color: #3182ce;
-    }
-
-    .courses-list {
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-    }
-
-    .course-item {
-      background: white;
-      border: 1px solid #e2e8f0;
-      border-radius: 0.5rem;
-      padding: 1.5rem;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
-
-    .course-main-info {
-      margin-bottom: 1.5rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid #e2e8f0;
-    }
-
-    .course-title-section {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 1rem;
-    }
-
-    .course-title-section h2 {
-      font-size: 1.5rem;
-      color: #2d3748;
-      margin: 0;
-    }
-
-    .course-dates {
-      font-size: 0.875rem;
-      color: #718096;
-    }
-
-    .course-description {
-      color: #4a5568;
-      margin: 0;
-    }
-
-    .course-details-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 2rem;
-    }
-
-    .detail-section {
-      flex: 1;
-    }
-
-    .detail-section h3 {
-      font-size: 1rem;
-      color: #2d3748;
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .detail-section ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    .detail-section li {
-      margin-bottom: 0.5rem;
-      color: #4a5568;
-    }
-
-    .detail-section li strong {
-      color: #2d3748;
-      margin-right: 0.5rem;
-    }
-
-    .no-data {
-      text-align: center;
-      color: #718096;
-      padding: 2rem;
-    }
-
-    .nav-section {
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      padding-top: 1rem;
-      margin-top: 1rem;
-    }
-
-    .nav-section-title {
-      display: block;
-      color: #718096;
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      padding: 0.5rem 1rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .nav-button {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.75rem 1rem;
-      color: #4a5568;
-      text-decoration: none;
-      transition: all 0.2s;
-    }
-
-    .nav-button:hover {
-      background-color: rgba(66, 153, 225, 0.1);
-      color: #4299e1;
-    }
-
-    .nav-button i {
-      width: 1.25rem;
-      text-align: center;
-    }
-  </style>
 
   <footer class="relative bg-blueGray-200 pt-8 pb-6">
     <div class="container mx-auto px-4">

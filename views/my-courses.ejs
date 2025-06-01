@@ -21,10 +21,21 @@
             line-height: 1;
         }
 
-        .container {
-            max-width: 95%;
-            margin: 0 auto;
-            padding: 8px;
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        main, .modern-container, .container {
+            flex: 1 0 auto;
+        }
+        footer {
+            flex-shrink: 0;
         }
 
         .course-card {
@@ -151,6 +162,79 @@
         .payment-badge.unpaid {
             background-color: #FED7D7;
             color: #C53030;
+        }
+
+        .modern-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2375D8;
+            text-align: center;
+            margin-bottom: 2rem;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.7rem;
+        }
+        .modern-card {
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px rgba(44,62,80,0.10);
+            border: 1px solid #e3e6ed;
+            padding: 2rem 2rem 1.5rem 2rem;
+            margin-bottom: 2rem;
+            transition: box-shadow 0.2s;
+        }
+        .modern-card:hover {
+            box-shadow: 0 8px 32px rgba(36,117,216,0.13);
+        }
+        .modern-header {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2375D8;
+            margin-bottom: 0.7rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .modern-info-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+            align-items: center;
+        }
+        .modern-info-label {
+            color: #6b7280;
+            font-weight: 500;
+            min-width: 90px;
+        }
+        .modern-info-value {
+            font-weight: 600;
+            color: #374151;
+        }
+        .modern-badge {
+            display: inline-block;
+            padding: 0.2rem 0.9rem;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+        .modern-badge.paid {
+            background: #C6F6D5;
+            color: #2F855A;
+        }
+        .modern-badge.unpaid {
+            background: #FED7D7;
+            color: #C53030;
+        }
+        .modern-section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2375D8;
+            margin-bottom: 0.5rem;
+            margin-top: 1.2rem;
         }
     </style>
     <link rel="stylesheet" href="/css/style.css">
@@ -357,69 +441,51 @@
 </style>
 <% } %>
 
-    <div class="container">
-        <h2 style="font-size: 16px; margin-bottom: 12px;">My Courses</h2>
-        
-        <div id="coursesList">
-            <% courses.forEach(course => { %>
-                <div class="course-card <%= user.role === 'teacher' ? 'teacher-view' : '' %>">
-                    <div class="course-header">
-                        <div class="course-title">
-                            <%= course.course_name %>
-                            <% if (user.role === 'teacher') { %>
-                                <div class="student-count">
-                                    Students: <%= course.student_count %> (Paid: <%= course.paid_students %>)
-                                </div>
-                            <% } %>
-                        </div>
-                    </div>
-
-                    <div class="course-info">
-                        <div class="course-fee">
-                            Fee: <%= course.tuition_fee ? `$${course.tuition_fee.toLocaleString()}` : 'Not set' %>
-                        </div>
-                        <% if (user.role === 'student') { %>
-                            <div class="payment-badge <%= course.payment_status ? 'paid' : 'unpaid' %>">
-                                <%= course.payment_status ? 'Paid' : 'Unpaid' %>
-                            </div>
-                        <% } %>
-                    </div>
-
-                    <div class="course-details">
-                        <div class="detail-group">
-                            <div class="detail-label">Class Schedule</div>
-                            <div class="detail-value">
-                                <%= course.class_name %><br>
-                                <%= course.class_start_time %> - <%= course.class_end_time %><br>
-                                Weekly: <%= course.weekly_schedule.split(',').map(day => ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][day-1]).join(', ') %>
-                            </div>
-                        </div>
-
-                        <% if (user.role === 'student') { %>
-                        <div class="detail-group">
-                            <div class="detail-label">Teacher</div>
-                            <div class="detail-value teacher-info">
-                                <div class="teacher-avatar"></div>
-                                <div>
-                                    <%= course.teacher_name %><br>
-                                    Email: <%= course.teacher_email %><br>
-                                    Phone: <%= course.teacher_phone %>
-                                </div>
-                            </div>
-                        </div>
-                        <% } %>
-
-                        <div class="detail-group">
-                            <div class="detail-label">Description</div>
-                            <div class="detail-value">
-                                <%= course.course_description || 'No description available' %>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            <% }); %>
+    <div class="container" style="max-width: 900px; margin: 0 auto;">
+  <div class="modern-title">
+    <i class="fas fa-chalkboard"></i> My Courses
+  </div>
+  <div id="coursesList">
+    <% courses.forEach(course => { %>
+      <div class="modern-card">
+        <div class="modern-header">
+          <i class="fas fa-book"></i> <%= course.course_name %>
         </div>
-    </div>
+        <div class="modern-info-row">
+          <span class="modern-info-label">Fee:</span>
+          <span class="modern-info-value">
+            <%= course.tuition_fee ? `$${course.tuition_fee.toLocaleString()}` : 'Not set' %>
+          </span>
+          <% if (user.role === 'student') { %>
+            <span class="modern-badge <%= course.payment_status ? 'paid' : 'unpaid' %>">
+              <%= course.payment_status ? 'Paid' : 'Unpaid' %>
+            </span>
+          <% } %>
+        </div>
+        <div class="modern-info-row">
+          <span class="modern-info-label">Class Schedule:</span>
+          <span class="modern-info-value"><%= course.weekly_schedule || '-' %></span>
+        </div>
+        <% if (user.role === 'student') { %>
+        <div class="modern-info-row">
+          <span class="modern-info-label">Teacher:</span>
+          <span class="modern-info-value"><%= course.teacher_name || '-' %></span>
+        </div>
+        <% } %>
+        <div class="modern-info-row">
+          <span class="modern-info-label">Description:</span>
+          <span class="modern-info-value"><%= course.description || '-' %></span>
+        </div>
+      </div>
+    <% }); %>
+    <% if (!courses || courses.length === 0) { %>
+      <div class="modern-card text-center text-gray-500">
+        <i class="fas fa-book-open text-3xl mb-2"></i>
+        <div>No courses found.</div>
+      </div>
+    <% } %>
+  </div>
+</div>
     <footer class="relative bg-blueGray-200 pt-8 pb-6">
         <div class="container mx-auto px-4">
             <div class="flex flex-wrap text-left lg:text-left">

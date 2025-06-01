@@ -4,14 +4,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trang Chủ</title>
+    <title>Upload Material</title>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://demos.creative-tim.com/notus-js/assets/styles/tailwind.css">
-    <!-- link swiper-->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <link rel="stylesheet"
         href="https://demos.creative-tim.com/notus-js/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css">
+    <style>
+        .modern-container {
+            max-width: 520px;
+            margin: 48px auto 0 auto;
+            padding: 2.5rem 2rem 2rem 2rem;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px rgba(44,62,80,0.10);
+            border: 1px solid #e3e6ed;
+            animation: fadeIn 0.5s;
+        }
+        .modern-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2375D8;
+            text-align: center;
+            margin-bottom: 2rem;
+            letter-spacing: 1px;
+        }
+        .modern-form-group {
+            margin-bottom: 1.5rem;
+        }
+        .modern-form-group label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.5px;
+        }
+        .modern-form-control, .modern-form-control:focus {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: #f9fafb;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+            color: #22223b;
+        }
+        .modern-form-control:focus {
+            border-color: #2375D8;
+            box-shadow: 0 0 0 2px #2375d830;
+            background: #fff;
+        }
+        .modern-btn-primary {
+            width: 100%;
+            background: linear-gradient(90deg, #2375D8 0%, #0c9083 100%);
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 0.85rem 0;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 16px rgba(36,117,216,0.10);
+            transition: background 0.2s, transform 0.15s;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.7rem;
+        }
+        .modern-btn-primary:hover {
+            background: linear-gradient(90deg, #0c9083 0%, #2375D8 100%);
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 8px 24px rgba(36,117,216,0.18);
+        }
+        .modern-btn-secondary {
+            width: 100%;
+            background: #e5e7eb;
+            color: #2375D8;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 0.85rem 0;
+            border: none;
+            border-radius: 10px;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.7rem;
+            text-decoration: none;
+            transition: background 0.2s, color 0.2s;
+        }
+        .modern-btn-secondary:hover {
+            background: #d1d5db;
+            color: #0c9083;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(18px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+    </style>
 </head>
 
 <body>
@@ -211,44 +304,29 @@
 </style>
 <% } %>
 
-    <div class="container mx-auto px-4 sm:px-8 py-8">
-        <div class="max-w-md mx-auto bg-white rounded-lg shadow-md">
-            <div class="p-6">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Upload Course Material</h2>
-
-                <form action="/upload-material" method="POST" enctype="multipart/form-data" class="space-y-6">
-                    <div class="flex flex-col">
-                        <label for="course_id" class="text-gray-700 font-medium mb-1">
-                            Course ID
-                        </label>
-                        <input type="number" id="course_id" name="course_id" required
-                            class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-
-                    <div class="flex flex-col">
-                        <label for="material" class="text-gray-700 font-medium mb-1">
-                            Select File
-                        </label>
-                        <input type="file" id="material" name="material" required class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500
-                                      file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0
-                                      file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700
-                                      hover:file:bg-blue-100">
-                    </div>
-
-                    <div class="flex justify-between items-center pt-4">
-                        <a href="/materials" class="text-blue-500 hover:text-blue-700 font-medium">
-                            Back to materials
-                        </a>
-                        <button type="submit"
-                            class="bg-blue-500 text-black px-6 py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <i class="fas fa-upload mr-2"></i>
-                            Upload Material
-                        </button>
-                    </div>
-                </form>
+    <main>
+        <form action="/upload-material" method="POST" enctype="multipart/form-data" class="modern-container" autocomplete="off">
+            <legend class="modern-title">
+                <i class="fas fa-upload mr-2"></i>
+                Upload Course Material
+            </legend>
+            <div class="modern-form-group">
+                <label for="course_id"><i class="fas fa-book mr-2"></i>Course ID</label>
+                <input type="number" id="course_id" name="course_id" required class="modern-form-control">
             </div>
-        </div>
-    </div>
+            <div class="modern-form-group">
+                <label for="material"><i class="fas fa-file mr-2"></i>Select File</label>
+                <input type="file" id="material" name="material" required class="modern-form-control">
+            </div>
+            <button type="submit" class="modern-btn-primary">
+                <i class="fas fa-upload"></i>
+                Upload Material
+            </button>
+            <a href="/materials" class="modern-btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to materials
+            </a>
+        </form>
+    </main>
     <footer class="relative bg-blueGray-200 pt-8 pb-6">
         <div class="container mx-auto px-4">
             <div class="flex flex-wrap text-left lg:text-left">

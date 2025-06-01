@@ -11,6 +11,119 @@
     <link href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" rel="stylesheet">
     <!--Custom styles-->
     <style>
+        html,
+        body {
+            height: 100%;
+            min-height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background: linear-gradient(120deg, #e0eafc 0%, #cfdef3 100%);
+        }
+
+        main,
+        .main-content,
+        section.vh-100 {
+            flex: 1 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 80vh;
+        }
+
+        .modern-form-container {
+            max-width: 520px;
+            margin: 48px auto 0 auto;
+            padding: 2.5rem 2rem 2rem 2rem;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px rgba(44, 62, 80, 0.10);
+            border: 1px solid #e3e6ed;
+            animation: fadeIn 0.5s;
+        }
+
+        .modern-form-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2375D8;
+            text-align: center;
+            margin-bottom: 2rem;
+            letter-spacing: 1px;
+        }
+
+        .modern-form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .modern-form-group label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.5px;
+        }
+
+        .modern-form-control,
+        .modern-form-control:focus {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: #f9fafb;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+            color: #22223b;
+        }
+
+        .modern-form-control:focus {
+            border-color: #2375D8;
+            box-shadow: 0 0 0 2px #2375d830;
+            background: #fff;
+        }
+
+        .modern-btn-primary {
+            width: 100%;
+            background: linear-gradient(90deg, #2375D8 0%, #0c9083 100%);
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 0.85rem 0;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 16px rgba(36, 117, 216, 0.10);
+            transition: background 0.2s, transform 0.15s;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.7rem;
+        }
+
+        .modern-btn-primary:hover {
+            background: linear-gradient(90deg, #0c9083 0%, #2375D8 100%);
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 8px 24px rgba(36, 117, 216, 0.18);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         body {
             background-image: url('https://images.pexels.com/photos/618833/pexels-photo-618833.jpeg?cs=srgb&dl=pexels-sagui-andrea-200115-618833.jpg&fm=jpg');
             background-attachment: fixed;
@@ -207,6 +320,17 @@
             </div>
 
         </header>
+
+        <main>
+            <form action="/register" method="POST" class="modern-form-container" autocomplete="off">
+                <legend class="modern-form-title">
+                    <i class="fas fa-user-plus mr-2"></i>
+                    Registration Form
+                </legend>
+                <div class="modern-form-group">
+                    <label for="Name"><i class="fas fa-user mr-2"></i>Full Name</label>
+                    <input type="text" name="Name" class="modern-form-control" id="Name" required>
+
  
 <% if (messages.error) { %>
 <div id="loginPopup" class="fixed inset-0 flex items-center justify-center z-50">
@@ -271,90 +395,46 @@
 </style>
 <% } %>
 
-        <section class="vh-100 d-flex justify-content-center align-items-center">
-            <div class="container">
-                <div class="row justify-content-center">
-                    <div class="col-12 col-lg-9 col-xl-7">
-                        <div class="card card-registration shadow">
-                            <div class="card-body">
-                                <h3 class="mb-4">Registration Form</h3>
-                                <form action="/register" method="POST">
-
-                                    <div class="form-row">
-                                        <div class="form-group col-md-12">
-                                            <label for="firstName">Full Name</label>
-                                            <input type="text" name="Name" class="form-control" id="Name" required>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-row">
-                                        <div class="form-group col-md-6">
-                                            <label for="birthdayDate">Birthday</label>
-                                            <input type="date" class="form-control" id="birthdayDate" name="birthday"
-                                                required>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-row">
-                                        <div class="form-group col-md-6">
-                                            <label for="emailAddress">Email</label>
-                                            <input type="email" class="form-control" id="emailAddress" name="email"
-                                                required>
-                                        </div>
-                                        <div class="form-group col-md-6">
-                                            <label for="phoneNumber">Phone Number</label>
-                                            <input type="tel" class="form-control" id="phoneNumber" name="phone"
-                                                required>
-                                        </div>
-                                        <div class="form-group col-md-12">
-                                            <label for="phoneNumber">Address</label>
-                                            <input type="Address" class="form-control" id="Address" name="Address"
-                                                required>
-                                        </div>
-                                        <div class="form-group col-md-12">
-                                            <label for="phoneNumber">Password</label>
-                                            <input type="Password" class="form-control" id="Password" name="Password"
-                                                required>
-                                        </div>
-                                    </div>
-                                    <script>
-                                        $(document).ready(function () {
-                                            $('#subjectSelect').change(function () {
-                                                if ($(this).val() === 'subject2') {
-                                                    $('#salaryInput').show();
-                                                } else {
-                                                    $('#salaryInput').hide();
-                                                }
-                                            });
-                                        });
-                                    </script>
-
-                                    <div class="form-group" id="salaryInput" style="display: none;">
-                                        <label for="salary">Salary</label>
-                                        <input type="number" class="form-control" id="salary" name="salary"
-                                            placeholder="Enter salary">
-                                    </div>
-
-
-                                    <div class="form-group">
-                                        <label class="select-label" for="subjectSelect">Loại tài khoản</label>
-                                        <select class="form-control" id="subjectSelect" name="subject" required>
-                                            <option value="" disabled selected>chọn loại tài khoản</option>
-                                            <option value="subject1">học sinh</option>
-                                            <option value="subject2">giáo viên</option>
-                                            <option value="subject3">nhân viên</option>
-                                        </select>
-                                    </div>
-
-                                    <button type="submit" class="btn btn-primary btn-lg btn-submit">Submit</button>
-                                    <p>Already have an accout? <a href="/login">Login</a></p>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
                 </div>
-            </div>
-        </section>
+                <div class="modern-form-group">
+                    <label for="birthdayDate"><i class="fas fa-birthday-cake mr-2"></i>Birthday</label>
+                    <input type="date" class="modern-form-control" id="birthdayDate" name="birthday" required>
+                </div>
+                <div class="modern-form-group">
+                    <label for="emailAddress"><i class="fas fa-envelope mr-2"></i>Email</label>
+                    <input type="email" class="modern-form-control" id="emailAddress" name="email" required>
+                </div>
+                <div class="modern-form-group">
+                    <label for="phoneNumber"><i class="fas fa-phone mr-2"></i>Phone Number</label>
+                    <input type="tel" class="modern-form-control" id="phoneNumber" name="phone" required>
+                </div>
+                <div class="modern-form-group">
+                    <label for="Address"><i class="fas fa-map-marker-alt mr-2"></i>Address</label>
+                    <input type="text" class="modern-form-control" id="Address" name="Address" required>
+                </div>
+                <div class="modern-form-group">
+                    <label for="Password"><i class="fas fa-lock mr-2"></i>Password</label>
+                    <input type="password" class="modern-form-control" id="Password" name="Password" required>
+                </div>
+                <div class="modern-form-group">
+                    <label class="select-label" for="subjectSelect"><i class="fas fa-users mr-2"></i>Loại tài khoản
+                    </label>
+                    <select class="modern-form-control" id="subjectSelect" name="subject" required>
+                        <option value="" disabled selected>chọn loại tài khoản</option>
+                        <option value="subject1">học sinh</option>
+                        <option value="subject2">giáo viên</option>
+                        <option value="subject3">nhân viên</option>
+                    </select>
+                </div>
+                <div class="modern-form-group" id="salaryInput" style="display: none;">
+                    <label for="salary"><i class="fas fa-money-bill-wave mr-2"></i>Salary</label>
+                    <input type="number" class="modern-form-control" id="salary" name="salary" placeholder="Enter salary">
+                </div>
+                <button type="submit" class="modern-btn-primary">
+                    <i class="fas fa-user-plus"></i> Submit
+                
+            </form>
+        </main>
         <footer class="relative bg-blueGray-200 pt-8 pb-6">
             <div class="container mx-auto px-4">
                 <div class="flex flex-wrap text-left lg:text-left">
@@ -429,6 +509,17 @@
         <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+        <script>
+            $(document).ready(function () {
+                $('#subjectSelect').change(function () {
+                    if ($(this).val() === 'subject2') {
+                        $('#salaryInput').show();
+                    } else {
+                        $('#salaryInput').hide();
+                    }
+                });
+            });
+        </script>
     </body>
 
 </html>

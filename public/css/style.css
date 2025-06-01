@@ -271,12 +271,59 @@ padding: 10px 0;
 
 
 .container-login {
-    max-width: 1200px;
+    max-width: 100vw;
     margin: 0 auto;
-    padding: 20px;
+    padding: 40px 0;
     display: flex;
     justify-content: center;
     align-items: center;
+    min-height: 400px;
+}
+
+.container-login .card {
+    width: 100%;
+    max-width: 350px;
+    border-radius: 18px;
+    box-shadow: 0 2px 16px rgba(44,62,80,0.10);
+    padding: 0;
+    margin: 0 auto;
+    background: #fff;
+    border: 1px solid #e3e6ed;
+}
+
+.container-login .card-header {
+    border-radius: 18px 18px 0 0;
+    background: #f8f9fa;
+    padding: 18px 24px 10px 24px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    border-bottom: 1px solid #e3e6ed;
+}
+
+.container-login .card-body {
+    padding: 18px 24px 24px 24px;
+}
+
+.container-login .input-group {
+    margin-bottom: 18px;
+}
+
+.container-login .form-control {
+    border-radius: 8px;
+    min-height: 38px;
+    font-size: 1rem;
+}
+
+.container-login .login_btn {
+    border-radius: 8px;
+    padding: 8px 0;
+    width: 100%;
+    font-size: 1rem;
+}
+
+.container-login .remember {
+    margin-bottom: 12px;
+    font-size: 0.98rem;
 }
 
 h1 {
@@ -1842,4 +1889,60 @@ label[for="nav-footer-toggle"] {
 
 .popup-button:hover {
   background-color: #2779bd;
+}
+
+.kn2-swiper .news-item2 {
+  height: 100%;
+  margin: 0 8px;
+  box-sizing: border-box;
+  max-width: 320px;
+  min-width: 280px;
+  flex: 0 0 auto;
+}
+.kn2-swiper .news-item2 img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
+}
+.kn2-swiper .news-content {
+  padding: 20px 18px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.kn2-swiper .news-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #333;
+}
+.kn2-swiper .news-description {
+  font-size: 1rem;
+  color: #444;
+  line-height: 1.6;
+  margin-top: 4px;
+}
+
+.forgot-password-link {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.forgot-password-link a {
+    color: #7200F4;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: color 0.2s;
+    opacity: 0.85;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    display: inline-block;
+}
+
+.forgot-password-link a:hover {
+    color: #4b0082;
+    text-decoration: underline;
+    opacity: 1;
 }

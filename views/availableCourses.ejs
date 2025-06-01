@@ -8,339 +8,360 @@
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://demos.creative-tim.com/notus-js/assets/styles/tailwind.css">
-    <!-- link swiper-->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <link rel="stylesheet"
         href="https://demos.creative-tim.com/notus-js/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css">
+    <style>
+
+      .modern-table-container {
+        max-width: 1100px;
+        margin: 48px auto 0 auto;
+        background: #fff;
+        border-radius: 18px;
+        box-shadow: 0 4px 24px rgba(44, 62, 80, 0.10);
+        border: 1px solid #e3e6ed;
+        padding: 2.5rem 2rem 2rem 2rem;
+        animation: fadeIn 0.5s;
+      }
+      .modern-table-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2375D8;
+        text-align: center;
+        margin-bottom: 2rem;
+        letter-spacing: 1px;
+      }
+      .modern-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1.5rem;
+        background: #f9fafb;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(44, 62, 80, 0.06);
+      }
+      .modern-table th {
+        background: linear-gradient(90deg, #2375D8 0%, #0c9083 100%);
+        color: #fff;
+        font-weight: 700;
+        border: none;
+        padding: 12px 8px;
+        text-align: center;
+        font-size: 1rem;
+      }
+      .modern-table td {
+        background: #f9fafb;
+        border: none;
+        padding: 10px 8px;
+        color: #22223b;
+        text-align: left;
+        vertical-align: top;
+      }
+      .modern-btn-primary {
+        background: linear-gradient(90deg, #2375D8 0%, #0c9083 100%);
+        color: #fff;
+        font-weight: 700;
+        font-size: 1.1rem;
+        padding: 0.5rem 1.2rem;
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 4px 16px rgba(36, 117, 216, 0.10);
+        transition: background 0.2s, transform 0.15s;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.7rem;
+        text-decoration: none;
+      }
+      .modern-btn-primary:hover {
+        background: linear-gradient(90deg, #0c9083 0%, #2375D8 100%);
+        transform: translateY(-2px) scale(1.03);
+        box-shadow: 0 8px 24px rgba(36, 117, 216, 0.18);
+      }
+      .modern-search-sort {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-bottom: 2rem;
+      }
+      @media (min-width: 768px) {
+        .modern-search-sort {
+          flex-direction: row;
+          justify-content: space-between;
+          align-items: center;
+        }
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(18px);}
+        to { opacity: 1; transform: translateY(0);}
+      }
+    </style>
 </head>
 
 <body>
-    <header>
-        <div class="header-container">
-            <div class="logo">
-                <img src="/images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png" alt="Logo"
-                    width="90" height="90">
-            </div>
-            <nav>
-                <ul>
-                    <li><a href="/">Trang Chủ</a></li>
-                    <li><a href="/school">Trung Tâm</a></li>
-                    <li>
-                        <a href="#0">Thư Viện</a>
-                        <ul>
-                            <li><a href="https://drive.google.com/drive/folders/1j_lNKViTx_UUyZNXRlkhRd-w9ghDxAYB">Sách
-                                    Giáo Khoa</a>
-                            </li>
-                            <li><a href="#0">Tài Liệu Tham Khảo</a></li>
-                            <li><a href="#0">Tài Liệu Tiếng Anh</a></li>
-                        </ul>
-                    </li>
-                    <li>
-                        <a href="/news">Tin Tức - Sự Kiện</a>
-                    </li>
-                </ul>
-            </nav>
-
-            <% if (!user) { %>
-            <a href="/login" class="login-btn">
-                <i class="fa-solid fa-user"></i> Login
-            </a>
-            <% } else { %>
-            <div id="nav-bar">
-                <input type="checkbox" id="nav-toggle" />
-                <div id="nav-header">
-                    <a id="nav-title" href="https://codepen.io" target="_blank"
-                        style="display:flex;align-items:center;gap:12px;">
-                        <img class="logo"
-                            src="/images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png"
-                            alt="Logo" style="width:40px;height:40px;object-fit:contain;">
-
-                    </a>
-                    <label for="nav-toggle">
-                        <span id="nav-toggle-burger"></span>
-                    </label>
-                    <hr>
-                </div>
-                <div id="nav-content">
-                    <a href="/" class="nav-button"><i class="fas fa-house"></i><span>Home</span></a>
-
-                    <!-- Common options for all authenticated users -->
-                    <% if (user.role === 'teacher' || user.role === 'student') { %>
-                    <a href="/schedule" class="nav-button"><i class="fas fa-calendar"></i><span>My Schedule</span></a>
-                    <a href="/my-courses" class="nav-button"><i class="fas fa-chalkboard"></i><span>My
-                            courses</span></a>
-                    <% } %>
-                    <a href="/notifications" class="nav-button"><i
-                            class="fas fa-bell"></i><span>Notifications</span></a>
-                    <a href="/profile" class="nav-button"><i class="fas fa-user"></i><span>Profile</span></a>
-                    <% if (user.role === 'student') { %>
-                    <a href="/available-courses" class="nav-button">
-                        <i class="fas fa-book-reader"></i><span>Available Courses</span>
-                    </a>
-                    <% } %>
-
-                    <!-- Teacher & Admin only options -->
-                    <% if (user.role === 'admin' || user.role === 'teacher') { %>
-                    <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
-                    <a href="/materials" class="nav-button"><i class="fas fa-file"></i><span>Materials</span></a>
-                    <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload Material</span></a>
-                    <% } %>
-
-                    <!-- Admin only options -->
-                    <% if (user.role === 'admin') { %>
-                    <a href="/courses" class="nav-button"><i class="fas fa-book"></i><span>Courses</span></a>
-                    <a href="/users" class="nav-button"><i class="fas fa-user-cog"></i><span>User List</span></a>
-                    <a href="/register" class="nav-button"><i class="fas fa-user-plus"></i><span>Register
-                            User</span></a>
-                    <a href="/enrollments" class="nav-button"><i
-                            class="fas fa-user-plus"></i><span>Enrollments</span></a>
-                     
-                    <a href="/schedules" class="nav-button"><i class="fas fa-money-bill"></i><span>schedules
-                            list</span></a>
-                    <a href="/courses/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Course</span></a>
-                    <a href="/classes/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Class</span></a>
-                    <a href="/enrollments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add
-                            Enrollment</span></a>
-                     
-                    <a href="/schedule/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Schedule</span></a>
-                    <% } %>
-
-                    <!-- Logout button for all authenticated users -->
-                    <div class="nav-button">
-                        <form action="/logout?_method=DELETE" method="POST">
-                            <button type="submit" class="nav-button">
-                                <i class="fas fa-right-from-bracket"></i><span>Logout</span>
-                            </button>
-                        </form>
-                    </div>
-
-                    <div id="nav-content-highlight"></div>
-                </div>
-
-
-
-                <input type="checkbox" id="nav-footer-toggle" />
-                <div id="nav-footer">
-                    <div id="nav-footer-heading">
-                        <div id="nav-footer-avatar">
-                            <img src="/images/gv1.png" />
-                        </div>
-                        <div id="nav-footer-titlebox">
-                            <a id="nav-footer-title" href="https://codepen.io/uahnbu/pens/public"
-                                target="_blank">User</a>
-                            <span id="nav-footer-subtitle">Role</span>
-                        </div>
-                        <label for="nav-footer-toggle">
-                            <i class="fas fa-caret-up"></i>
-                        </label>
-                    </div>
-                    <div id="nav-footer-content">
-
-                    </div>
-                </div>
-            </div>
-
-            <% } %>
-
-
-
-        </div>
-
-    </header>
- 
-<% if (messages.error) { %>
-<div id="loginPopup" class="fixed inset-0 flex items-center justify-center z-50">
-  <div class="fixed inset-0 bg-black opacity-50"></div>
-  <div class="bg-white rounded-lg p-8 relative z-10">
-    <div class="flex flex-col items-center">
-      <div class="text-xl font-bold text-red-600 mb-4">
-        <i class="fas fa-exclamation-circle mr-2"></i>
-        Authentication Required
+  <header>
+    <div class="header-container">
+      <div class="logo">
+        <img src="/images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png" alt="Logo" width="90" height="90">
       </div>
-      <p class="text-gray-700 mb-4"><%= messages.error %></p>
-      <button onclick="closePopup()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
-        OK
-      </button>
-    </div>
-  </div>
-</div>
+      <nav>
+        <ul>
+          <li><a href="/">Trang Chủ</a></li>
+          <li><a href="/school">Trung Tâm</a></li>
+          <li>
+            <a href="#0">Thư Viện</a>
+            <ul>
+              <li><a href="https://drive.google.com/drive/folders/1j_lNKViTx_UUyZNXRlkhRd-w9ghDxAYB">Sách
+                  Giáo Khoa</a>
+              </li>
+              <li><a href="#0">Tài Liệu Tham Khảo</a></li>
+              <li><a href="#0">Tài Liệu Tiếng Anh</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/news">Tin Tức - Sự Kiện</a>
+          </li>
+        </ul>
+      </nav>
 
-<script>
-  function closePopup() {
-    const popup = document.getElementById('loginPopup');
-    if (popup) {
-      popup.classList.add('fade-out');
-      setTimeout(() => {
-        popup.remove();
-      }, 300);
-    }
-  }
+      <% if (!user) { %>
+      <a href="/login" class="login-btn">
+          <i class="fa-solid fa-user"></i> Login
+      </a>
+      <% } else { %>
+      <div id="nav-bar">
+          <input type="checkbox" id="nav-toggle" />
+          <div id="nav-header">
+              <a id="nav-title" href="https://codepen.io" target="_blank"
+                  style="display:flex;align-items:center;gap:12px;">
+                  <img class="logo"
+                      src="/images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png"
+                      alt="Logo" style="width:40px;height:40px;object-fit:contain;">
 
-  // Auto close after 3 seconds
-  setTimeout(closePopup, 3000);
-</script>
+              </a>
+              <label for="nav-toggle">
+                  <span id="nav-toggle-burger"></span>
+              </label>
+              <hr>
+          </div>
+          <div id="nav-content">
+              <a href="/" class="nav-button"><i class="fas fa-house"></i><span>Home</span></a>
 
-<style>
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
+              <!-- Common options for all authenticated users -->
+              <% if (user.role === 'teacher' || user.role === 'student') { %>
+              <a href="/schedule" class="nav-button"><i class="fas fa-calendar"></i><span>My Schedule</span></a>
+              <a href="/my-courses" class="nav-button"><i class="fas fa-chalkboard"></i><span>My
+                  courses</span></a>
+              <% } %>
+              <a href="/notifications" class="nav-button"><i
+                      class="fas fa-bell"></i><span>Notifications</span></a>
+              <a href="/profile" class="nav-button"><i class="fas fa-user"></i><span>Profile</span></a>
+              <% if (user.role === 'student') { %>
+              <a href="/available-courses" class="nav-button">
+                  <i class="fas fa-book-reader"></i><span>Available Courses</span>
+              </a>
+              <% } %>
 
-    to {
-      opacity: 1;
-    }
-  }
+              <!-- Teacher & Admin only options -->
+              <% if (user.role === 'admin' || user.role === 'teacher') { %>
+              <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
+              <a href="/materials" class="nav-button"><i class="fas fa-file"></i><span>Materials</span></a>
+              <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload Material</span></a>
+              <% } %>
 
-  @keyframes fadeOut {
-    from {
-      opacity: 1;
-    }
+              <!-- Admin only options -->
+              <% if (user.role === 'admin') { %>
+              <a href="/courses" class="nav-button"><i class="fas fa-book"></i><span>Courses</span></a>
+              <a href="/users" class="nav-button"><i class="fas fa-user-cog"></i><span>User List</span></a>
+              <a href="/register" class="nav-button"><i class="fas fa-user-plus"></i><span>Register
+                  User</span></a>
+              <a href="/enrollments" class="nav-button"><i
+                  class="fas fa-user-plus"></i><span>Enrollments</span></a>
+             
+              <a href="/schedules" class="nav-button"><i class="fas fa-money-bill"></i><span>schedules
+                  list</span></a>
+              <a href="/courses/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Course</span></a>
+              <a href="/classes/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Class</span></a>
+              <a href="/enrollments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add
+                  Enrollment</span></a>
+             
+              <a href="/schedule/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Schedule</span></a>
+              <% } %>
 
-    to {
-      opacity: 0;
-    }
-  }
+              <!-- Logout button for all authenticated users -->
+              <div class="nav-button">
+                  <form action="/logout?_method=DELETE" method="POST">
+                      <button type="submit" class="nav-button">
+                          <i class="fas fa-right-from-bracket"></i><span>Logout</span>
+                      </button>
+                  </form>
+              </div>
 
-  #loginPopup {
-    animation: fadeIn 0.3s ease-in;
-  }
+              <div id="nav-content-highlight"></div>
+          </div>
 
-  #loginPopup.fade-out {
-    animation: fadeOut 0.3s ease-out;
-  }
-</style>
-<% } %>
 
-    <div class="container mx-auto px-4 py-8">
-        <!-- Search and Filter Section -->
-        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-            <h1 class="text-4xl font-bold text-gray-800">Available Courses</h1>
-            <div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-                <div class="relative w-full sm:w-64">
-                    <input type="text" id="searchInput" placeholder="Search courses..."
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    <i class="fas fa-search absolute right-3 top-3 text-gray-400"></i>
-                </div>
-                <select id="sortSelect"
-                    class="w-full sm:w-48 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white">
-                    <option value="name">Sort by Name</option>
-                    <option value="date">Sort by Start Date</option>
-                    <option value="price">Sort by Price</option>
-                </select>
-            </div>
-        </div>
 
-        <!-- Course Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="courseGrid">
-            <% if (courses && courses.length > 0) { %>
-            <% courses.forEach(course => { %>
-            <div class="bg-white rounded-xl shadow-lg overflow-hidden course-card hover:shadow-2xl transition-shadow duration-300">
-                <div class="p-6">
-                    <!-- Course Header -->
-                    <div class="flex justify-between items-start mb-4">
-                        <h2 class="text-2xl font-bold text-gray-800"><%= course.course_name %></h2>
-                        <span class="bg-blue-100 text-blue-800 text-sm font-semibold px-3 py-1 rounded-full">
-                            <%= new Date(course.start_date).toLocaleDateString() %>
-                        </span>
-                    </div>
+          <input type="checkbox" id="nav-footer-toggle" />
+          <div id="nav-footer">
+              <div id="nav-footer-heading">
+                  <div id="nav-footer-avatar">
+                      <img src="/images/gv1.png" />
+                  </div>
+                  <div id="nav-footer-titlebox">
+                      <a id="nav-footer-title" href="https://codepen.io/uahnbu/pens/public"
+                          target="_blank">User</a>
+                      <span id="nav-footer-subtitle">Role</span>
+                  </div>
+                  <label for="nav-footer-toggle">
+                      <i class="fas fa-caret-up"></i>
+                  </label>
+              </div>
+              <div id="nav-footer-content">
 
-                    <!-- Course Description -->
-                    <p class="text-gray-600 mb-6 line-clamp-2"><%= course.description %></p>
+              </div>
+          </div>
+      </div>
 
-                    <!-- Course Details -->
-                    <div class="space-y-3 mb-6">
-                        <div class="flex items-center text-gray-700">
-                            <i class="fas fa-user-tie w-6 text-blue-500"></i>
-                            <span class="font-medium w-20">Teacher:</span>
-                            <span class="flex-1"><%= course.teacher_name %></span>
-                        </div>
-                        <div class="flex items-center text-gray-700">
-                            <i class="fas fa-calendar w-6 text-blue-500"></i>
-                            <span class="font-medium w-20">Schedule:</span>
-                            <span class="flex-1"><%= course.weekly_schedule %></span>
-                        </div>
-                        <div class="flex items-center text-gray-700">
-                            <i class="fas fa-clock w-6 text-blue-500"></i>
-                            <span class="font-medium w-20">Time:</span>
-                            <span class="flex-1"><%= course.start_time %> - <%= course.end_time %></span>
-                        </div>
-                        <div class="flex items-center text-gray-700">
-                            <i class="fas fa-users w-6 text-blue-500"></i>
-                            <span class="font-medium w-20">Enrolled:</span>
-                            <span class="flex-1"><%= course.enrolled_count || 0 %> students</span>
-                        </div>
-                        <div class="flex items-center text-gray-700">
-                            <i class="fas fa-money-bill w-6 text-blue-500"></i>
-                            <span class="font-medium w-20">Tuition:</span>
-                            <span class="flex-1 font-semibold text-green-600">
-                                <%= course.tuition_fee?.toLocaleString() %> VND
-                            </span>
-                        </div>
-                    </div>
+      <% } %>
 
-                    <!-- Enroll Button -->
-                    <form action="/enroll-course" method="POST">
-                        <input type="hidden" name="class_id" value="<%= course.class_id %>">
-                        <button type="submit"
-                            class="w-full bg-blue-500 text-black px-6 py-3 rounded-lg hover:bg-blue-600 
-                                   transition-colors duration-300 flex items-center justify-center gap-2 font-semibold"
-                            onclick="return confirm('Are you sure you want to enroll in this course?')">
-                            <i class="fas fa-user-plus"></i>
-                            Enroll Now
-                        </button>
-                    </form>
-                </div>
-            </div>
-            <% }) %>
-            <% } else { %>
-            <!-- Empty State -->
-            <div class="col-span-full text-center py-16">
-                <i class="fas fa-book-open text-6xl text-gray-300 mb-6"></i>
-                <h3 class="text-2xl font-semibold text-gray-600 mb-2">No Courses Available</h3>
-                <p class="text-gray-500">Check back later for new course offerings.</p>
-            </div>
-            <% } %>
-        </div>
+
+
     </div>
 
+  </header>
+  <% if (messages && messages.error) { %>
+    <div id="loginPopup" class="fixed inset-0 flex items-center justify-center z-50">
+      <div class="fixed inset-0 bg-black opacity-50"></div>
+      <div class="bg-white rounded-lg p-8 relative z-10">
+        <div class="flex flex-col items-center">
+          <div class="text-xl font-bold text-red-600 mb-4">
+            <i class="fas fa-exclamation-circle mr-2"></i>
+            Authentication Required
+          </div>
+          <p class="text-gray-700 mb-4"><%= messages.error %></p>
+          <button onclick="closePopup()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+            OK
+          </button>
+        </div>
+      </div>
+    </div>
     <script>
-        // Search functionality
-        document.getElementById('searchInput').addEventListener('input', function (e) {
-            const searchText = e.target.value.toLowerCase();
-            const cards = document.querySelectorAll('.course-card');
-
-            cards.forEach(card => {
-                const title = card.querySelector('h2').textContent.toLowerCase();
-                const desc = card.querySelector('p').textContent.toLowerCase();
-                card.style.display =
-                    title.includes(searchText) || desc.includes(searchText) ? 'block' : 'none';
-            });
-        });
-
-        // Sorting functionality
-        document.getElementById('sortSelect').addEventListener('change', function (e) {
-            const grid = document.getElementById('courseGrid');
-            const cards = Array.from(document.querySelectorAll('.course-card'));
-
-            cards.sort((a, b) => {
-                if (e.target.value === 'name') {
-                    return a.querySelector('h2').textContent.localeCompare(
-                        b.querySelector('h2').textContent
-                    );
-                } else if (e.target.value === 'date') {
-                    const dateA = new Date(a.querySelector('.bg-blue-100').textContent);
-                    const dateB = new Date(b.querySelector('.bg-blue-100').textContent);
-                    return dateA - dateB;
-                } else if (e.target.value === 'price') {
-                    const priceA = parseInt(a.querySelector('.fa-money-bill').nextElementSibling.textContent);
-                    const priceB = parseInt(b.querySelector('.fa-money-bill').nextElementSibling.textContent);
-                    return priceA - priceB;
-                }
-            });
-
-            cards.forEach(card => grid.appendChild(card));
-        });
+      function closePopup() {
+        const popup = document.getElementById('loginPopup');
+        if (popup) {
+          popup.classList.add('fade-out');
+          setTimeout(() => {
+            popup.remove();
+          }, 300);
+        }
+      }
+      setTimeout(closePopup, 3000);
     </script>
+    <style>
+      @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+      @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+      #loginPopup { animation: fadeIn 0.3s ease-in; }
+      #loginPopup.fade-out { animation: fadeOut 0.3s ease-out; }
+    </style>
+  <% } %>
+  <main>
+    <div class="modern-table-container">
+      <div class="modern-table-title">
+        <i class="fas fa-book-reader"></i> Available Courses
+      </div>
+      <div class="modern-search-sort">
+        <input type="text" id="searchInput" placeholder="Search courses..."
+          class="w-full md:w-80 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        <select id="sortSelect"
+          class="w-full md:w-48 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white">
+          <option value="name">Sort by Name</option>
+          <option value="date">Sort by Start Date</option>
+          <option value="price">Sort by Price</option>
+        </select>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="modern-table" id="courseTable">
+          <thead>
+            <tr>
+              <th>Course</th>
+              <th>Class</th>
+              <th>Teacher</th>
+              <th>Schedule</th>
+              <th>Time</th>
+              <th>Enrolled</th>
+              <th>Tuition</th>
+              <th>Description</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="courseTableBody">
+            <% if (courses && courses.length > 0) { %>
+              <% courses.forEach(course => { %>
+                <tr class="course-row">
+                  <td><%= course.course_name %></td>
+                  <td><%= course.class_name %></td>
+                  <td><%= course.teacher_name %></td>
+                  <td><%= course.weekly_schedule %></td>
+                  <td><%= course.start_time %> - <%= course.end_time %></td>
+                  <td><%= course.enrolled_count || 0 %></td>
+                  <td>$<%= course.tuition_fee ? course.tuition_fee.toLocaleString() : 'N/A' %></td>
+                  <td><%= course.description %></td>
+                  <td>
+                    <form action="/enroll-course" method="POST">
+                      <input type="hidden" name="class_id" value="<%= course.class_id %>">
+                      <button type="submit" class="modern-btn-primary">
+                        <i class="fas fa-user-plus"></i> Enroll
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="9" style="height:260px; padding:0;">
+                  <div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+                    <i class="fas fa-book-open text-4xl mb-3"></i>
+                    <div>No courses available.</div>
+                  </div>
+                </td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+  <script>
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('input', function (e) {
+      const searchText = e.target.value.toLowerCase();
+      const rows = document.querySelectorAll('.course-row');
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(searchText) ? '' : 'none';
+      });
+    });
+
+    // Sorting functionality
+    document.getElementById('sortSelect').addEventListener('change', function (e) {
+      const table = document.getElementById('courseTableBody');
+      const rows = Array.from(document.querySelectorAll('.course-row'));
+      rows.sort((a, b) => {
+        if (e.target.value === 'name') {
+          return a.cells[0].textContent.localeCompare(b.cells[0].textContent);
+        } else if (e.target.value === 'date') {
+          // Assuming start_date is in the 0-based index 0 (course_name), so use class_name or another field if needed
+          return 0; // You can adjust this if you have a date column
+        } else if (e.target.value === 'price') {
+          const priceA = parseFloat(a.cells[6].textContent.replace(/[^0-9.]/g, '')) || 0;
+          const priceB = parseFloat(b.cells[6].textContent.replace(/[^0-9.]/g, '')) || 0;
+          return priceA - priceB;
+        }
+      });
+      rows.forEach(row => table.appendChild(row));
+    });
+  </script>
 
     <footer class="relative bg-blueGray-200 pt-8 pb-6">
         <div class="container mx-auto px-4">
@@ -409,6 +430,6 @@
             </div>
         </div>
     </footer>
-</body>
 
+</body>
 </html>
