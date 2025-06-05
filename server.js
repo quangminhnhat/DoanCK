@@ -38,7 +38,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 const connectionString =
-  "Driver={ODBC Driver 17 for SQL Server};Server=DESKTOP-M7HENCK;Database=DOANCS;Trusted_Connection=Yes;";
+  "Driver={ODBC Driver 17 for SQL Server};Server=LAPTOP-ND7KAD0J;Database=DOANCS;Trusted_Connection=Yes;";
 const initalizePassport = require("./pass-config");
 const { time } = require("console");
 const e = require("express");
