@@ -25,7 +25,8 @@ const newsSwiper = new Swiper('.news-swiper', {
   navigation: {
     nextEl: '.news-slider-arrow.right',
     prevEl: '.news-slider-arrow.left',
-  }
+  },
+  autoplay: {delay: 2000}
 });
 
 // Swiper init
@@ -48,5 +49,6 @@ const kn2Swiper = new Swiper('.kn2-swiper', {
   navigation: {
     nextEl: '.news-slider-arrow.right',
     prevEl: '.news-slider-arrow.left',
-  }
+  },
+  autoplay: {delay: 2000}
 });

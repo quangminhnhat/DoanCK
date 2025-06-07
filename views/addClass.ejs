@@ -10,120 +10,49 @@
     <link rel="stylesheet" href="https://demos.creative-tim.com/notus-js/assets/styles/tailwind.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <style>
-        .form-container {
-            max-width: 600px;
-            margin: 2rem auto;
-            padding: 2rem;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
         }
-
-        .form-title {
-            font-size: 1.8rem;
-            color: #2d3748;
-            margin-bottom: 2rem;
-            text-align: center;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: #4a5568;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #e2e8f0;
-            border-radius: 4px;
-            font-size: 1rem;
-            transition: border-color 0.2s;
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: #4299e1;
-            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
-        }
-
-        .time-inputs {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-        }
-
-        .button-group {
+        body {
+            min-height: 100vh;
             display: flex;
-            gap: 1rem;
-            margin-top: 2rem;
+            flex-direction: column;
         }
-
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 4px;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.2s;
+        main, .modern-container {
+            flex: 1 0 auto;
         }
-
-        .btn-primary {
-            background-color: #4299e1;
-            color: white;
-            flex: 1;
+        footer {
+            flex-shrink: 0;
         }
-
-        .btn-primary:hover {
-            background-color: #3182ce;
-        }
-
-        .btn-secondary {
-            background-color: #e2e8f0;
-            color: #4a5568;
-            text-decoration: none;
-            text-align: center;
-            flex: 1;
-        }
-
-        .btn-secondary:hover {
-            background-color: #cbd5e0;
-        }
-
-        /* Modern form styles */
-        .modern-form-container {
+        .modern-container {
             max-width: 600px;
-            margin: 2rem auto;
-            padding: 2rem;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin: 48px auto 0 auto;
+            padding: 2.5rem 2rem 2rem 2rem;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px rgba(44,62,80,0.10);
+            border: 1px solid #e3e6ed;
+            animation: fadeIn 0.5s;
         }
-
-        .modern-form-title {
-            font-size: 1.8rem;
-            color: #2d3748;
-            margin-bottom: 2rem;
+        .modern-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2375D8;
             text-align: center;
+            margin-bottom: 2rem;
+            letter-spacing: 1px;
         }
-
         .modern-form-group {
             margin-bottom: 1.5rem;
         }
-
         .modern-form-group label {
             display: block;
             margin-bottom: 0.5rem;
             font-weight: 500;
             color: #4a5568;
         }
-
         .modern-form-control {
             width: 100%;
             padding: 0.75rem;
@@ -132,13 +61,11 @@
             font-size: 1rem;
             transition: border-color 0.2s;
         }
-
         .modern-form-control:focus {
             outline: none;
             border-color: #4299e1;
             box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
         }
-
         .modern-btn-primary {
             width: 100%;
             background: linear-gradient(90deg, #2375D8 0%, #0c9083 100%);
@@ -157,11 +84,56 @@
             justify-content: center;
             gap: 0.7rem;
         }
-
         .modern-btn-primary:hover {
             background: linear-gradient(90deg, #0c9083 0%, #2375D8 100%);
             transform: translateY(-2px) scale(1.03);
             box-shadow: 0 8px 24px rgba(36, 117, 216, 0.18);
+        }
+        .modern-btn-secondary {
+            width: 100%;
+            background: #e2e8f0;
+            color: #4a5568;
+            font-weight: 600;
+            font-size: 1.1rem;
+            padding: 0.85rem 0;
+            border: none;
+            border-radius: 10px;
+            transition: background 0.2s, color 0.2s;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.7rem;
+            text-decoration: none;
+            text-align: center;
+        }
+        .modern-btn-secondary:hover {
+            background: #cbd5e0;
+            color: #2375D8;
+        }
+        .modern-checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+        }
+        .modern-checkbox-label {
+            display: flex;
+            align-items: center;
+            font-size: 0.95rem;
+            color: #374151;
+        }
+        .modern-checkbox-label input[type="checkbox"] {
+            margin-right: 0.4rem;
+        }
+        .modern-form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(18px);}
+            to { opacity: 1; transform: translateY(0);}
         }
     </style>
 </head>
@@ -181,8 +153,7 @@
                         <a href="#0">Thư Viện</a>
                         <ul>
                             <li><a href="https://drive.google.com/drive/folders/1j_lNKViTx_UUyZNXRlkhRd-w9ghDxAYB">Sách
-                                    Giáo
-                                    Khoa</a>
+                                    Giáo Khoa</a>
                             </li>
                             <li><a href="#0">Tài Liệu Tham Khảo</a></li>
                             <li><a href="#0">Tài Liệu Tiếng Anh</a></li>
@@ -193,7 +164,6 @@
                     </li>
                 </ul>
             </nav>
-
             <% if (!user) { %>
             <a href="/login" class="login-btn">
                 <i class="fa-solid fa-user"></i> Login
@@ -207,18 +177,14 @@
                         <img class="logo"
                             src="/images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png"
                             alt="Logo" style="width:40px;height:40px;object-fit:contain;">
-
                     </a>
                     <label for="nav-toggle">
                         <span id="nav-toggle-burger"></span>
                     </label>
                     <hr>
                 </div>
-                <!-- Common nav section for all authenticated users -->
                 <div id="nav-content">
                     <a href="/" class="nav-button"><i class="fas fa-house"></i><span>Home</span></a>
-
-                    <!-- Common options for all authenticated users -->
                     <% if (user.role === 'teacher' || user.role === 'student') { %>
                     <a href="/schedule" class="nav-button"><i class="fas fa-calendar"></i><span>My Schedule</span></a>
                     <a href="/my-courses" class="nav-button"><i class="fas fa-chalkboard"></i><span>My
@@ -227,42 +193,31 @@
                     <a href="/notifications" class="nav-button"><i
                             class="fas fa-bell"></i><span>Notifications</span></a>
                     <a href="/profile" class="nav-button"><i class="fas fa-user"></i><span>Profile</span></a>
-          <% if (user.role === 'student') { %>
-          <a href="/available-courses" class="nav-button">
-            <i class="fas fa-book-reader"></i><span>Available Courses</span>
-          </a>
-          <% } %>
-
-
-
-
-                    <!-- Teacher & Admin only options -->
-          <% if (user.role === 'admin' || user.role === 'teacher') { %>
-          <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
-          <a href="/materials" class="nav-button"><i class="fas fa-file"></i><span>Materials</span></a>
-          <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload Material</span></a>
-          <% } %>
-      
-        <!-- Admin only options -->
-          <% if (user.role === 'admin') { %>
-            <a href="/courses" class="nav-button"><i class="fas fa-book"></i><span>Courses</span></a>
+                    <% if (user.role === 'student') { %>
+                    <a href="/available-courses" class="nav-button">
+                        <i class="fas fa-book-reader"></i><span>Available Courses</span>
+                    </a>
+                    <% } %>
+                    <% if (user.role === 'admin' || user.role === 'teacher') { %>
+                    <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
+                    <a href="/materials" class="nav-button"><i class="fas fa-file"></i><span>Materials</span></a>
+                    <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload Material</span></a>
+                    <% } %>
+                    <% if (user.role === 'admin') { %>
+                    <a href="/courses" class="nav-button"><i class="fas fa-book"></i><span>Courses</span></a>
                     <a href="/users" class="nav-button"><i class="fas fa-user-cog"></i><span>User List</span></a>
                     <a href="/register" class="nav-button"><i class="fas fa-user-plus"></i><span>Register
                             User</span></a>
                     <a href="/enrollments" class="nav-button"><i
                             class="fas fa-user-plus"></i><span>Enrollments</span></a>
-                     
                     <a href="/schedules" class="nav-button"><i class="fas fa-money-bill"></i><span>schedules
                             list</span></a>
                     <a href="/courses/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Course</span></a>
                     <a href="/classes/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Class</span></a>
                     <a href="/enrollments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add
                             Enrollment</span></a>
-                     
                     <a href="/schedule/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Schedule</span></a>
                     <% } %>
-
-                    <!-- Logout button for all authenticated users -->
                     <div class="nav-button">
                         <form action="/logout?_method=DELETE" method="POST">
                             <button type="submit" class="nav-button">
@@ -270,12 +225,8 @@
                             </button>
                         </form>
                     </div>
-
                     <div id="nav-content-highlight"></div>
                 </div>
-
-
-
                 <input type="checkbox" id="nav-footer-toggle" />
                 <div id="nav-footer">
                     <div id="nav-footer-heading">
@@ -291,256 +242,220 @@
                             <i class="fas fa-caret-up"></i>
                         </label>
                     </div>
-                    <div id="nav-footer-content">
-
-                    </div>
+                    <div id="nav-footer-content"></div>
                 </div>
             </div>
-
             <% } %>
-
-
-
         </div>
-
     </header>
- 
-<% if (messages.error) { %>
-<div id="loginPopup" class="fixed inset-0 flex items-center justify-center z-50">
-  <div class="fixed inset-0 bg-black opacity-50"></div>
-  <div class="bg-white rounded-lg p-8 relative z-10">
-    <div class="flex flex-col items-center">
-      <div class="text-xl font-bold text-red-600 mb-4">
-        <i class="fas fa-exclamation-circle mr-2"></i>
-        Authentication Required
-      </div>
-      <p class="text-gray-700 mb-4"><%= messages.error %></p>
-      <button onclick="closePopup()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
-        OK
-      </button>
-    </div>
-  </div>
-</div>
 
-<script>
-  function closePopup() {
-    const popup = document.getElementById('loginPopup');
-    if (popup) {
-      popup.classList.add('fade-out');
-      setTimeout(() => {
-        popup.remove();
-      }, 300);
-    }
-  }
-
-  // Auto close after 3 seconds
-  setTimeout(closePopup, 3000);
-</script>
-
-<style>
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-
-    to {
-      opacity: 1;
-    }
-  }
-
-  @keyframes fadeOut {
-    from {
-      opacity: 1;
-    }
-
-    to {
-      opacity: 0;
-    }
-  }
-
-  #loginPopup {
-    animation: fadeIn 0.3s ease-in;
-  }
-
-  #loginPopup.fade-out {
-    animation: fadeOut 0.3s ease-out;
-  }
-</style>
-<% } %>
-
-    <main class="container mx-auto px-4 py-8">
-        <div class="form-container">
-            <h1 class="form-title">Add New Class</h1>
-
-            <form action="/classes" method="POST" class="space-y-6">
-                <div class="form-group">
-                    <label for="class_name" class="block text-sm font-medium text-gray-700">Class Name</label>
-                    <input type="text" 
-                           id="class_name" 
-                           name="class_name" 
-                           class="mt-1 block w-full rounded-md border-gray-300" 
-                           required>
+    <% if (messages.error) { %>
+    <div id="loginPopup" class="fixed inset-0 flex items-center justify-center z-50">
+        <div class="fixed inset-0 bg-black opacity-50"></div>
+        <div class="bg-white rounded-lg p-8 relative z-10">
+            <div class="flex flex-col items-center">
+                <div class="text-xl font-bold text-red-600 mb-4">
+                    <i class="fas fa-exclamation-circle mr-2"></i>
+                    Authentication Required
                 </div>
+                <p class="text-gray-700 mb-4"><%= messages.error %></p>
+                <button onclick="closePopup()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+    <script>
+        function closePopup() {
+            const popup = document.getElementById('loginPopup');
+            if (popup) {
+                popup.classList.add('fade-out');
+                setTimeout(() => {
+                    popup.remove();
+                }, 300);
+            }
+        }
+        setTimeout(closePopup, 3000);
+    </script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        #loginPopup { animation: fadeIn 0.3s ease-in; }
+        #loginPopup.fade-out { animation: fadeOut 0.3s ease-out; }
+    </style>
+    <% } %>
 
-                <div class="form-group">
-                    <label for="course_id" class="block text-sm font-medium text-gray-700">Course</label>
-                    <select id="course_id" 
-                            name="course_id" 
-                            class="mt-1 block w-full rounded-md border-gray-300" 
-                            required>
+    <main>
+        <div class="modern-container">
+            <div class="modern-title">
+                <i class="fas fa-plus"></i> Add New Class
+            </div>
+            <form action="/classes" method="POST">
+                <div class="modern-form-group">
+                    <label for="class_name">Class Name</label>
+                    <input type="text"
+                        id="class_name"
+                        name="class_name"
+                        class="modern-form-control"
+                        required>
+                </div>
+                <div class="modern-form-group">
+                    <label for="course_id">Course</label>
+                    <select id="course_id"
+                        name="course_id"
+                        class="modern-form-control"
+                        required>
                         <option value="">Select Course</option>
                         <% courses.forEach(course => { %>
-                            <option value="<%= course.id %>"
-                                    data-start="<%= course.start_date %>"
-                                    data-end="<%= course.end_date %>">
-                                <%= course.course_name %>
-                            </option>
+                        <option value="<%= course.id %>"
+                            data-start="<%= course.start_date %>"
+                            data-end="<%= course.end_date %>">
+                            <%= course.course_name %>
+                        </option>
                         <% }) %>
                     </select>
                 </div>
-
-                <div class="form-group">
-                    <label for="teacher_id" class="block text-sm font-medium text-gray-700">Teacher</label>
-                    <select id="teacher_id" 
-                            name="teacher_id" 
-                            class="mt-1 block w-full rounded-md border-gray-300" 
-                            required>
+                <div class="modern-form-group">
+                    <label for="teacher_id">Teacher</label>
+                    <select id="teacher_id"
+                        name="teacher_id"
+                        class="modern-form-control"
+                        required>
                         <option value="">Select Teacher</option>
                         <% teachers.forEach(teacher => { %>
-                            <option value="<%= teacher.id %>">
-                                <%= teacher.full_name %>
-                            </option>
+                        <option value="<%= teacher.id %>">
+                            <%= teacher.full_name %>
+                        </option>
                         <% }) %>
                     </select>
                 </div>
-
-                <div class="form-group">
-                    <label class="block text-sm font-medium text-gray-700">Weekly Schedule</label>
-                    <div class="grid grid-cols-7 gap-2 mt-1">
+                <div class="modern-form-group">
+                    <label>Weekly Schedule</label>
+                    <div class="modern-checkbox-group">
                         <% ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].forEach((day, index) => { %>
-                            <div class="flex items-center">
-                                <input type="checkbox" 
-                                       name="weekly_days" 
-                                       value="<%= index + 1 %>"
-                                       class="h-4 w-4 text-blue-600 rounded border-gray-300">
-                                <label class="ml-2 text-sm text-gray-600"><%= day %></label>
-                            </div>
+                        <label class="modern-checkbox-label">
+                            <input type="checkbox"
+                                name="weekly_days"
+                                value="<%= index + 1 %>">
+                            <%= day %>
+                        </label>
                         <% }) %>
                     </div>
                 </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="form-group">
-                        <label for="start_time" class="block text-sm font-medium text-gray-700">Start Time</label>
-                        <input type="time" 
-                               id="start_time" 
-                               name="start_time" 
-                               class="mt-1 block w-full rounded-md border-gray-300" 
-                               required>
+                <div class="modern-form-row">
+                    <div class="modern-form-group">
+                        <label for="start_time">Start Time</label>
+                        <input type="time"
+                            id="start_time"
+                            name="start_time"
+                            class="modern-form-control"
+                            required>
                     </div>
-
-                    <div class="form-group">
-                        <label for="end_time" class="block text-sm font-medium text-gray-700">End Time</label>
-                        <input type="time" 
-                               id="end_time" 
-                               name="end_time" 
-                               class="mt-1 block w-full rounded-md border-gray-300" 
-                               required>
+                    <div class="modern-form-group">
+                        <label for="end_time">End Time</label>
+                        <input type="time"
+                            id="end_time"
+                            name="end_time"
+                            class="modern-form-control"
+                            required>
                     </div>
                 </div>
-
-                <div class="flex justify-end space-x-4">
-                    <a href="/classes" 
-                       class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
-                        Cancel
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <a href="/classes"
+                        class="modern-btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Cancel
                     </a>
-                    <button type="submit" 
-                            class="px-4 py-2 bg-blue-500 text-black rounded hover:bg-blue-600">
-                        Create Class
+                    <button type="submit"
+                        class="modern-btn-primary">
+                        <i class="fas fa-plus"></i> Create Class
                     </button>
                 </div>
             </form>
         </div>
     </main>
     <script>
-    document.querySelector('form').addEventListener('submit', function(e) {
-        const startTime = document.getElementById('start_time').value;
-        const endTime = document.getElementById('end_time').value;
-        const weeklyDays = document.querySelectorAll('input[name="weekly_days"]:checked');
-        if (weeklyDays.length === 0) {
-            e.preventDefault();
-            alert('Please select at least one day for the weekly schedule');
-            return;
-        }
-        if (startTime >= endTime) {
-            e.preventDefault();
-            alert('End time must be after start time');
-            return;
-        }
-    });
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const startTime = document.getElementById('start_time').value;
+            const endTime = document.getElementById('end_time').value;
+            const weeklyDays = document.querySelectorAll('input[name="weekly_days"]:checked');
+            if (weeklyDays.length === 0) {
+                e.preventDefault();
+                alert('Please select at least one day for the weekly schedule');
+                return;
+            }
+            if (startTime >= endTime) {
+                e.preventDefault();
+                alert('End time must be after start time');
+                return;
+            }
+        });
     </script>
-
-
 </body>
 
-  <footer class="relative bg-blueGray-200 pt-8 pb-6">
+<footer class="relative bg-blueGray-200 pt-8 pb-6">
     <div class="container mx-auto px-4">
-      <div class="flex flex-wrap text-left lg:text-left">
-        <div class="w-full lg:w-6/12 px-4">
-          <h4 class="text-3xl fonat-semibold text-blueGray-700">Liên hệ với chúng tôi!</h4>
-          <h5 class="text-lg mt-0 mb-2 text-blueGray-600">
-            Tìm kiếm chúng tôi trên bất kỳ mạng xã hội nào và gửi cho chúng tôi một tin nhắn! Chúng tôi sẽ trả lời bạn
-            ngay khi có thể.
-          </h5>
-          <div class="mt-6 lg:mb-0 mb-6">
-            <button
-              class="bg-white text-lightBlue-400 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
-              type="button">
-              <i class="fab fa-twitter"></i></button><button
-              class="bg-white text-lightBlue-600 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
-              type="button">
-              <i class="fab fa-facebook-square"></i></button><button
-              class="bg-white text-pink-400 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
-              type="button">
-              <i class="fab fa-dribbble"></i></button><button
-              class="bg-white text-blueGray-800 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
-              type="button">
-              <i class="fab fa-github"></i>
-            </button>
-          </div>
-        </div>
-        <div class="w-full lg:w-6/12 px-4">
-          <div class="flex flex-wrap items-top mb-6">
-            <div class="w-full lg:w-4/12 px-4 ml-auto">
-              <span class="block uppercase text-blueGray-500 text-sm font-semibold mb-2">Bạn Đang Tìm Kiếm</span>
-              <ul class="list-unstyled">
-                <li>
-                  <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm" href="">Liên
-                    Hệ</a>
-                </li>
-                <li>
-                  <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm" href="">Thông
-                    Tin Mới</a>
-                </li>
-                <li>
-                  <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm" href="">Tuyển
-                    Dụng</a>
-                </li>
-              </ul>
+        <div class="flex flex-wrap text-left lg:text-left">
+            <div class="w-full lg:w-6/12 px-4">
+                <h4 class="text-3xl fonat-semibold text-blueGray-700">Liên hệ với chúng tôi!</h4>
+                <h5 class="text-lg mt-0 mb-2 text-blueGray-600">
+                    Tìm kiếm chúng tôi trên bất kỳ mạng xã hội nào và gửi cho chúng tôi một tin nhắn! Chúng tôi sẽ trả lời bạn
+                    ngay khi có thể.
+                </h5>
+                <div class="mt-6 lg:mb-0 mb-6">
+                    <button
+                        class="bg-white text-lightBlue-400 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
+                        type="button">
+                        <i class="fab fa-twitter"></i></button><button
+                        class="bg-white text-lightBlue-600 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
+                        type="button">
+                        <i class="fab fa-facebook-square"></i></button><button
+                        class="bg-white text-pink-400 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
+                        type="button">
+                        <i class="fab fa-dribbble"></i></button><button
+                        class="bg-white text-blueGray-800 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
+                        type="button">
+                        <i class="fab fa-github"></i>
+                    </button>
+                </div>
             </div>
-          </div>
+            <div class="w-full lg:w-6/12 px-4">
+                <div class="flex flex-wrap items-top mb-6">
+                    <div class="w-full lg:w-4/12 px-4 ml-auto">
+                        <span class="block uppercase text-blueGray-500 text-sm font-semibold mb-2">Bạn Đang Tìm Kiếm</span>
+                        <ul class="list-unstyled">
+                            <li>
+                                <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm" href="">Liên
+                                    Hệ</a>
+                            </li>
+                            <li>
+                                <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm" href="">Thông
+                                    Tin Mới</a>
+                            </li>
+                            <li>
+                                <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm" href="">Tuyển
+                                    Dụng</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-      <hr class="my-6 border-blueGray-300">
-      <div class="flex flex-wrap items-center md:justify-between justify-center">
-        <div class="w-full md:w-4/12 px-4 mx-auto text-center">
-          <div class="text-sm text-blueGray-500 font-semibold py-1">
-            Copyright © <span id="get-current-year">2025</span><a href="https://www.facebook.com/ttgdvpttnht"
-              class="text-blueGray-500 hover:text-gray-800" target="_blank"> Talent Education</a>. Made by
-            <a href="https://github.com/Rin-0808" class="text-blueGray-500 hover:text-blueGray-800">Rin</a>.
-          </div>
+        <hr class="my-6 border-blueGray-300">
+        <div class="flex flex-wrap items-center md:justify-between justify-center">
+            <div class="w-full md:w-4/12 px-4 mx-auto text-center">
+                <div class="text-sm text-blueGray-500 font-semibold py-1">
+                    Copyright © <span id="get-current-year">2025</span><a href="https://www.facebook.com/ttgdvpttnht"
+                        class="text-blueGray-500 hover:text-gray-800" target="_blank"> Talent Education</a>. Made by
+                    <a href="https://github.com/Rin-0808" class="text-blueGray-500 hover:text-blueGray-800">Rin</a>.
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </footer>
+</footer>
 </html>

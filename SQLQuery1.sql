@@ -303,19 +303,13 @@ VALUES
 -- Insert courses (with image_path)
 INSERT INTO courses (course_name, description, start_date, end_date, tuition_fee, image_path)
 VALUES 
-(N'Khoá học Toán, Lý, Hoá, Anh', N'Khoá học tổng hợp các môn Toán, Lý, Hoá, và Anh', '2025-08-01', '2025-08-31', 3000000, 'uploads\image\course-1.jpg'),
-
-(N'Khoá học Anh Văn', N'Khoá học chuyên sâu về Anh Văn', '2025-09-01', '2025-09-30', 1500000, 'uploads\image\course-2.jpg'),
-
-(N'Khoá học Văn', N'Khoá học môn Văn giúp phát triển kỹ năng viết và đọc hiểu', '2025-10-01', '2025-10-31', 1800000, 'uploads\image\course-3.jpg'),
-
-(N'Khoá học Toán', N'Khoá học môn Toán từ cơ bản đến nâng cao', '2025-08-15', '2025-09-15', 2000000, 'uploads\image\course-4.jpg'),
-
-(N'Khoá học Lý', N'Khoá học môn Vật Lý với các thí nghiệm thực tiễn', '2025-09-05', '2025-10-05', 2000000, 'uploads\image\course-5.jpg'),
-
-(N'Khoá học Hoá', N'Khoá học môn Hoá Học kết hợp lý thuyết và thực hành', '2025-10-10', '2025-11-10', 2000000, 'uploads\image\course-6.jpg'),
-
-(N'Khoá học Sử', N'Khoá học Lịch Sử Việt Nam và Thế Giới', '2025-11-01', '2025-11-30', 1700000, 'uploads\image\course-7.jpg');
+(N'Khoá học Toán, Lý, Hoá, Anh', N'...', '2025-08-01', '2025-08-31', 3000000, 'uploads\image\course-1.jpg'), -- id = 1
+(N'Khoá học Anh Văn', N'...', '2025-09-01', '2025-09-30', 1500000, 'uploads\image\course-2.jpg'),             -- id = 2
+(N'Khoá học Văn', N'...', '2025-10-01', '2025-10-31', 1800000, 'uploads\image\course-3.jpg'),                 -- id = 3
+(N'Khoá học Toán', N'...', '2025-08-15', '2025-09-15', 2000000, 'uploads\image\course-4.jpg'),                -- id = 4
+(N'Khoá học Lý', N'...', '2025-09-05', '2025-10-05', 2000000, 'uploads\image\course-5.jpg'),                  -- id = 5
+(N'Khoá học Hoá', N'...', '2025-10-10', '2025-11-10', 2000000, 'uploads\image\course-6.jpg'),                 -- id = 6
+(N'Khoá học Sử', N'...', '2025-11-01', '2025-11-30', 1700000, 'uploads\image\course-7.jpg');                  -- id = 7
 
 
 
@@ -523,3 +517,220 @@ VALUES
 (1, 1, N'Thursday', '2025-06-05', '08:00', '10:00'),
 -- Saturday (6)
 (1, 1, N'Saturday', '2025-06-07', '08:00', '10:00');
+
+
+-- BƯỚC 2: Thêm user và teacher cho 8 giảng viên
+
+INSERT INTO users (username, password, role, created_at, updated_at) VALUES
+('nguyenthilan', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'teacher', GETDATE(), GETDATE()), -- 4
+('tranvanminh', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'teacher', GETDATE(), GETDATE()),  -- 5
+('lethihuong', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'teacher', GETDATE(), GETDATE()),   -- 6
+('phamquocanh', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'teacher', GETDATE(), GETDATE()),  -- 7
+('ngothimai', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'teacher', GETDATE(), GETDATE()),    -- 8
+('dangvanson', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'teacher', GETDATE(), GETDATE()),   -- 9
+('vuthithu', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'teacher', GETDATE(), GETDATE()),     -- 10
+('hoanglong', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'teacher', GETDATE(), GETDATE());    -- 11
+
+-- Lấy user_id tương ứng (giả sử từ 4 đến 11)
+INSERT INTO teachers (user_id, full_name, email, phone_number, address, date_of_birth, salary, created_at, updated_at) VALUES
+(4, N'Nguyễn Thị Lan', 'lan.ielts@gmail.com', '0901000001', N'Hà Tĩnh', '1990-05-20', 15000000, GETDATE(), GETDATE()),
+(5, N'Trần Văn Minh', 'minh.tv@gmail.com', '0901000002', N'Hà Nội', '1985-03-15', 17000000, GETDATE(), GETDATE()),
+(6, N'Lê Thị Hương', 'huong.le@gmail.com', '0901000003', N'Hải Phòng', '1992-07-10', 14000000, GETDATE(), GETDATE()),
+(7, N'Phạm Quốc Anh', 'quocanh.pham@gmail.com', '0901000004', N'Đà Nẵng', '1988-11-22', 16000000, GETDATE(), GETDATE()),
+(8, N'Ngô Thị Mai', 'mai.ngo@gmail.com', '0901000005', N'Hồ Chí Minh', '1991-09-05', 15500000, GETDATE(), GETDATE()),
+(9, N'Đặng Văn Sơn', 'son.dang@gmail.com', '0901000006', N'Cần Thơ', '1983-12-30', 18000000, GETDATE(), GETDATE()),
+(10, N'Vũ Thị Thu', 'thu.vu@gmail.com', '0901000007', N'Quảng Ninh', '1993-04-18', 14500000, GETDATE(), GETDATE()),
+(11, N'Hoàng Long', 'long.hoang@gmail.com', '0901000008', N'Hà Tĩnh', '1980-01-01', 20000000, GETDATE(), GETDATE());
+
+-- BƯỚC 3: Tạo class cho từng giảng viên, gán vào từng khoá học (course_id từ 1 đến 8)
+-- Giả sử teacher_id cũng từ 2 (đã có) đến 9 (vừa thêm), course_id từ 1 đến 7 (theo dữ liệu mẫu của bạn)
+
+INSERT INTO classes (class_name, course_id, teacher_id, start_time, end_time, weekly_schedule, created_at, updated_at) VALUES
+(N'Toán, Lý, Hoá, Anh - Lớp 1', 1, 4, '18:00', '20:00', '2,4,6', GETDATE(), GETDATE()), -- Nguyễn Thị Lan
+(N'Anh Văn - Lớp 1', 2, 5, '18:00', '20:00', '2,4,6', GETDATE(), GETDATE()),             -- Trần Văn Minh
+(N'Văn - Lớp 1', 3, 6, '18:00', '20:00', '2,4,6', GETDATE(), GETDATE()),                 -- Lê Thị Hương
+(N'Toán - Lớp 1', 4, 7, '18:00', '20:00', '2,4,6', GETDATE(), GETDATE()),                -- Phạm Quốc Anh
+(N'Lý - Lớp 1', 5, 8, '18:00', '20:00', '2,4,6', GETDATE(), GETDATE()),                  -- Ngô Thị Mai
+(N'Hoá - Lớp 1', 6, 9, '18:00', '20:00', '2,4,6', GETDATE(), GETDATE()),                 -- Đặng Văn Sơn
+(N'Sử - Lớp 1', 7, 10, '18:00', '20:00', '2,4,6', GETDATE(), GETDATE());            -- Vũ Thị Thu (gán lại course_id=1 nếu chưa có course kỹ năng)
+
+-- Tạo 64 học sinh mới (8 học sinh cho mỗi lớp từ class_id = 2 đến 9)
+-- Lưu ý: Thay 'hashed_password_here' bằng mật khẩu đã mã hoá thực tế
+
+-- 1. Thêm users và students
+INSERT INTO users (username, password, role, created_at, updated_at) VALUES
+('hs_tlha_01', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_tlha_02', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_tlha_03', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_tlha_04', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_tlha_05', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_tlha_06', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_tlha_07', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_tlha_08', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+
+('hs_av_01', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_av_02', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_av_03', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_av_04', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_av_05', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_av_06', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_av_07', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_av_08', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+
+('hs_van_01', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_van_02', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_van_03', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_van_04', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_van_05', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_van_06', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_van_07', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_van_08', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+
+('hs_toan_01', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_toan_02', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_toan_03', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_toan_04', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_toan_05', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_toan_06', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_toan_07', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_toan_08', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+
+('hs_ly_01', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_ly_02', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_ly_03', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_ly_04', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_ly_05', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_ly_06', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_ly_07', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_ly_08', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+
+('hs_hoa_01', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_hoa_02', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_hoa_03', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_hoa_04', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_hoa_05', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_hoa_06', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_hoa_07', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_hoa_08', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+
+('hs_su_01', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_su_02', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_su_03', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_su_04', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_su_05', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_su_06', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_su_07', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_su_08', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+
+('hs_kn_01', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_kn_02', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_kn_03', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_kn_04', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_kn_05', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_kn_06', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_kn_07', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE()),
+('hs_kn_08', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', GETDATE(), GETDATE());
+
+-- Giả sử user_id của các học sinh này bắt đầu từ 20 (sau các user đã có)
+-- Thêm students (user_id từ 20 đến 83)
+INSERT INTO students (user_id, full_name, email, phone_number, address, date_of_birth)
+VALUES
+(20, N'Nguyễn Văn A1', 'a1@gmail.com', '0903000001', N'Hà Nội', '2007-01-01'),
+(21, N'Nguyễn Văn A2', 'a2@gmail.com', '0903000002', N'Hà Nội', '2007-01-02'),
+(22, N'Nguyễn Văn A3', 'a3@gmail.com', '0903000003', N'Hà Nội', '2007-01-03'),
+(23, N'Nguyễn Văn A4', 'a4@gmail.com', '0903000004', N'Hà Nội', '2007-01-04'),
+(24, N'Nguyễn Văn A5', 'a5@gmail.com', '0903000005', N'Hà Nội', '2007-01-05'),
+(25, N'Nguyễn Văn A6', 'a6@gmail.com', '0903000006', N'Hà Nội', '2007-01-06'),
+(26, N'Nguyễn Văn A7', 'a7@gmail.com', '0903000007', N'Hà Nội', '2007-01-07'),
+(27, N'Nguyễn Văn A8', 'a8@gmail.com', '0903000008', N'Hà Nội', '2007-01-08'),
+
+(28, N'Lê Thị B1', 'b1@gmail.com', '0903000011', N'Hà Nam', '2007-02-01'),
+(29, N'Lê Thị B2', 'b2@gmail.com', '0903000012', N'Hà Nam', '2007-02-02'),
+(30, N'Lê Thị B3', 'b3@gmail.com', '0903000013', N'Hà Nam', '2007-02-03'),
+(31, N'Lê Thị B4', 'b4@gmail.com', '0903000014', N'Hà Nam', '2007-02-04'),
+(32, N'Lê Thị B5', 'b5@gmail.com', '0903000015', N'Hà Nam', '2007-02-05'),
+(33, N'Lê Thị B6', 'b6@gmail.com', '0903000016', N'Hà Nam', '2007-02-06'),
+(34, N'Lê Thị B7', 'b7@gmail.com', '0903000017', N'Hà Nam', '2007-02-07'),
+(35, N'Lê Thị B8', 'b8@gmail.com', '0903000018', N'Hà Nam', '2007-02-08'),
+
+(36, N'Trần Văn C1', 'c1@gmail.com', '0903000021', N'Hải Dương', '2007-03-01'),
+(37, N'Trần Văn C2', 'c2@gmail.com', '0903000022', N'Hải Dương', '2007-03-02'),
+(38, N'Trần Văn C3', 'c3@gmail.com', '0903000023', N'Hải Dương', '2007-03-03'),
+(39, N'Trần Văn C4', 'c4@gmail.com', '0903000024', N'Hải Dương', '2007-03-04'),
+(40, N'Trần Văn C5', 'c5@gmail.com', '0903000025', N'Hải Dương', '2007-03-05'),
+(41, N'Trần Văn C6', 'c6@gmail.com', '0903000026', N'Hải Dương', '2007-03-06'),
+(42, N'Trần Văn C7', 'c7@gmail.com', '0903000027', N'Hải Dương', '2007-03-07'),
+(43, N'Trần Văn C8', 'c8@gmail.com', '0903000028', N'Hải Dương', '2007-03-08'),
+
+(44, N'Phạm Thị D1', 'd1@gmail.com', '0903000031', N'Hưng Yên', '2007-04-01'),
+(45, N'Phạm Thị D2', 'd2@gmail.com', '0903000032', N'Hưng Yên', '2007-04-02'),
+(46, N'Phạm Thị D3', 'd3@gmail.com', '0903000033', N'Hưng Yên', '2007-04-03'),
+(47, N'Phạm Thị D4', 'd4@gmail.com', '0903000034', N'Hưng Yên', '2007-04-04'),
+(48, N'Phạm Thị D5', 'd5@gmail.com', '0903000035', N'Hưng Yên', '2007-04-05'),
+(49, N'Phạm Thị D6', 'd6@gmail.com', '0903000036', N'Hưng Yên', '2007-04-06'),
+(50, N'Phạm Thị D7', 'd7@gmail.com', '0903000037', N'Hưng Yên', '2007-04-07'),
+(51, N'Phạm Thị D8', 'd8@gmail.com', '0903000038', N'Hưng Yên', '2007-04-08'),
+
+(52, N'Hoàng Văn E1', 'e1@gmail.com', '0903000041', N'Nam Định', '2007-05-01'),
+(53, N'Hoàng Văn E2', 'e2@gmail.com', '0903000042', N'Nam Định', '2007-05-02'),
+(54, N'Hoàng Văn E3', 'e3@gmail.com', '0903000043', N'Nam Định', '2007-05-03'),
+(55, N'Hoàng Văn E4', 'e4@gmail.com', '0903000044', N'Nam Định', '2007-05-04'),
+(56, N'Hoàng Văn E5', 'e5@gmail.com', '0903000045', N'Nam Định', '2007-05-05'),
+(57, N'Hoàng Văn E6', 'e6@gmail.com', '0903000046', N'Nam Định', '2007-05-06'),
+(58, N'Hoàng Văn E7', 'e7@gmail.com', '0903000047', N'Nam Định', '2007-05-07'),
+(59, N'Hoàng Văn E8', 'e8@gmail.com', '0903000048', N'Nam Định', '2007-05-08'),
+
+(60, N'Vũ Thị F1', 'f1@gmail.com', '0903000051', N'Ninh Bình', '2007-06-01'),
+(61, N'Vũ Thị F2', 'f2@gmail.com', '0903000052', N'Ninh Bình', '2007-06-02'),
+(62, N'Vũ Thị F3', 'f3@gmail.com', '0903000053', N'Ninh Bình', '2007-06-03'),
+(63, N'Vũ Thị F4', 'f4@gmail.com', '0903000054', N'Ninh Bình', '2007-06-04'),
+(64, N'Vũ Thị F5', 'f5@gmail.com', '0903000055', N'Ninh Bình', '2007-06-05'),
+(65, N'Vũ Thị F6', 'f6@gmail.com', '0903000056', N'Ninh Bình', '2007-06-06'),
+(66, N'Vũ Thị F7', 'f7@gmail.com', '0903000057', N'Ninh Bình', '2007-06-07'),
+(67, N'Vũ Thị F8', 'f8@gmail.com', '0903000058', N'Ninh Bình', '2007-06-08'),
+
+(68, N'Đặng Văn G1', 'g1@gmail.com', '0903000061', N'Thanh Hoá', '2007-07-01'),
+(69, N'Đặng Văn G2', 'g2@gmail.com', '0903000062', N'Thanh Hoá', '2007-07-02'),
+(70, N'Đặng Văn G3', 'g3@gmail.com', '0903000063', N'Thanh Hoá', '2007-07-03'),
+(71, N'Đặng Văn G4', 'g4@gmail.com', '0903000064', N'Thanh Hoá', '2007-07-04'),
+(72, N'Đặng Văn G5', 'g5@gmail.com', '0903000065', N'Thanh Hoá', '2007-07-05'),
+(73, N'Đặng Văn G6', 'g6@gmail.com', '0903000066', N'Thanh Hoá', '2007-07-06'),
+(74, N'Đặng Văn G7', 'g7@gmail.com', '0903000067', N'Thanh Hoá', '2007-07-07'),
+(75, N'Đặng Văn G8', 'g8@gmail.com', '0903000068', N'Thanh Hoá', '2007-07-08'),
+
+(76, N'Bùi Thị H1', 'h1@gmail.com', '0903000071', N'Hà Tĩnh', '2007-08-01'),
+(77, N'Bùi Thị H2', 'h2@gmail.com', '0903000072', N'Hà Tĩnh', '2007-08-02'),
+(78, N'Bùi Thị H3', 'h3@gmail.com', '0903000073', N'Hà Tĩnh', '2007-08-03'),
+(79, N'Bùi Thị H4', 'h4@gmail.com', '0903000074', N'Hà Tĩnh', '2007-08-04'),
+(80, N'Bùi Thị H5', 'h5@gmail.com', '0903000075', N'Hà Tĩnh', '2007-08-05'),
+(81, N'Bùi Thị H6', 'h6@gmail.com', '0903000076', N'Hà Tĩnh', '2007-08-06'),
+(82, N'Bùi Thị H7', 'h7@gmail.com', '0903000077', N'Hà Tĩnh', '2007-08-07'),
+(83, N'Bùi Thị H8', 'h8@gmail.com', '0903000078', N'Hà Tĩnh', '2007-08-08');
+
+-- 2. Đăng ký mỗi học sinh vào đúng 1 lớp (class_id từ 2 đến 9)
+INSERT INTO enrollments (student_id, class_id, enrollment_date, payment_status, payment_date)
+VALUES
+
+(174, 2, GETDATE(), 1, GETDATE()), (175, 2, GETDATE(), 1, GETDATE()), (176, 2, GETDATE(), 1, GETDATE()), (177, 2, GETDATE(), 1, GETDATE()),
+(178, 2, GETDATE(), 1, GETDATE()), (179, 2, GETDATE(), 1, GETDATE()), (180, 2, GETDATE(), 1, GETDATE()), (181, 2, GETDATE(), 1, GETDATE()),
+
+(182, 3, GETDATE(), 1, GETDATE()), (183, 3, GETDATE(), 1, GETDATE()), (184, 3, GETDATE(), 1, GETDATE()), (185, 3, GETDATE(), 1, GETDATE()),
+(186, 3, GETDATE(), 1, GETDATE()), (187, 3, GETDATE(), 1, GETDATE()), (188, 3, GETDATE(), 1, GETDATE()), (230, 3, GETDATE(), 1, GETDATE()),
+
+(231, 4, GETDATE(), 1, GETDATE()), (232, 4, GETDATE(), 1, GETDATE()), (233, 4, GETDATE(), 1, GETDATE()), (234, 4, GETDATE(), 1, GETDATE()),
+(235, 4, GETDATE(), 1, GETDATE()), (236, 4, GETDATE(), 1, GETDATE()), (237, 4, GETDATE(), 1, GETDATE()), (238, 4, GETDATE(), 1, GETDATE()),
+
+(239, 5, GETDATE(), 1, GETDATE()), (240, 5, GETDATE(), 1, GETDATE()), (241, 5, GETDATE(), 1, GETDATE()), (242, 5, GETDATE(), 1, GETDATE()),
+(243, 5, GETDATE(), 1, GETDATE()), (244, 5, GETDATE(), 1, GETDATE()), (245, 5, GETDATE(), 1, GETDATE()), (246, 5, GETDATE(), 1, GETDATE()),
+
+(247, 6, GETDATE(), 1, GETDATE()), (248, 6, GETDATE(), 1, GETDATE()), (249, 6, GETDATE(), 1, GETDATE()), (250, 6, GETDATE(), 1, GETDATE()),
+(251, 6, GETDATE(), 1, GETDATE()), (252, 6, GETDATE(), 1, GETDATE()), (253, 6, GETDATE(), 1, GETDATE()), (254, 6, GETDATE(), 1, GETDATE()),
+
+(255, 7, GETDATE(), 1, GETDATE()), (256, 7, GETDATE(), 1, GETDATE()), (257, 7, GETDATE(), 1, GETDATE()), (258, 7, GETDATE(), 1, GETDATE()),
+(259, 7, GETDATE(), 1, GETDATE()), (260, 7, GETDATE(), 1, GETDATE()), (261, 7, GETDATE(), 1, GETDATE()), (262, 7, GETDATE(), 1, GETDATE()),
+
+(263, 8, GETDATE(), 1, GETDATE()), (264, 8, GETDATE(), 1, GETDATE()), (265, 8, GETDATE(), 1, GETDATE()), (266, 8, GETDATE(), 1, GETDATE()),
+(267, 8, GETDATE(), 1, GETDATE()), (268, 8, GETDATE(), 1, GETDATE()), (269, 8, GETDATE(), 1, GETDATE()), (271, 8, GETDATE(), 1, GETDATE()),
+
+(272, 9, GETDATE(), 1, GETDATE()), (273, 9, GETDATE(), 1, GETDATE()), (274, 9, GETDATE(), 1, GETDATE()), (275, 9, GETDATE(), 1, GETDATE()),
+(276, 9, GETDATE(), 1, GETDATE()), (277, 9, GETDATE(), 1, GETDATE()), (278, 9, GETDATE(), 1, GETDATE()), (287, 9, GETDATE(), 1, GETDATE());

@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://demos.creative-tim.com/notus-js/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css">
     <style>
         .modern-container {
-            max-width: 500px;
+            max-width: 600px;
             margin: 48px auto 0 auto;
             padding: 2.5rem 2rem 2rem 2rem;
             background: #fff;
@@ -101,6 +101,24 @@
             align-items: center;
             gap: 0.3rem;
             font-size: 0.95rem;
+        }
+        .modern-checkbox-group {
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .modern-checkbox-label {
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        .modern-checkbox-label input[type="checkbox"] {
+            width: 5px;
+            height: 5px;
+            border-radius: 6px;
+            border: 2px solid #a0aec0;
+            margin-right: 0.2rem;
+            flex-shrink: 0;
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(18px);}
@@ -280,16 +298,23 @@
             </div>
           </div>
 
-          <label>Weekly Schedule</label>
-          <div class="weekday-grid">
-            <% const selectedDays = classItem.weekly_schedule ? classItem.weekly_schedule.split(',').map(Number) : []; %>
-            <% ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].forEach((day, index) => { %>
-              <label class="weekday-checkbox">
-                <input type="checkbox" name="weekly_schedule" value="<%= index+1 %>" <%= selectedDays.includes(index+1) ? 'checked' : '' %>>
-                <%= day %>
-              </label>
-            <% }) %>
-          </div>
+         <div class="modern-form-group" style="width: 100%;">
+                    <label>Weekly Schedule</label>
+                    <div class="modern-checkbox-group" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.3rem; width: 100%;">
+                        <% const selectedDays = classItem.weekly_schedule ? classItem.weekly_schedule.split(',').map(Number) : []; %>
+                        <% ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].forEach((day, index) => { %>
+                        <label class="modern-checkbox-label" style="display: flex; align-items: center; font-size: 0.95rem; color: #374151; width: 100%;">
+                            <input
+                                type="checkbox"
+                                name="weekly_days"
+                                value="<%= index + 1 %>"
+                                <%= selectedDays.includes(index + 1) ? 'checked' : '' %>
+                            >
+                            <span style="flex: 1;"><%= day %></span>
+                        </label>
+                        <% }) %>
+                    </div>
+                </div>
 
           <div style="display: flex; justify-content: space-between; gap: 1rem; margin-top: 2rem;">
             <a href="/classes" class="modern-btn-secondary">
