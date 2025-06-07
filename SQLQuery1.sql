@@ -303,7 +303,19 @@ VALUES
 -- Insert courses (with image_path)
 INSERT INTO courses (course_name, description, start_date, end_date, tuition_fee, image_path)
 VALUES 
-(N'Math 101', N'Basic math course', '2025-08-01', '2025-08-30', 2000000, 'uploads\image\course-1748752260981-882327646.jpg');
+(N'Khoá học Toán, Lý, Hoá, Anh', N'Khoá học tổng hợp các môn Toán, Lý, Hoá, và Anh', '2025-08-01', '2025-08-31', 3000000, 'uploads\image\course-1.jpg'),
+
+(N'Khoá học Anh Văn', N'Khoá học chuyên sâu về Anh Văn', '2025-09-01', '2025-09-30', 1500000, 'uploads\image\course-2.jpg'),
+
+(N'Khoá học Văn', N'Khoá học môn Văn giúp phát triển kỹ năng viết và đọc hiểu', '2025-10-01', '2025-10-31', 1800000, 'uploads\image\course-3.jpg'),
+
+(N'Khoá học Toán', N'Khoá học môn Toán từ cơ bản đến nâng cao', '2025-08-15', '2025-09-15', 2000000, 'uploads\image\course-4.jpg'),
+
+(N'Khoá học Lý', N'Khoá học môn Vật Lý với các thí nghiệm thực tiễn', '2025-09-05', '2025-10-05', 2000000, 'uploads\image\course-5.jpg'),
+
+(N'Khoá học Hoá', N'Khoá học môn Hoá Học kết hợp lý thuyết và thực hành', '2025-10-10', '2025-11-10', 2000000, 'uploads\image\course-6.jpg'),
+
+(N'Khoá học Sử', N'Khoá học Lịch Sử Việt Nam và Thế Giới', '2025-11-01', '2025-11-30', 1700000, 'uploads\image\course-7.jpg');
 
 
 
