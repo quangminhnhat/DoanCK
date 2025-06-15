@@ -76,12 +76,13 @@
           <% } %>
           
 
-            <!-- Teacher & Admin only options -->
-          <% if (user.role === 'admin' || user.role === 'teacher') { %>
-          <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
           <a href="/materials" class="nav-button"><i class="fas fa-file"></i><span>Materials</span></a>
-          <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload Material</span></a>
-          <% } %>
+                      <!-- Teacher & Admin only options -->
+                      <% if (user.role==='admin' || user.role==='teacher' ) { %>
+                        <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
+                        <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload
+                            Material</span></a>
+                        <% } %>
       
         <!-- Admin only options -->
           <% if (user.role === 'admin') { %>
@@ -282,6 +283,12 @@
           link: "/SuClass",
           title: "Khoá học Sử",
           desc: "Khoá học Lịch sử giúp học sinh hiểu rõ các sự kiện, nhân vật lịch sử và phát triển tư duy phản biện, phân tích."
+        },
+        {
+          img: "/images/slide4.jpg",
+          link: "/ToanClass",
+          title: "Khoá học Toán",
+          desc: "Khoá học Toán xây dựng nền tảng vững chắc, phát triển tư duy logic và khả năng giải quyết vấn đề cho học sinh ở mọi cấp độ."
         }
       ]; %>
       <% newsList.forEach(function(news) { %>
@@ -334,13 +341,13 @@
 <!-- news-slider-container dưới khoá học kỹ năng -->
 <% 
   const skillList2 = [
-  { img: "/images/kn1.jpg", title: "Khoá Học Giao Tiếp", desc: "Khoá học giúp học viên phát triển kỹ năng giao tiếp hiệu quả, tự tin trong các tình huống hàng ngày và môi trường học tập, làm việc." },
-  { img: "/images/kn2.png", title: "Khoá Học Thuyết Trình", desc: "Trang bị cho học viên kỹ năng thuyết trình chuyên nghiệp, diễn đạt ý tưởng rõ ràng, thuyết phục trước đám đông." },
-  { img: "/images/kn3.jpg", title: "Khoá Học MC", desc: "Đào tạo kỹ năng dẫn chương trình, xử lý tình huống linh hoạt, nâng cao sự tự tin và khả năng giao tiếp trước công chúng." },
-  { img: "/images/kn4.jpg", title: "Khoá Học Hát", desc: "Giúp học viên rèn luyện kỹ thuật thanh nhạc, cảm âm, phát triển giọng hát và thể hiện cảm xúc qua âm nhạc." },
-  { img: "/images/kn5.jpg", title: "Khoá Học Vẽ Tranh", desc: "Khơi dậy khả năng sáng tạo, hướng dẫn các kỹ thuật vẽ cơ bản đến nâng cao, phát triển tư duy nghệ thuật cho học viên." },
-  { img: "/images/kn6.jpg", title: "Khoá Học Guitar", desc: "Cung cấp kiến thức nhạc lý, kỹ thuật chơi guitar từ cơ bản đến nâng cao, giúp học viên tự tin biểu diễn các bản nhạc yêu thích." },
-  { img: "/images/kn7.jpg", title: "Khoá Học Piano", desc: "Hướng dẫn kỹ thuật chơi piano, đọc bản nhạc, phát triển khả năng cảm thụ âm nhạc và biểu diễn tự tin." }
+  { img: "/images/kn1.jpg",link: "/VanClass", title: "Khoá Học Giao Tiếp", desc: "Khoá học giúp học viên phát triển kỹ năng giao tiếp hiệu quả, tự tin trong các tình huống hàng ngày và môi trường học tập, làm việc." },
+  { img: "/images/kn2.png", link: "/ThuyetTrinhClass", title: "Khoá Học Thuyết Trình", desc: "Trang bị cho học viên kỹ năng thuyết trình chuyên nghiệp, diễn đạt ý tưởng rõ ràng, thuyết phục trước đám đông." },
+  { img: "/images/kn3.jpg", link: "/MCClass", title: "Khoá Học MC", desc: "Đào tạo kỹ năng dẫn chương trình, xử lý tình huống linh hoạt, nâng cao sự tự tin và khả năng giao tiếp trước công chúng." },
+  { img: "/images/kn4.jpg", link: "/HatClass", title: "Khoá Học Hát", desc: "Giúp học viên rèn luyện kỹ thuật thanh nhạc, cảm âm, phát triển giọng hát và thể hiện cảm xúc qua âm nhạc." },
+  { img: "/images/kn5.jpg", link: "/VeTranhClass", title: "Khoá Học Vẽ Tranh", desc: "Khơi dậy khả năng sáng tạo, hướng dẫn các kỹ thuật vẽ cơ bản đến nâng cao, phát triển tư duy nghệ thuật cho học viên." },
+  { img: "/images/kn6.jpg", link: "/GuitarClass", title: "Khoá Học Guitar", desc: "Cung cấp kiến thức nhạc lý, kỹ thuật chơi guitar từ cơ bản đến nâng cao, giúp học viên tự tin biểu diễn các bản nhạc yêu thích." },
+  { img: "/images/kn7.jpg", link: "/PianoClass", title: "Khoá Học Piano", desc: "Hướng dẫn kỹ thuật chơi piano, đọc bản nhạc, phát triển khả năng cảm thụ âm nhạc và biểu diễn tự tin." }
   ];
 %>
 <div class="news-slider-container">
