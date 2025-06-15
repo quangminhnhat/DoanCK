@@ -77,12 +77,13 @@
           <% } %>
           
 
-            <!-- Teacher & Admin only options -->
-          <% if (user.role === 'admin' || user.role === 'teacher') { %>
-          <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
           <a href="/materials" class="nav-button"><i class="fas fa-file"></i><span>Materials</span></a>
-          <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload Material</span></a>
-          <% } %>
+                      <!-- Teacher & Admin only options -->
+                      <% if (user.role==='admin' || user.role==='teacher' ) { %>
+                        <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
+                        <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload
+                            Material</span></a>
+                        <% } %>
       
         <!-- Admin only options -->
           <% if (user.role === 'admin') { %>
@@ -256,26 +257,25 @@
           desc: "Chương trình Hoá học chú trọng thực hành, giúp học sinh nắm vững lý thuyết và ứng dụng vào các bài tập, thí nghiệm thực tế."
           }, { img: "/images/slide7.jpg" , link: "/SuClass" , title: "Khoá học Sử" ,
           desc: "Khoá học Lịch sử giúp học sinh hiểu rõ các sự kiện, nhân vật lịch sử và phát triển tư duy phản biện, phân tích."
-          } ]; %>
-          <% newsList.forEach(function(news) { %>
-            <div class="news-item2 swiper-slide">
-              <img src="<%= news.img %>" alt="News Image">
-              <div class="news-content">
-                <div class="news-title">
-                  <a href="<%= news.link %>">
-                    <%= news.title %>
-                  </a>
-                </div>
-                <div class="news-description">
-                  <%= news.desc %>
-                </div>
-              </div>
+        }
+      ]; %>
+      <% newsList.forEach(function(news) { %>
+        <div class="news-item2 swiper-slide">
+          <img src="<%= news.img %>" alt="News Image">
+          <div class="news-content">
+            <div class="news-title">
+              <a href="<%= news.link %>"><%= news.title %></a>
             </div>
-            <% }); %>
-      </div>
+            <div class="news-description">
+              <%= news.desc %>
+            </div>
+          </div>
+        </div>
+      <% }); %>
     </div>
-    <button class="news-slider-arrow right"><i class="fas fa-chevron-right"></i></button>
   </div>
+  <button class="news-slider-arrow right"><i class="fas fa-chevron-right"></i></button>
+</div>
 
   <div class="slider-title" style="
   font-size: 2.5rem;
@@ -300,79 +300,61 @@
     position: relative;
     z-index: 1;
   ">
-      <i class="fas fa-star" style="color:#facc15;margin-right:12px;"></i>
-      Khoá học kỹ năng
-      <i class="fas fa-star" style="color:#facc15;margin-left:12px;"></i>
-    </span>
-  </div>
-
-  <!-- news-slider-container dưới khoá học kỹ năng -->
-  <% const skillList2=[ { img: "/images/kn1.jpg" , title: "Khoá Học Giao Tiếp" ,
-    desc: "Khoá học giúp học viên phát triển kỹ năng giao tiếp hiệu quả, tự tin trong các tình huống hàng ngày và môi trường học tập, làm việc."
-    }, { img: "/images/kn2.png" , title: "Khoá Học Thuyết Trình" ,
-    desc: "Trang bị cho học viên kỹ năng thuyết trình chuyên nghiệp, diễn đạt ý tưởng rõ ràng, thuyết phục trước đám đông."
-    }, { img: "/images/kn3.jpg" , title: "Khoá Học MC" ,
-    desc: "Đào tạo kỹ năng dẫn chương trình, xử lý tình huống linh hoạt, nâng cao sự tự tin và khả năng giao tiếp trước công chúng."
-    }, { img: "/images/kn4.jpg" , title: "Khoá Học Hát" ,
-    desc: "Giúp học viên rèn luyện kỹ thuật thanh nhạc, cảm âm, phát triển giọng hát và thể hiện cảm xúc qua âm nhạc."
-    }, { img: "/images/kn5.jpg" , title: "Khoá Học Vẽ Tranh" ,
-    desc: "Khơi dậy khả năng sáng tạo, hướng dẫn các kỹ thuật vẽ cơ bản đến nâng cao, phát triển tư duy nghệ thuật cho học viên."
-    }, { img: "/images/kn6.jpg" , title: "Khoá Học Guitar" ,
-    desc: "Cung cấp kiến thức nhạc lý, kỹ thuật chơi guitar từ cơ bản đến nâng cao, giúp học viên tự tin biểu diễn các bản nhạc yêu thích."
-    }, { img: "/images/kn7.jpg" , title: "Khoá Học Piano" ,
-    desc: "Hướng dẫn kỹ thuật chơi piano, đọc bản nhạc, phát triển khả năng cảm thụ âm nhạc và biểu diễn tự tin." } ];
-    %>
-    <div class="news-slider-container">
-      <button class="news-slider-arrow left"><i class="fas fa-chevron-left"></i></button>
-      <div class="news-section swiper kn2-swiper">
-        <div class="swiper-wrapper">
-          <% skillList2.forEach(function(skill) { %>
-            <div class="news-item2 swiper-slide">
-              <img src="<%= skill.img %>" alt="Skill Image">
-              <div class="news-content">
-                <div class="news-title">
-                  <% if (skill.title==="Khoá Học Giao Tiếp" ) { %>
-                    <a href="/GiaoTiepClass">
-                      <%= skill.title %>
-                    </a>
-                    <% } else if (skill.title==="Khoá Học Thuyết Trình" ) { %>
-                      <a href="/ThuyetTrinhClass">
-                        <%= skill.title %>
-                      </a>
-                      <% } else if (skill.title==="Khoá Học MC" ) { %>
-                        <a href="/MCClass">
-                          <%= skill.title %>
-                        </a>
-                        <% } else if (skill.title==="Khoá Học Hát" ) { %>
-                          <a href="/HatClass">
-                            <%= skill.title %>
-                          </a>
-                          <% } else if (skill.title==="Khoá Học Vẽ Tranh" ) { %>
-                            <a href="/VeTranhClass">
-                              <%= skill.title %>
-                            </a>
-                            <% } else if (skill.title==="Khoá Học Guitar" ) { %>
-                              <a href="/GuitarClass">
-                                <%= skill.title %>
-                              </a>
-                              <% } else if (skill.title==="Khoá Học Piano" ) { %>
-                                <a href="/PianoClass">
-                                  <%= skill.title %>
-                                </a>
-                                <% } else { %>
-                                  <%= skill.title %>
-                                    <% } %>
-                </div>
-                <div class="news-description">
-                  <%= skill.desc %>
-                </div>
-              </div>
+    <i class="fas fa-star" style="color:#facc15;margin-right:12px;"></i>
+    Khoá học kỹ năng
+    <i class="fas fa-star" style="color:#facc15;margin-left:12px;"></i>
+  </span>
+</div>
+  
+<!-- news-slider-container dưới khoá học kỹ năng -->
+<% 
+  const skillList2 = [
+  { img: "/images/kn1.jpg", title: "Khoá Học Giao Tiếp", desc: "Khoá học giúp học viên phát triển kỹ năng giao tiếp hiệu quả, tự tin trong các tình huống hàng ngày và môi trường học tập, làm việc." },
+  { img: "/images/kn2.png", title: "Khoá Học Thuyết Trình", desc: "Trang bị cho học viên kỹ năng thuyết trình chuyên nghiệp, diễn đạt ý tưởng rõ ràng, thuyết phục trước đám đông." },
+  { img: "/images/kn3.jpg", title: "Khoá Học MC", desc: "Đào tạo kỹ năng dẫn chương trình, xử lý tình huống linh hoạt, nâng cao sự tự tin và khả năng giao tiếp trước công chúng." },
+  { img: "/images/kn4.jpg", title: "Khoá Học Hát", desc: "Giúp học viên rèn luyện kỹ thuật thanh nhạc, cảm âm, phát triển giọng hát và thể hiện cảm xúc qua âm nhạc." },
+  { img: "/images/kn5.jpg", title: "Khoá Học Vẽ Tranh", desc: "Khơi dậy khả năng sáng tạo, hướng dẫn các kỹ thuật vẽ cơ bản đến nâng cao, phát triển tư duy nghệ thuật cho học viên." },
+  { img: "/images/kn6.jpg", title: "Khoá Học Guitar", desc: "Cung cấp kiến thức nhạc lý, kỹ thuật chơi guitar từ cơ bản đến nâng cao, giúp học viên tự tin biểu diễn các bản nhạc yêu thích." },
+  { img: "/images/kn7.jpg", title: "Khoá Học Piano", desc: "Hướng dẫn kỹ thuật chơi piano, đọc bản nhạc, phát triển khả năng cảm thụ âm nhạc và biểu diễn tự tin." }
+  ];
+%>
+<div class="news-slider-container">
+  <button class="news-slider-arrow left"><i class="fas fa-chevron-left"></i></button>
+  <div class="news-section swiper kn2-swiper">
+    <div class="swiper-wrapper">
+      <% skillList2.forEach(function(skill) { %>
+        <div class="news-item2 swiper-slide">
+          <img src="<%= skill.img %>" alt="Skill Image">
+          <div class="news-content">
+            <div class="news-title">
+              <% if (skill.title === "Khoá Học Giao Tiếp") { %>
+                <a href="/GiaoTiepClass"><%= skill.title %></a>
+              <% } else if (skill.title === "Khoá Học Thuyết Trình") { %>
+                <a href="/ThuyetTrinhClass"><%= skill.title %></a>
+              <% } else if (skill.title === "Khoá Học MC") { %>
+                <a href="/MCClass"><%= skill.title %></a>
+              <% } else if (skill.title === "Khoá Học Hát") { %>
+                <a href="/HatClass"><%= skill.title %></a>
+              <% } else if (skill.title === "Khoá Học Vẽ Tranh") { %>
+                <a href="/VeTranhClass"><%= skill.title %></a>
+              <% } else if (skill.title === "Khoá Học Guitar") { %>
+                <a href="/GuitarClass"><%= skill.title %></a>
+              <% } else if (skill.title === "Khoá Học Piano") { %>
+                <a href="/PianoClass"><%= skill.title %></a>
+              <% } else { %>
+                <%= skill.title %>
+              <% } %>
             </div>
-            <% }); %>
+            <div class="news-description">
+              <%= skill.desc %>
+            </div>
+          </div>
         </div>
-      </div>
-      <button class="news-slider-arrow right"><i class="fas fa-chevron-right"></i></button>
+      <% }); %>
     </div>
+  </div>
+  <button class="news-slider-arrow right"><i class="fas fa-chevron-right"></i></button>
+</div>
 
     <footer class="relative bg-blueGray-200 pt-8 pb-6">
       <div class="container mx-auto px-4">

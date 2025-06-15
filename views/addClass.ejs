@@ -193,18 +193,25 @@
                     <a href="/notifications" class="nav-button"><i
                             class="fas fa-bell"></i><span>Notifications</span></a>
                     <a href="/profile" class="nav-button"><i class="fas fa-user"></i><span>Profile</span></a>
-                    <% if (user.role === 'student') { %>
-                    <a href="/available-courses" class="nav-button">
-                        <i class="fas fa-book-reader"></i><span>Available Courses</span>
-                    </a>
-                    <% } %>
-                    <% if (user.role === 'admin' || user.role === 'teacher') { %>
-                    <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
-                    <a href="/materials" class="nav-button"><i class="fas fa-file"></i><span>Materials</span></a>
-                    <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload Material</span></a>
-                    <% } %>
-                    <% if (user.role === 'admin') { %>
-                    <a href="/courses" class="nav-button"><i class="fas fa-book"></i><span>Courses</span></a>
+          <% if (user.role === 'student') { %>
+          <a href="/available-courses" class="nav-button">
+            <i class="fas fa-book-reader"></i><span>Available Courses</span>
+          </a>
+          <% } %>
+
+
+
+
+                    <!-- Teacher & Admin only options -->
+          <% if (user.role === 'admin' || user.role === 'teacher') { %>
+          <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
+          <a href="/materials" class="nav-button"><i class="fas fa-file"></i><span>Materials</span></a>
+          <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload Material</span></a>
+          <% } %>
+      
+        <!-- Admin only options -->
+          <% if (user.role === 'admin') { %>
+            <a href="/courses" class="nav-button"><i class="fas fa-book"></i><span>Courses</span></a>
                     <a href="/users" class="nav-button"><i class="fas fa-user-cog"></i><span>User List</span></a>
                     <a href="/register" class="nav-button"><i class="fas fa-user-plus"></i><span>Register
                             User</span></a>
