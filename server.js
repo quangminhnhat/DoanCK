@@ -316,6 +316,26 @@ app.post(
   }
 );
 
+app.get(
+  "/download/:id",
+  checkAuthenticated,
+  async (req, res) => {
+    try {
+      const materialId = req.params.id;
+      const query = "SELECT file_name, file_path FROM materials WHERE id = ?";
+      const result = await executeQuery(query, [materialId]);
+      if (!result.length) {
+        return res.status(404).send("File not found");
+      }
+      const filePath = path.join(__dirname, result[0].file_path);
+      res.download(filePath, result[0].file_name);
+    } catch (error) {
+      console.error("Download error:", error);
+      res.status(500).send("Download failed");
+    }
+  }
+);
+
 app.get("/my-courses", checkAuthenticated, async (req, res) => {
   try {
     let query;
@@ -501,7 +521,6 @@ app.delete("/notifications/:id", checkAuthenticated, async (req, res) => {
 app.get(
   "/materials",
   checkAuthenticated,
-  authenticateRole(["admin", "teacher"]),
   (req, res) => {
     const query = `SELECT * FROM materials ORDER BY uploaded_at DESC`;
 
