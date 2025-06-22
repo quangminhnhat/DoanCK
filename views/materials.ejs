@@ -193,12 +193,13 @@ footer {
 
 
 
-                    <!-- Teacher & Admin only options -->
-          <% if (user.role === 'admin' || user.role === 'teacher') { %>
-          <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
-          <a href="/materials" class="nav-button"><i class="fas fa-file"></i><span>Materials</span></a>
-          <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload Material</span></a>
-          <% } %>
+                  <a href="/materials" class="nav-button"><i class="fas fa-file"></i><span>Materials</span></a>
+                      <!-- Teacher & Admin only options -->
+                      <% if (user.role==='admin' || user.role==='teacher' ) { %>
+                        <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
+                        <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload
+                            Material</span></a>
+                        <% } %>
       
         <!-- Admin only options -->
           <% if (user.role === 'admin') { %>
@@ -296,10 +297,15 @@ footer {
                             <td><a href="/<%= material.file_path %>" target="_blank" class="text-blue-600 hover:text-blue-900 hover:underline"><%= material.file_name %></a></td>
                             <td><%= new Date(material.uploaded_at).toLocaleDateString() %></td>
                             <td class="actions">
-                                <a href="/materials/<%= material.id %>/edit" title="Edit"><i class="fas fa-edit"></i></a>
-                                <form action="/materials/<%= material.id %>?_method=DELETE" method="POST" style="display:inline;">
-                                    <button type="submit" title="Delete" class="delete" onclick="return confirm('Are you sure you want to delete this file?');"><i class="fas fa-trash-alt"></i></button>
-                                </form>
+                                <% if (user && (user.role === 'admin' || user.role === 'teacher')) { %>
+                                    <a href="/materials/<%= material.id %>/edit" title="Edit"><i class="fas fa-edit"></i></a>
+                                    <form action="/materials/<%= material.id %>?_method=DELETE" method="POST" style="display:inline;">
+                                        <button type="submit" title="Delete" class="delete" onclick="return confirm('Are you sure you want to delete this file?');"><i class="fas fa-trash-alt"></i></button>
+                                    </form>  <% } %>
+                                    <a href="/download/<%= material.id %>" title="Download" style="color:#16a34a;">
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                              
                             </td>
                         </tr>
                         <% }) %>

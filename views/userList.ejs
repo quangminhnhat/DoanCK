@@ -174,12 +174,13 @@
 
 
 
-                    <!-- Teacher & Admin only options -->
-          <% if (user.role === 'admin' || user.role === 'teacher') { %>
-          <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
-          <a href="/materials" class="nav-button"><i class="fas fa-file"></i><span>Materials</span></a>
-          <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload Material</span></a>
-          <% } %>
+                  <a href="/materials" class="nav-button"><i class="fas fa-file"></i><span>Materials</span></a>
+                      <!-- Teacher & Admin only options -->
+                      <% if (user.role==='admin' || user.role==='teacher' ) { %>
+                        <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
+                        <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload
+                            Material</span></a>
+                        <% } %>
       
         <!-- Admin only options -->
           <% if (user.role === 'admin') { %>
@@ -282,10 +283,18 @@
                                 <td class="py-3 px-6"><%= user.id %></td>
                                 <td class="py-3 px-6"><%= user.username %></td>
                                 <td class="py-3 px-6">
-                                    <span class="px-2 py-1 text-xs rounded-full 
-                                        <% if (user.role === 'admin') { %>bg-blue-600 text-white<% } else if (user.role === 'teacher') { %>bg-green-500 text-white<% } else if (user.role === 'student') { %>bg-yellow-500 text-white<% } else { %>bg-gray-400 text-white<% } %>">
-                                        <%= user.role.charAt(0).toUpperCase() + user.role.slice(1) %>
-                                    </span>
+                                    <span class="px-2 py-1 text-xs rounded-full font-semibold"
+    <% if (user.role === 'admin') { %>
+        style="background:#22c55e;color:#fff;" <!-- Xanh lá cho admin -->
+    <% } else if (user.role === 'teacher') { %>
+        style="background:#ef4444;color:#fff;" <!-- Đỏ cho teacher -->
+    <% } else if (user.role === 'student') { %>
+        style="background:#f59e0b;color:#fff;" <!-- Vàng cho student -->
+    <% } else { %>
+        style="background:#9ca3af;color:#fff;" <!-- Xám cho role khác -->
+    <% } %>>
+        <%= user.role.charAt(0).toUpperCase() + user.role.slice(1) %>
+    </span>
                                 </td>
                                 <td class="py-3 px-6"><%= user.full_name || "N/A" %></td>
                                 <td class="py-3 px-6"><%= user.email || "N/A" %></td>

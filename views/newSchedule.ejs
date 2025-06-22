@@ -103,6 +103,76 @@
         .btn-secondary:hover {
             background-color: #cbd5e0;
         }
+
+        /* Modern container and title (copy from classes.ejs) */
+        .modern-container {
+            max-width: 600px;
+            margin: 48px auto 0 auto;
+            padding: 2.5rem 2rem 2rem 2rem;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px rgba(44,62,80,0.10);
+            border: 1px solid #e3e6ed;
+            animation: fadeIn 0.5s;
+        }
+        .modern-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2375D8;
+            text-align: center;
+            margin-bottom: 2rem;
+            letter-spacing: 1px;
+        }
+        .modern-btn-primary {
+            background: linear-gradient(90deg, #2375D8 0%, #0c9083 100%);
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 16px rgba(36,117,216,0.10);
+            transition: background 0.2s, transform 0.15s, color 0.2s;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.7rem;
+            text-decoration: none;
+        }
+        .modern-btn-primary:hover {
+            background: linear-gradient(90deg, #0c9083 0%, #2375D8 100%);
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 8px 24px rgba(36,117,216,0.18);
+            color: #fff;
+        }
+        .form-group label {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #2375D8;
+        }
+        .form-control {
+            padding: 0.7rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: #2375D8;
+            box-shadow: 0 0 0 3px rgba(36,117,216,0.08);
+        }
+        .form-row {
+            display: flex;
+            gap: 1rem;
+        }
+        .form-group.half {
+            flex: 1;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(18px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
     </style>
 </head>
 <body>
@@ -173,12 +243,13 @@
 
 
 
-                    <!-- Teacher & Admin only options -->
-          <% if (user.role === 'admin' || user.role === 'teacher') { %>
-          <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
-          <a href="/materials" class="nav-button"><i class="fas fa-file"></i><span>Materials</span></a>
-          <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload Material</span></a>
-          <% } %>
+                  <a href="/materials" class="nav-button"><i class="fas fa-file"></i><span>Materials</span></a>
+                      <!-- Teacher & Admin only options -->
+                      <% if (user.role==='admin' || user.role==='teacher' ) { %>
+                        <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
+                        <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload
+                            Material</span></a>
+                        <% } %>
       
         <!-- Admin only options -->
           <% if (user.role === 'admin') { %>
@@ -240,71 +311,75 @@
 
     </header>
  
- 
-
-    <div class="form-container">
-        <h2 class="text-2xl font-bold mb-4">Add New Schedule</h2>
-        
-        <form method="POST" action="/schedules" id="scheduleForm">
-            <div class="form-group">
-                <label for="class_id">Class:</label>
-                <select id="class_id" name="class_id" class="form-control" required>
-                    <option value="">Select a class</option>
-                    <% classes.forEach(cls => { %>
-                        <option value="<%= cls.id %>"
-                                data-course-id="<%= cls.course_id %>"
-                                data-course-start="<%= cls.start_date %>"
-                                data-course-end="<%= cls.end_date %>"
-                                data-class-start="<%= cls.formattedStartTime %>"
-                                data-class-end="<%= cls.formattedEndTime %>">
-                            <%= cls.class_name %> - <%= cls.course_name %> 
-                            (<%= cls.teacher_name %>) - <%= cls.schedule %>
-                        </option>
-                    <% }) %>
-                </select>
+    <main>
+        <div class="modern-container" style="max-width: 600px;">
+            <div class="modern-title" style="margin-bottom: 1.5rem;">
+                <i class="fas fa-calendar-plus"></i> Add New Schedule
             </div>
+            <form method="POST" action="/schedules" id="scheduleForm" class="schedule-form">
+                <div class="form-group">
+                    <label for="class_id">Class:</label>
+                    <select id="class_id" name="class_id" class="form-control" required>
+                        <option value="">Select a class</option>
+                        <% classes.forEach(cls => { %>
+                            <option value="<%= cls.id %>"
+                                    data-course-id="<%= cls.course_id %>"
+                                    data-course-start="<%= cls.start_date %>"
+                                    data-course-end="<%= cls.end_date %>"
+                                    data-class-start="<%= cls.formattedStartTime %>"
+                                    data-class-end="<%= cls.formattedEndTime %>">
+                                <%= cls.class_name %> - <%= cls.course_name %> 
+                                (<%= cls.teacher_name %>) - <%= cls.schedule %>
+                            </option>
+                        <% }) %>
+                    </select>
+                </div>
 
-            <div class="form-group">
-                <label for="day_of_week">Day of Week:</label>
-                <select id="day_of_week" name="day_of_week" class="form-control" required>
-                    <option value="Monday">Monday</option>
-                    <option value="Tuesday">Tuesday</option>
-                    <option value="Wednesday">Wednesday</option>
-                    <option value="Thursday">Thursday</option>
-                    <option value="Friday">Friday</option>
-                    <option value="Saturday">Saturday</option>
-                    <option value="Sunday">Sunday</option>
-                </select>
-            </div>
+                <div class="form-group">
+                    <label for="day_of_week">Day of Week:</label>
+                    <select id="day_of_week" name="day_of_week" class="form-control" required>
+                        <option value="Monday">Monday</option>
+                        <option value="Tuesday">Tuesday</option>
+                        <option value="Wednesday">Wednesday</option>
+                        <option value="Thursday">Thursday</option>
+                        <option value="Friday">Friday</option>
+                        <option value="Saturday">Saturday</option>
+                        <option value="Sunday">Sunday</option>
+                    </select>
+                </div>
 
-            <div class="form-group">
-                <label for="schedule_date">Date:</label>
-                <input type="date" id="schedule_date" name="schedule_date" 
-                       class="form-control" required>
-            </div>
+                <div class="form-group">
+                    <label for="schedule_date">Date:</label>
+                    <input type="date" id="schedule_date" name="schedule_date" 
+                        class="form-control" required>
+                </div>
 
-            <div class="form-group">
-                <label for="start_time">Start Time:</label>
-                <input type="time" id="start_time" name="start_time" 
-                       class="form-control" required>
-            </div>
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label for="start_time">Start Time:</label>
+                        <input type="time" id="start_time" name="start_time" 
+                            class="form-control" required>
+                    </div>
+                    <div class="form-group half">
+                        <label for="end_time">End Time:</label>
+                        <input type="time" id="end_time" name="end_time" 
+                            class="form-control" required>
+                    </div>
+                </div>
 
-            <div class="form-group">
-                <label for="end_time">End Time:</label>
-                <input type="time" id="end_time" name="end_time" 
-                       class="form-control" required>
-            </div>
+                <input type="hidden" id="course_id" name="course_id">
 
-            <input type="hidden" id="course_id" name="course_id">
-
-            <div class="flex justify-between mt-4">
-                <a href="/schedules" class="bg-gray-500 text-black px-4 py-2 rounded">Back</a>
-                <button type="submit" class="bg-blue-500 text-black px-4 py-2 rounded">
-                    Create Schedule
-                </button>
-            </div>
-        </form>
-    </div>
+                <div class="form-actions" style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
+                    <a href="/schedules" class="modern-btn-primary" style="background: #e2e8f0; color: #374151;">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </a>
+                    <button type="submit" class="modern-btn-primary">
+                        <i class="fas fa-plus"></i> Create Schedule
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
     <footer class="relative bg-blueGray-200 pt-8 pb-6">
         <div class="container mx-auto px-4">
             <div class="flex flex-wrap text-left lg:text-left">

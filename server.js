@@ -38,7 +38,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 const connectionString =
-  "Driver={ODBC Driver 17 for SQL Server};Server=LAPTOP-ND7KAD0J;Database=DOANCS;Trusted_Connection=Yes;";
+  "Driver={ODBC Driver 17 for SQL Server};Server=DESKTOP-M7HENCK;Database=DOANCS;Trusted_Connection=Yes;";
 const initalizePassport = require("./pass-config");
 const { time } = require("console");
 const e = require("express");
@@ -316,6 +316,26 @@ app.post(
   }
 );
 
+app.get(
+  "/download/:id",
+  checkAuthenticated,
+  async (req, res) => {
+    try {
+      const materialId = req.params.id;
+      const query = "SELECT file_name, file_path FROM materials WHERE id = ?";
+      const result = await executeQuery(query, [materialId]);
+      if (!result.length) {
+        return res.status(404).send("File not found");
+      }
+      const filePath = path.join(__dirname, result[0].file_path);
+      res.download(filePath, result[0].file_name);
+    } catch (error) {
+      console.error("Download error:", error);
+      res.status(500).send("Download failed");
+    }
+  }
+);
+
 app.get("/my-courses", checkAuthenticated, async (req, res) => {
   try {
     let query;
@@ -501,7 +521,6 @@ app.delete("/notifications/:id", checkAuthenticated, async (req, res) => {
 app.get(
   "/materials",
   checkAuthenticated,
-  authenticateRole(["admin", "teacher"]),
   (req, res) => {
     const query = `SELECT * FROM materials ORDER BY uploaded_at DESC`;
 
@@ -1972,36 +1991,19 @@ app.get(
   async (req, res) => {
     try {
       const classId = req.params.id;
-
-      // Get class details with related info
+      // Lấy thông tin lớp học
       const classQuery = `
         SELECT 
-          c.*,
-          co.id as course_id,
-          co.course_name,
-          t.id as teacher_id,
-          t.full_name as teacher_name,
-          CONVERT(VARCHAR(5), c.start_time, 108) as formatted_start_time,
-          CONVERT(VARCHAR(5), c.end_time, 108) as formatted_end_time
+          c.*, 
+          CONVERT(varchar(5), c.start_time, 108) as formatted_start_time,
+          CONVERT(varchar(5), c.end_time, 108) as formatted_end_time
         FROM classes c
-        JOIN courses co ON c.course_id = co.id
-        JOIN teachers t ON c.teacher_id = t.id
         WHERE c.id = ?
       `;
-
-      // Get available courses and teachers for dropdowns
-      const courseQuery = `
-        SELECT id, course_name, start_date, end_date 
-        FROM courses 
-        WHERE end_date >= GETDATE()
-        ORDER BY course_name
-      `;
-
-      const teacherQuery = `
-        SELECT t.id, t.full_name, t.email 
-        FROM teachers t
-        ORDER BY t.full_name
-      `;
+      // Lấy danh sách khóa học
+      const courseQuery = `SELECT id, course_name FROM courses ORDER BY course_name`;
+      // Lấy danh sách giáo viên
+      const teacherQuery = `SELECT id, full_name FROM teachers ORDER BY full_name`;
 
       const [classResult, courses, teachers] = await Promise.all([
         executeQuery(classQuery, [classId]),
@@ -2013,11 +2015,32 @@ app.get(
         return res.status(404).send("Class not found");
       }
 
+      // Đổi tên trường cho EJS
+      const classItem = {
+        ...classResult[0],
+        course_id: classResult[0].course_id,
+        teacher_id: classResult[0].teacher_id,
+        class_name: classResult[0].class_name,
+        formatted_start_time: classResult[0].formatted_start_time,
+        formatted_end_time: classResult[0].formatted_end_time,
+        weekly_schedule: classResult[0].weekly_schedule,
+      };
+
+      // Đổi tên trường cho EJS dropdown
+      const courseList = courses.map(c => ({
+        id: c.id,
+        name: c.course_name
+      }));
+      const teacherList = teachers.map(t => ({
+        id: t.id,
+        name: t.full_name
+      }));
+
       res.render("editClass.ejs", {
-        classItem: classResult[0],
-        courses,
-        teachers,
         user: req.user,
+        classItem,
+        courses: courseList,
+        teachers: teacherList,
       });
     } catch (error) {
       console.error("Error loading class edit form:", error);
