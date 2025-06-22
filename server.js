@@ -3464,7 +3464,9 @@ app.get(
   }
 );
 
-// Handle course enrollment
+
+
+
 app.post("/enroll-course", checkAuthenticated, authenticateRole("student"), async (req, res) => {
   try {
     const { class_id } = req.body;
@@ -3567,7 +3569,9 @@ function checkNotAuthenticated(req, res, next) {
   next();
 }
 
-app.listen(3000);
+app.listen(3000, () => {
+  console.log("Server is online at http://localhost:3000");
+});
 
 // Configure connection pool
 const pool = {
