@@ -12,7 +12,7 @@ const passport = require("passport");
 const flash = require("express-flash");
 const session = require("express-session");
 const methodOverride = require("method-override");
-const { authenticateRole } = require("./roleAuth");
+const { authenticateRole } = require("./middleware/roleAuth");
 const multer = require("multer");
 const fs = require("fs");
 // Static files
@@ -39,7 +39,7 @@ app.use(passport.session());
 
 const connectionString =
   "Driver={ODBC Driver 17 for SQL Server};Server=DESKTOP-M7HENCK;Database=DOANCS;Trusted_Connection=Yes;";
-const initalizePassport = require("./pass-config");
+const initalizePassport = require("./middleware/pass-config");
 const { time } = require("console");
 const e = require("express");
 initalizePassport(
