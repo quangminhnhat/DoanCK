@@ -5,5 +5,5 @@ tạo .env
 có SECRET_KEY={bấm đại tùy ý}
 
 tải module chay cái ngay dưới trong commmand promtpromt:
-npm i express path bcrypt msnodesqlv8 passport passport-local express-flash express-session method-override node-cron multer
 npm i dotenv nodemon --save-dev
+npm i
