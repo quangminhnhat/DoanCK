@@ -1,0 +1,484 @@
+const express = require("express");
+const path = require("path");
+const sql = require("msnodesqlv8");
+const { authenticateRole } = require("../middleware/roleAuth");
+const fs = require("fs");
+const connectionString = process.env.CONNECTION_STRING; 
+const courseImageUpload = require("../middleware/courseImageUpload");
+const executeQuery = require("../middleware/executeQuery");
+const {
+  checkAuthenticated,
+} = require("../middleware/auth");
+const router = express.Router();
+
+
+
+
+router.get(
+  "/courses/new",
+  checkAuthenticated,
+  authenticateRole("admin"),
+  (req, res) => {
+    res.render("addCourse.ejs", { user: req.user });
+  }
+);
+
+
+router.delete(
+  "/courses/:id",
+  checkAuthenticated,
+  authenticateRole("admin"),
+  async (req, res) => {
+    try {
+      const courseId = req.params.id;
+
+      // Check if course has any classes
+      const classCheckQuery = `
+      SELECT COUNT(*) as classCount 
+      FROM classes 
+      WHERE course_id = ?
+    `;
+      const classCheck = await executeQuery(classCheckQuery, [courseId]);
+
+      if (classCheck[0].classCount > 0) {
+        req.flash("error", "Cannot delete course that has classes");
+        return res.redirect("/courses");
+      }
+
+      // Check if course has any materials
+      const materialCheckQuery = `
+      SELECT COUNT(*) as materialCount 
+      FROM materials 
+      WHERE course_id = ?
+    `;
+      const materialCheck = await executeQuery(materialCheckQuery, [courseId]);
+
+      if (materialCheck[0].materialCount > 0) {
+        req.flash("error", "Cannot delete course that has materials");
+        return res.redirect("/courses");
+      }
+
+      // If no dependencies, delete the course
+      const deleteQuery = `DELETE FROM courses WHERE id = ?`;
+      await executeQuery(deleteQuery, [courseId]);
+
+      req.flash("success", "Course deleted successfully");
+      res.redirect("/courses");
+    } catch (error) {
+      console.error("Course deletion error:", error);
+      req.flash("error", "Failed to delete course");
+      res.redirect("/courses");
+    }
+  }
+);
+
+
+router.get("/courses/:id", checkAuthenticated, authenticateRole(["admin", "teacher"]), async (req, res) => {
+  try {
+    const courseId = req.params.id;
+    
+    // Get course details with class and material counts
+    const query = `
+      SELECT 
+        c.*,
+        CONVERT(varchar(10), c.start_date, 23) as formatted_start_date,
+        CONVERT(varchar(10), c.end_date, 23) as formatted_end_date,
+        (SELECT COUNT(*) FROM classes WHERE course_id = c.id) as class_count,
+        (SELECT COUNT(*) FROM materials WHERE course_id = c.id) as material_count,
+        (
+          SELECT STRING_AGG(CONCAT(t.full_name, ' (', cls.class_name, ')'), ', ')
+          FROM classes cls
+          JOIN teachers t ON cls.teacher_id = t.id
+          WHERE cls.course_id = c.id
+        ) as teachers_and_classes
+      FROM courses c
+      WHERE c.id = ?
+    `;
+
+    const courseResult = await executeQuery(query, [courseId]);
+
+    if (!courseResult.length) {
+      return res.status(404).send("Course not found");
+    }
+
+    // Get all classes for this course
+    const classesQuery = `
+      SELECT 
+        cls.id,
+        cls.class_name,
+        t.full_name as teacher_name,
+        CONVERT(varchar(5), cls.start_time, 108) as start_time,
+        CONVERT(varchar(5), cls.end_time, 108) as end_time,
+        cls.weekly_schedule,
+        (SELECT COUNT(*) FROM enrollments WHERE class_id = cls.id) as student_count
+      FROM classes cls
+      JOIN teachers t ON cls.teacher_id = t.id
+      WHERE cls.course_id = ?
+      ORDER BY cls.class_name
+    `;
+
+    const classesResult = await executeQuery(classesQuery, [courseId]);
+
+    // Get all materials for this course
+    const materialsQuery = `
+      SELECT id, file_name, uploaded_at
+      FROM materials
+      WHERE course_id = ?
+      ORDER BY uploaded_at DESC
+    `;
+
+    const materialsResult = await executeQuery(materialsQuery, [courseId]);
+
+    // Process the course data
+    const course = {
+      ...courseResult[0],
+      classes: classesResult.map(cls => ({
+        ...cls,
+        schedule: cls.weekly_schedule ? 
+          cls.weekly_schedule.split(',')
+            .map(day => ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][parseInt(day) - 1])
+            .join(', ') : 
+          'No schedule set'
+      })),
+      materials: materialsResult
+    };
+
+    res.render("courseDetail.ejs", {
+      course,
+      user: req.user,
+      messages: {
+        error: req.flash('error'),
+        success: req.flash('success')
+      }
+    });
+
+  } catch (error) {
+    console.error("Error fetching course details:", error);
+    res.status(500).send("Error loading course details");
+  }
+});
+
+
+router.get("/courses/:id/edit", checkAuthenticated, authenticateRole("admin"), async (req, res) => {
+  try {
+    const courseId = req.params.id;
+    
+    // Get course details
+    const query = `
+      SELECT 
+        c.*,
+        CONVERT(varchar(10), c.start_date, 23) as formatted_start_date,
+        CONVERT(varchar(10), c.end_date, 23) as formatted_end_date,
+        (SELECT COUNT(*) FROM classes WHERE course_id = c.id) as class_count,
+        (SELECT COUNT(*) FROM materials WHERE course_id = c.id) as material_count,
+        (
+          SELECT STRING_AGG(CONCAT(t.full_name, ' (', cls.class_name, ')'), ', ') 
+          FROM classes cls
+          JOIN teachers t ON cls.teacher_id = t.id
+          WHERE cls.course_id = c.id
+        ) as teachers_and_classes
+      FROM courses c
+      WHERE c.id = ?
+    `;
+
+    const courseResult = await executeQuery(query, [courseId]);
+
+    if (!courseResult.length) {
+      return res.status(404).send("Course not found");
+    }
+
+    const course = {
+      ...courseResult[0],
+      start_date: new Date(courseResult[0].start_date),
+      end_date: new Date(courseResult[0].end_date)
+    };
+
+    res.render("editCourse.ejs", {
+      course,
+      user: req.user,
+      messages: {
+        error: req.flash('error'),
+        success: req.flash('success')
+      }
+    });
+
+  } catch (error) {
+    console.error("Error loading course edit form:", error);
+    res.status(500).send("Error loading course edit form");
+  }
+});
+
+router.get(
+  "/courses",
+  checkAuthenticated,
+  authenticateRole(["admin", "teacher"]),
+  async (req, res) => {
+    try {
+      const query = `
+      SELECT 
+        c.*,
+        (SELECT COUNT(*) FROM classes WHERE course_id = c.id) as class_count,
+        (SELECT COUNT(*) FROM materials WHERE course_id = c.id) as material_count,
+        (
+          SELECT STRING_AGG(CONCAT(t.full_name, ' (', cls.class_name, ')'), ', ')
+          FROM classes cls
+          JOIN teachers t ON cls.teacher_id = t.id
+          WHERE cls.course_id = c.id
+        ) as teachers_and_classes
+      FROM courses c
+      ORDER BY c.created_at DESC
+    `;
+
+      const courses = await executeQuery(query);
+
+      // Process the results
+      const processedCourses = courses.map((course) => ({
+        ...course,
+        hasClasses: course.class_count > 0,
+        teacherInfo: course.teachers_and_classes || "No classes assigned",
+      }));
+
+      res.render("courses.ejs", {
+        courses: processedCourses,
+        user: req.user,
+      });
+    } catch (err) {
+      console.error("Fetch courses error:", err);
+      res.status(500).send("Error loading courses");
+    }
+  }
+);
+
+router.post("/courses", 
+  checkAuthenticated, 
+  authenticateRole("admin"),
+  courseImageUpload.single('course_image'),
+  async (req, res) => {
+  try {
+    const { course_name, description, start_date, end_date, tuition_fee } = req.body;
+
+      // Handle image path
+      const image_path = req.file ? 
+        path.join('uploads', 'image', req.file.filename) : null;
+
+    const query = `
+        INSERT INTO courses (
+          course_name, 
+          description, 
+          start_date, 
+          end_date, 
+          tuition_fee,
+          image_path,
+          created_at, 
+          updated_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, GETDATE(), GETDATE())
+    `;
+
+    await executeQuery(query, [
+      course_name,
+      description,
+      start_date,
+      end_date,
+        tuition_fee || null,
+        image_path
+    ]);
+
+    res.redirect("/courses");
+  } catch (err) {
+      // Clean up uploaded file if query fails
+      if (req.file) {
+        fs.unlink(req.file.path, (unlinkErr) => {
+          if (unlinkErr) console.error('Error deleting file:', unlinkErr);
+        });
+      }
+    console.error("Course creation error:", err);
+    res.status(500).send("Failed to create course");
+  }
+  }
+);
+
+
+router.post("/courses/:id", 
+  checkAuthenticated, 
+  authenticateRole("admin"),
+  courseImageUpload.single('course_image'),
+  async (req, res) => {
+  try {
+      const courseId = req.params.id;
+    const { course_name, description, start_date, end_date, tuition_fee } = req.body;
+
+      // Get current course info
+      const currentCourse = await executeQuery(
+        "SELECT image_path FROM courses WHERE id = ?", 
+      [courseId]
+    );
+
+      if (!currentCourse.length) {
+      return res.status(404).send("Course not found");
+    }
+
+      let image_path = currentCourse[0].image_path;
+
+      // If new image uploaded, update path and delete old image
+      if (req.file) {
+        if (image_path) {
+          const oldImagePath = path.join(__dirname, image_path);
+          fs.unlink(oldImagePath, err => {
+            if (err) console.error("Error deleting old image:", err);
+          });
+        }
+        image_path = path.join('uploads', 'image', req.file.filename);
+      }
+
+    const query = `
+      UPDATE courses 
+      SET course_name = ?,
+          description = ?,
+          start_date = ?,
+          end_date = ?,
+          tuition_fee = ?,
+            image_path = ?,
+          updated_at = GETDATE()
+      WHERE id = ?
+    `;
+
+    await executeQuery(query, [
+      course_name,
+      description,
+      start_date,
+      end_date,
+      tuition_fee || null,
+        image_path,
+      courseId
+    ]);
+
+    res.redirect("/courses");
+  } catch (err) {
+      // Clean up uploaded file if query fails
+      if (req.file) {
+        fs.unlink(req.file.path, (unlinkErr) => {
+          if (unlinkErr) console.error('Error deleting file:', unlinkErr);
+        });
+      }
+    console.error("Course update error:", err);
+    res.status(500).send("Failed to update course");
+  }
+  }
+);
+
+router.delete("/courses/:id", 
+  checkAuthenticated, 
+  authenticateRole("admin"), 
+  async (req, res) => {
+  try {
+    const courseId = req.params.id;
+
+      // Get course info for image deletion
+      const course = await executeQuery(
+        "SELECT image_path FROM courses WHERE id = ?", 
+        [courseId]
+      );
+
+      // Delete image file if exists
+      if (course[0]?.image_path) {
+        const imagePath = path.join(__dirname, course[0].image_path);
+        fs.unlink(imagePath, err => {
+          if (err) console.error("Error deleting course image:", err);
+        });
+      }
+
+      // Delete course record
+    await executeQuery("DELETE FROM courses WHERE id = ?", [courseId]);
+      
+    res.redirect("/courses");
+  } catch (err) {
+    console.error("Course deletion error:", err);
+    res.status(500).send("Failed to delete course");
+  }
+});
+
+
+
+router.post(
+  "/courses/:id",
+  checkAuthenticated,
+  authenticateRole("admin"),
+  (req, res) => {
+    const { course_name, description, start_date, end_date } = req.body;
+    const role = req.user.role;
+
+    // Check authorization first
+    if (role !== "admin" && role !== "teacher") {
+      return res.status(403).send("Unauthorized access");
+    }
+
+    // Validate input
+    if (!course_name || !start_date || !end_date) {
+      return res.status(400).send("Missing required fields");
+    }
+
+    const query = `
+    UPDATE courses 
+    SET course_name = ?,
+        description = ?,
+        start_date = ?,
+        end_date = ?,
+        tuition_fee = ?,
+        updated_at = GETDATE()
+    WHERE id = ?
+  `;
+
+    const values = [
+      course_name,
+      description,
+      start_date,
+      end_date,
+      req.params.id,
+    ];
+
+    // Execute query with proper error handling
+    sql.query(connectionString, query, values, (err, result) => {
+      try {
+        try {
+          if (err) {
+            console.error("Update error:", err);
+            return res.status(500).send("Update failed");
+          }
+          if (!result || result.rowsAffected === 0) {
+            return res.status(404).send("Course not found");
+          }
+          res.redirect("/courses");
+        } catch (error) {
+          if (error.code !== "ERR_HTTP_HEADERS_SENT") {
+            console.error("Unhandled error:", error);
+          }
+        }
+      } catch (error) {
+        // Ignore headers already sent error
+        if (error.code !== "ERR_HTTP_HEADERS_SENT") {
+          console.error("Unhandled error:", error);
+        }
+      }
+    });
+  }
+);
+
+
+router.delete(
+  "/courses/:id",
+  checkAuthenticated,
+  authenticateRole("admin"),
+  (req, res) => {
+    const query = "DELETE FROM courses WHERE id = ?";
+    sql.query(connectionString, query, [req.params.id], (err) => {
+      if (err) {
+        console.error("Delete error:", err);
+        return res.status(500).send("Delete failed");
+      }
+      res.redirect("/courses");
+    });
+  }
+);
+
+module.exports = router;

@@ -1,6 +1,7 @@
 if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }
+require('events').EventEmitter.defaultMaxListeners = 20;
 
 //lib import
 const express = require("express");
@@ -15,8 +16,32 @@ const methodOverride = require("method-override");
 const { authenticateRole } = require("./middleware/roleAuth");
 const multer = require("multer");
 const fs = require("fs");
+const connectionString = process.env.CONNECTION_STRING; 
+const upload = require("./middleware/upload");
+const courseImageUpload = require("./middleware/courseImageUpload");
+const executeQuery = require("./middleware/executeQuery");
+const {
+  checkAuthenticated,
+  checkNotAuthenticated,
+} = require("./middleware/auth");
+
+
+
+
+
+
+
 // Static files
 app.use(express.static(path.join(__dirname, "public")));
+
+//routes
+const materialRoutes = require("./routes/materialRoutes");
+const notificationRoutes = require("./routes/notificationsroutes");
+const materialsRoutes = require("./routes/materialsroute");
+const userRoutes = require("./routes/usersRoutes");
+const courseRoutes = require("./routes/coursesRoutes");
+
+ 
 
 // Essential middleware
 app.use(express.json());
@@ -37,11 +62,7 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-const connectionString =
-  "Driver={ODBC Driver 17 for SQL Server};Server=LAPTOP-ND7KAD0J;Database=DOANCS;Trusted_Connection=Yes;";
 const initalizePassport = require("./middleware/pass-config");
-const { time } = require("console");
-const e = require("express");
 initalizePassport(
   passport,
   (email) => {
@@ -88,147 +109,22 @@ initalizePassport(
 );
 
 // Add this near the top of server.js
-function executeQuery(query, params = []) {
-  return new Promise((resolve, reject) => {
-    sql.query(connectionString, query, params, (err, result) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(result);
-      }
-    });
-  });
-}
+
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-const uploadFolder = path.join(__dirname, "uploads");
-if (!fs.existsSync(uploadFolder)) {
-  fs.mkdirSync(uploadFolder);
-}
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadFolder);
-  },
-  filename: function (req, file, cb) {
-    const uniqueName = Date.now() + "-" + file.originalname;
-    cb(null, uniqueName);
-  },
-});
-const upload = multer({ storage });
 
-// 1. First, add the image upload configuration at the top with other configurations
-const courseImageStorage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const uploadDir = path.join(__dirname, 'uploads', 'image');
-    // Create directory if it doesn't exist
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    cb(null, uploadDir);
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E9)}`;
-    cb(null, `course-${uniqueSuffix}${path.extname(file.originalname)}`);
-  }
-});
-
-const courseImageUpload = multer({
-  storage: courseImageStorage,
-  fileFilter: (req, file, cb) => {
-    // Allow only images
-    if (file.mimetype.startsWith('image/')) {
-      cb(null, true);
-    } else {
-      cb(new Error('Only image files are allowed!'), false);
-    }
-  },
-  limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB limit
-  }
-});
 
 //routing
-app.post(
-  "/upload-material",
-  checkAuthenticated,
-  authenticateRole(["admin", "teacher"]),
-  upload.single("material"),
-  async (req, res) => {
-    try {
-      const { course_id } = req.body;
-      const file = req.file;
+app.use(materialRoutes);
+app.use(notificationRoutes);
+app.use(materialsRoutes);
+app.use(userRoutes);
+app.use(courseRoutes);
 
-      // Input validation
-      if (!course_id || !file) {
-        return res.status(400).json({
-          error: "Missing required fields",
-          details: {
-            course_id: !course_id ? "Missing course ID" : null,
-            file: !file ? "No file uploaded" : null,
-          },
-        });
-      }
 
-      // Verify course exists first
-      const courseCheckQuery = "SELECT id FROM courses WHERE id = ?";
-      const courseResult = await new Promise((resolve, reject) => {
-        sql.query(
-          connectionString,
-          courseCheckQuery,
-          [course_id],
-          (err, result) => {
-            if (err) reject(err);
-            else resolve(result);
-          }
-        );
-      });
 
-      if (!courseResult || courseResult.length === 0) {
-        return res.status(404).json({
-          error: "Course not found",
-          course_id,
-        });
-      }
-
-      const insertQuery = `
-        INSERT INTO materials (course_id, file_name, file_path, uploaded_at)
-        VALUES (?, ?, ?, GETDATE())
-      `;
-
-      const values = [
-        course_id,
-        file.originalname,
-        path.join("uploads", file.filename),
-      ];
-
-      await new Promise((resolve, reject) => {
-        sql.query(connectionString, insertQuery, values, (err, result) => {
-          if (err) reject(err);
-          else resolve(result);
-        });
-      });
-
-      res.redirect("/materials");
-    } catch (error) {
-      console.error("Material upload error:", error);
-
-      // Delete uploaded file if database insert fails
-      if (req.file) {
-        const filePath = path.join(__dirname, "uploads", req.file.filename);
-        fs.unlink(filePath, (err) => {
-          if (err) console.error("Error deleting file:", err);
-        });
-      }
-
-      res.status(500).json({
-        error: "Failed to upload material",
-        details: error.message,
-      });
-    }
-  }
-);
 
 app.post(
   "/login",
@@ -282,39 +178,7 @@ const mapRole = {
   subject3: "admin",
 };
 
-app.post(
-  "/notifications",
-  checkAuthenticated,
-  authenticateRole(["admin", "teacher"]),
-  (req, res) => {
-    const { userId, message } = req.body;
-    const senderRole = req.user.role;
 
-    // Only allow staff to send notifications
-    if (senderRole !== "admin" && senderRole !== "teacher") {
-      return res.status(403).send("Only staff can send notifications.");
-    }
-
-    if (!userId || !message) {
-      return res.status(400).send("User ID and message are required.");
-    }
-
-    const insertQuery = `
-    INSERT INTO notifications (user_id, message)
-    VALUES (?, ?);
-  `;
-
-    sql.query(connectionString, insertQuery, [userId, message], (err) => {
-      if (err) {
-        console.error("Insert notification error:", err);
-        return res.status(500).send("Database insert error");
-      }
-
-      console.log("Notification sent to user ID:", userId);
-      res.redirect("/notifications");
-    });
-  }
-);
 
 app.get(
   "/download/:id",
@@ -430,209 +294,21 @@ app.get("/my-courses", checkAuthenticated, async (req, res) => {
   }
 });
 
-app.get("/notifications", checkAuthenticated, async (req, res) => {
-  try {
-    // Get notifications based on user role
-    let query;
-    let params = [];
 
-    if (req.user.role === "admin") {
-      query = `
-              SELECT n.*, 
-                  COALESCE(s.full_name, t.full_name, a.full_name) as receiver_name,
-                  sender.full_name as sender_name
-              FROM notifications n
-              LEFT JOIN students s ON n.user_id = s.user_id
-              LEFT JOIN teachers t ON n.user_id = t.user_id
-              LEFT JOIN admins a ON n.user_id = a.user_id
-              LEFT JOIN admins sender ON n.sender_id = sender.user_id
-              ORDER BY n.created_at DESC
-          `;
-    } else {
-      query = `
-              SELECT n.*, 
-                  COALESCE(s.full_name, t.full_name, a.full_name) as sender_name
-              FROM notifications n
-              LEFT JOIN students s ON n.sender_id = s.user_id
-              LEFT JOIN teachers t ON n.sender_id = t.user_id
-              LEFT JOIN admins a ON n.sender_id = a.user_id
-              WHERE n.user_id = ?
-              ORDER BY n.created_at DESC
-          `;
-      params = [req.user.id];
-    }
-
-    const notifications = await executeQuery(query, params);
-
-    // If admin/teacher, get list of users for sending notifications
-    let users = [];
-    if (req.user.role === "admin" || req.user.role === "teacher") {
-      const userQuery = `
-              SELECT u.id, COALESCE(s.full_name, t.full_name, a.full_name) as full_name
-              FROM users u
-              LEFT JOIN students s ON u.id = s.user_id
-              LEFT JOIN teachers t ON u.id = t.user_id
-              LEFT JOIN admins a ON u.id = a.user_id
-          `;
-      users = await executeQuery(userQuery);
-    }
-
-    res.render("notifications.ejs", {
-      user: req.user,
-      notifications: notifications,
-      users: users,
-    });
-  } catch (error) {
-    console.error("Error fetching notifications:", error);
-    res.status(500).send("Error loading notifications");
-  }
-});
 
 // Mark notification as read
-app.post("/notifications/:id/read", checkAuthenticated, async (req, res) => {
-  try {
-    const query = `
-            UPDATE notifications 
-            SET [read] = 1, 
-                updated_at = GETDATE()
-            WHERE id = ? AND user_id = ?
-        `;
-    await executeQuery(query, [req.params.id, req.user.id]);
-    res.json({ success: true });
-  } catch (error) {
-    console.error("Error marking notification as read:", error);
-    res.status(500).json({ error: "Failed to update notification" });
-  }
-});
+
 
 // Delete notification (admin only)
-app.delete("/notifications/:id", checkAuthenticated, async (req, res) => {
-  try {
-    await executeQuery("DELETE FROM notifications WHERE id = ?", [
-      req.params.id,
-    ]);
-    res.redirect("/notifications");
-  } catch (error) {
-    console.error("Error deleting notification:", error);
-    res.status(500).send("Failed to delete notification");
-  }
-});
-
-app.get(
-  "/materials",
-  checkAuthenticated,
-  (req, res) => {
-    const query = `SELECT * FROM materials ORDER BY uploaded_at DESC`;
-
-    sql.query(connectionString, query, (err, rows) => {
-      if (err) {
-        console.error("Fetch materials error:", err);
-        return res.status(500).send("Database error");
-      }
-      res.render("materials.ejs", { materials: rows, user: req.user });
-    });
-  }
-);
-
-app.get(
-  "/materials/:id/edit",
-  checkAuthenticated,
-  authenticateRole(["admin", "teacher"]),
-  async (req, res) => {
-    try {
-      const materialId = req.params.id;
-
-      // Get material details with course info
-      const query = `
-        SELECT m.*, c.course_name
-        FROM materials m
-        JOIN courses c ON m.course_id = c.id
-        WHERE m.id = ?
-      `;
-
-      // Get available courses for dropdown
-      const courseQuery = `
-        SELECT id, course_name 
-        FROM courses 
-        WHERE end_date >= GETDATE()
-        ORDER BY course_name
-      `;
-
-      const [material, courses] = await Promise.all([
-        executeQuery(query, [materialId]),
-        executeQuery(courseQuery),
-      ]);
-
-      if (!material.length) {
-        return res.status(404).send("Material not found");
-      }
-
-      res.render("editMaterial.ejs", {
-        material: material[0],
-        courses,
-        user: req.user,
-      });
-    } catch (error) {
-      console.error("Error loading material edit form:", error);
-      res.status(500).send("Error loading material edit form");
-    }
-  }
-);
 
 
-app.get("/users", checkAuthenticated, authenticateRole("admin"), (req, res) => {
-  const query = `
-    	SELECT u.id, u.username, u.role, u.created_at, u.updated_at,
-       COALESCE(s.full_name, t.full_name, a.full_name) AS full_name,
-       COALESCE(s.email, t.email, a.email) AS email,
-       COALESCE(s.phone_number, t.phone_number, a.phone_number) AS phone
-FROM users u
-LEFT JOIN students s ON u.id = s.user_id
-LEFT JOIN teachers t ON u.id = t.user_id
-LEFT JOIN admins a   ON u.id = a.user_id
-ORDER BY u.created_at DESC;
-  `;
 
-  sql.query(connectionString, query, (err, rows) => {
-    if (err) return res.status(500).send("Database error");
-    res.render("userList", { users: rows, user: req.user });
-  });
-});
 
-app.get(
-  "/users/:id/edit",
-  checkAuthenticated,
-  async (req, res) => {
-    try {
-      const userId = req.params.id;
-      const query = `
-        SELECT u.id, u.username, u.role,
-          COALESCE(s.full_name, t.full_name, a.full_name) AS full_name,
-          COALESCE(s.email, t.email, a.email) AS email,
-          COALESCE(s.phone_number, t.phone_number, a.phone_number) AS phone_number
-        FROM users u
-        LEFT JOIN students s ON u.id = s.user_id
-        LEFT JOIN teachers t ON u.id = t.user_id
-        LEFT JOIN admins a ON u.id = a.user_id
-        WHERE u.id = ?
-      `;
 
-      const result = await executeQuery(query, [userId]);
-      
-      if (!result.length) {
-        return res.status(404).send("User not found");
-      }
 
-      res.render("editUser.ejs", { 
-        user: req.user,
-        editUser: result[0]
-      });
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).send("Error loading user data");
-    }
-  }
-);
+
+
+
 
 
 app.get("/", async (req, res) => {
@@ -679,17 +355,8 @@ app.get(
   }
 );
 
-app.get("/notifications", checkAuthenticated, (req, res) => {
-  res.render("notifications.ejs", { user: req.user });
-});
-app.get(
-  "/courses/new",
-  checkAuthenticated,
-  authenticateRole("admin"),
-  (req, res) => {
-    res.render("addCourse.ejs", { user: req.user });
-  }
-);
+
+
 
 app.get(
   "/schedule/new",
@@ -751,382 +418,17 @@ app.get(
 
 
 
-app.delete(
-  "/courses/:id",
-  checkAuthenticated,
-  authenticateRole("admin"),
-  async (req, res) => {
-    try {
-      const courseId = req.params.id;
-
-      // Check if course has any classes
-      const classCheckQuery = `
-      SELECT COUNT(*) as classCount 
-      FROM classes 
-      WHERE course_id = ?
-    `;
-      const classCheck = await executeQuery(classCheckQuery, [courseId]);
-
-      if (classCheck[0].classCount > 0) {
-        req.flash("error", "Cannot delete course that has classes");
-        return res.redirect("/courses");
-      }
-
-      // Check if course has any materials
-      const materialCheckQuery = `
-      SELECT COUNT(*) as materialCount 
-      FROM materials 
-      WHERE course_id = ?
-    `;
-      const materialCheck = await executeQuery(materialCheckQuery, [courseId]);
-
-      if (materialCheck[0].materialCount > 0) {
-        req.flash("error", "Cannot delete course that has materials");
-        return res.redirect("/courses");
-      }
-
-      // If no dependencies, delete the course
-      const deleteQuery = `DELETE FROM courses WHERE id = ?`;
-      await executeQuery(deleteQuery, [courseId]);
-
-      req.flash("success", "Course deleted successfully");
-      res.redirect("/courses");
-    } catch (error) {
-      console.error("Course deletion error:", error);
-      req.flash("error", "Failed to delete course");
-      res.redirect("/courses");
-    }
-  }
-);
 
 
-app.get("/courses/:id", checkAuthenticated, authenticateRole(["admin", "teacher"]), async (req, res) => {
-  try {
-    const courseId = req.params.id;
-    
-    // Get course details with class and material counts
-    const query = `
-      SELECT 
-        c.*,
-        CONVERT(varchar(10), c.start_date, 23) as formatted_start_date,
-        CONVERT(varchar(10), c.end_date, 23) as formatted_end_date,
-        (SELECT COUNT(*) FROM classes WHERE course_id = c.id) as class_count,
-        (SELECT COUNT(*) FROM materials WHERE course_id = c.id) as material_count,
-        (
-          SELECT STRING_AGG(CONCAT(t.full_name, ' (', cls.class_name, ')'), ', ')
-          FROM classes cls
-          JOIN teachers t ON cls.teacher_id = t.id
-          WHERE cls.course_id = c.id
-        ) as teachers_and_classes
-      FROM courses c
-      WHERE c.id = ?
-    `;
-
-    const courseResult = await executeQuery(query, [courseId]);
-
-    if (!courseResult.length) {
-      return res.status(404).send("Course not found");
-    }
-
-    // Get all classes for this course
-    const classesQuery = `
-      SELECT 
-        cls.id,
-        cls.class_name,
-        t.full_name as teacher_name,
-        CONVERT(varchar(5), cls.start_time, 108) as start_time,
-        CONVERT(varchar(5), cls.end_time, 108) as end_time,
-        cls.weekly_schedule,
-        (SELECT COUNT(*) FROM enrollments WHERE class_id = cls.id) as student_count
-      FROM classes cls
-      JOIN teachers t ON cls.teacher_id = t.id
-      WHERE cls.course_id = ?
-      ORDER BY cls.class_name
-    `;
-
-    const classesResult = await executeQuery(classesQuery, [courseId]);
-
-    // Get all materials for this course
-    const materialsQuery = `
-      SELECT id, file_name, uploaded_at
-      FROM materials
-      WHERE course_id = ?
-      ORDER BY uploaded_at DESC
-    `;
-
-    const materialsResult = await executeQuery(materialsQuery, [courseId]);
-
-    // Process the course data
-    const course = {
-      ...courseResult[0],
-      classes: classesResult.map(cls => ({
-        ...cls,
-        schedule: cls.weekly_schedule ? 
-          cls.weekly_schedule.split(',')
-            .map(day => ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][parseInt(day) - 1])
-            .join(', ') : 
-          'No schedule set'
-      })),
-      materials: materialsResult
-    };
-
-    res.render("courseDetail.ejs", {
-      course,
-      user: req.user,
-      messages: {
-        error: req.flash('error'),
-        success: req.flash('success')
-      }
-    });
-
-  } catch (error) {
-    console.error("Error fetching course details:", error);
-    res.status(500).send("Error loading course details");
-  }
-});
 
 
-app.get("/courses/:id/edit", checkAuthenticated, authenticateRole("admin"), async (req, res) => {
-  try {
-    const courseId = req.params.id;
-    
-    // Get course details
-    const query = `
-      SELECT 
-        c.*,
-        CONVERT(varchar(10), c.start_date, 23) as formatted_start_date,
-        CONVERT(varchar(10), c.end_date, 23) as formatted_end_date,
-        (SELECT COUNT(*) FROM classes WHERE course_id = c.id) as class_count,
-        (SELECT COUNT(*) FROM materials WHERE course_id = c.id) as material_count,
-        (
-          SELECT STRING_AGG(CONCAT(t.full_name, ' (', cls.class_name, ')'), ', ') 
-          FROM classes cls
-          JOIN teachers t ON cls.teacher_id = t.id
-          WHERE cls.course_id = c.id
-        ) as teachers_and_classes
-      FROM courses c
-      WHERE c.id = ?
-    `;
-
-    const courseResult = await executeQuery(query, [courseId]);
-
-    if (!courseResult.length) {
-      return res.status(404).send("Course not found");
-    }
-
-    const course = {
-      ...courseResult[0],
-      start_date: new Date(courseResult[0].start_date),
-      end_date: new Date(courseResult[0].end_date)
-    };
-
-    res.render("editCourse.ejs", {
-      course,
-      user: req.user,
-      messages: {
-        error: req.flash('error'),
-        success: req.flash('success')
-      }
-    });
-
-  } catch (error) {
-    console.error("Error loading course edit form:", error);
-    res.status(500).send("Error loading course edit form");
-  }
-});
 
 
-app.get(
-  "/courses",
-  checkAuthenticated,
-  authenticateRole(["admin", "teacher"]),
-  async (req, res) => {
-    try {
-      const query = `
-      SELECT 
-        c.*,
-        (SELECT COUNT(*) FROM classes WHERE course_id = c.id) as class_count,
-        (SELECT COUNT(*) FROM materials WHERE course_id = c.id) as material_count,
-        (
-          SELECT STRING_AGG(CONCAT(t.full_name, ' (', cls.class_name, ')'), ', ')
-          FROM classes cls
-          JOIN teachers t ON cls.teacher_id = t.id
-          WHERE cls.course_id = c.id
-        ) as teachers_and_classes
-      FROM courses c
-      ORDER BY c.created_at DESC
-    `;
 
-      const courses = await executeQuery(query);
 
-      // Process the results
-      const processedCourses = courses.map((course) => ({
-        ...course,
-        hasClasses: course.class_count > 0,
-        teacherInfo: course.teachers_and_classes || "No classes assigned",
-      }));
 
-      res.render("courses.ejs", {
-        courses: processedCourses,
-        user: req.user,
-      });
-    } catch (err) {
-      console.error("Fetch courses error:", err);
-      res.status(500).send("Error loading courses");
-    }
-  }
-);
 
-// 2. Update the course creation route
-app.post("/courses", 
-  checkAuthenticated, 
-  authenticateRole("admin"),
-  courseImageUpload.single('course_image'),
-  async (req, res) => {
-  try {
-    const { course_name, description, start_date, end_date, tuition_fee } = req.body;
 
-      // Handle image path
-      const image_path = req.file ? 
-        path.join('uploads', 'image', req.file.filename) : null;
-
-    const query = `
-        INSERT INTO courses (
-          course_name, 
-          description, 
-          start_date, 
-          end_date, 
-          tuition_fee,
-          image_path,
-          created_at, 
-          updated_at
-        )
-        VALUES (?, ?, ?, ?, ?, ?, GETDATE(), GETDATE())
-    `;
-
-    await executeQuery(query, [
-      course_name,
-      description,
-      start_date,
-      end_date,
-        tuition_fee || null,
-        image_path
-    ]);
-
-    res.redirect("/courses");
-  } catch (err) {
-      // Clean up uploaded file if query fails
-      if (req.file) {
-        fs.unlink(req.file.path, (unlinkErr) => {
-          if (unlinkErr) console.error('Error deleting file:', unlinkErr);
-        });
-      }
-    console.error("Course creation error:", err);
-    res.status(500).send("Failed to create course");
-  }
-  }
-);
-
-// 3. Update the course edit route
-app.post("/courses/:id", 
-  checkAuthenticated, 
-  authenticateRole("admin"),
-  courseImageUpload.single('course_image'),
-  async (req, res) => {
-  try {
-      const courseId = req.params.id;
-    const { course_name, description, start_date, end_date, tuition_fee } = req.body;
-
-      // Get current course info
-      const currentCourse = await executeQuery(
-        "SELECT image_path FROM courses WHERE id = ?", 
-      [courseId]
-    );
-
-      if (!currentCourse.length) {
-      return res.status(404).send("Course not found");
-    }
-
-      let image_path = currentCourse[0].image_path;
-
-      // If new image uploaded, update path and delete old image
-      if (req.file) {
-        if (image_path) {
-          const oldImagePath = path.join(__dirname, image_path);
-          fs.unlink(oldImagePath, err => {
-            if (err) console.error("Error deleting old image:", err);
-          });
-        }
-        image_path = path.join('uploads', 'image', req.file.filename);
-      }
-
-    const query = `
-      UPDATE courses 
-      SET course_name = ?,
-          description = ?,
-          start_date = ?,
-          end_date = ?,
-          tuition_fee = ?,
-            image_path = ?,
-          updated_at = GETDATE()
-      WHERE id = ?
-    `;
-
-    await executeQuery(query, [
-      course_name,
-      description,
-      start_date,
-      end_date,
-      tuition_fee || null,
-        image_path,
-      courseId
-    ]);
-
-    res.redirect("/courses");
-  } catch (err) {
-      // Clean up uploaded file if query fails
-      if (req.file) {
-        fs.unlink(req.file.path, (unlinkErr) => {
-          if (unlinkErr) console.error('Error deleting file:', unlinkErr);
-        });
-      }
-    console.error("Course update error:", err);
-    res.status(500).send("Failed to update course");
-  }
-  }
-);
-
-// 4. Update the course delete route to handle image deletion
-app.delete("/courses/:id", 
-  checkAuthenticated, 
-  authenticateRole("admin"), 
-  async (req, res) => {
-  try {
-    const courseId = req.params.id;
-
-      // Get course info for image deletion
-      const course = await executeQuery(
-        "SELECT image_path FROM courses WHERE id = ?", 
-        [courseId]
-      );
-
-      // Delete image file if exists
-      if (course[0]?.image_path) {
-        const imagePath = path.join(__dirname, course[0].image_path);
-        fs.unlink(imagePath, err => {
-          if (err) console.error("Error deleting course image:", err);
-        });
-      }
-
-      // Delete course record
-    await executeQuery("DELETE FROM courses WHERE id = ?", [courseId]);
-      
-    res.redirect("/courses");
-  } catch (err) {
-    console.error("Course deletion error:", err);
-    res.status(500).send("Failed to delete course");
-  }
-});
 
 
 app.post(
@@ -2727,100 +2029,8 @@ app.get("/profile", checkAuthenticated, (req, res) => {
 });
 
 
-app.post(
-  "/materials/:id",
-  checkAuthenticated,
-  authenticateRole(["admin", "teacher"]),
-  upload.single("material"),
-  async (req, res) => {
-    try {
-      const materialId = req.params.id;
-      const { course_id } = req.body;
-      const file = req.file;
 
-      // Get current material info
-      const currentMaterial = await executeQuery(
-        "SELECT * FROM materials WHERE id = ?",
-        [materialId]
-      );
 
-      if (!currentMaterial.length) {
-        return res.status(404).send("Material not found");
-      }
-
-      let updateQuery = "UPDATE materials SET course_id = ?";
-      let queryParams = [course_id];
-
-      // If new file uploaded, update file info
-      if (file) {
-        // Delete old file
-        const oldFilePath = path.join(__dirname, currentMaterial[0].file_path);
-        fs.unlink(oldFilePath, (err) => {
-          if (err) console.error("Error deleting old file:", err);
-        });
-
-        // Update with new file info
-        updateQuery += ", file_name = ?, file_path = ?";
-        queryParams.push(
-          file.originalname,
-          path.join("uploads", file.filename)
-        );
-      }
-
-      updateQuery += ", updated_at = GETDATE() WHERE id = ?";
-      queryParams.push(materialId);
-
-      await executeQuery(updateQuery, queryParams);
-      res.redirect("/materials");
-    } catch (error) {
-      console.error("Error updating material:", error);
-
-      // Delete uploaded file if there was an error
-      if (req.file) {
-        const filePath = path.join(__dirname, "uploads", req.file.filename);
-        fs.unlink(filePath, (err) => {
-          if (err) console.error("Error deleting file:", err);
-        });
-      }
-
-      res.status(500).send("Failed to update material");
-    }
-  }
-);
-
-app.delete(
-  "/materials/:id",
-  checkAuthenticated,
-  authenticateRole(["admin", "teacher"]),
-  (req, res) => {
-    const materialId = req.params.id;
-
-    const getFilePathQuery = "SELECT file_path FROM materials WHERE id = ?";
-    sql.query(
-      connectionString,
-      getFilePathQuery,
-      [materialId],
-      (err, result) => {
-        if (err || result.length === 0)
-          return res.status(500).send("Not found");
-
-        const filePath = path.join(__dirname, result[0].file_path);
-
-        // Delete from DB
-        const deleteQuery = "DELETE FROM materials WHERE id = ?";
-        sql.query(connectionString, deleteQuery, [materialId], (err) => {
-          if (err) return res.status(500).send("Delete error");
-
-          // Remove file from disk
-          fs.unlink(filePath, (fsErr) => {
-            if (fsErr) console.error("File deletion error:", fsErr);
-            res.redirect("/materials");
-          });
-        });
-      }
-    );
-  }
-);
 
 
 
@@ -2992,208 +2202,12 @@ app.post(
   }
 );
 
-app.post(
-  "/users/:id",
-  checkAuthenticated,
-  async (req, res) => {
-    try {
-     
 
-      const { username, role, full_name, email, phone_number } = req.body;
-      const userId = req.params.id;
 
-      const updateQuery = `
-        BEGIN TRY
-          BEGIN TRANSACTION;
-          
-          UPDATE users 
-          SET username = ?, 
-              role = ?, 
-              updated_at = GETDATE()
-          WHERE id = ?;
 
-          IF ? = 'student'
-          BEGIN
-            DELETE FROM teachers WHERE user_id = ?;
-            DELETE FROM admins WHERE user_id = ?;
-            
-            IF EXISTS (SELECT 1 FROM students WHERE user_id = ?)
-              UPDATE students 
-              SET full_name = ?, email = ?, phone_number = ?, updated_at = GETDATE()
-              WHERE user_id = ?
-            ELSE
-              INSERT INTO students (user_id, full_name, email, phone_number, created_at, updated_at)
-              VALUES (@NewUserId, ?, ?, ?, GETDATE(), GETDATE());
-          END
-          ELSE IF ? = 'teacher'
-          BEGIN
-            DELETE FROM students WHERE user_id = ?;
-            DELETE FROM admins WHERE user_id = ?;
-            
-            IF EXISTS (SELECT 1 FROM teachers WHERE user_id = ?)
-              UPDATE teachers 
-              SET full_name = ?, email = ?, phone_number = ?, updated_at = GETDATE()
-              WHERE user_id = ?
-            ELSE
-              INSERT INTO teachers (user_id, full_name, email, phone_number, created_at, updated_at)
-              VALUES (?, ?, ?, ?, GETDATE(), GETDATE());
-          END
-          ELSE IF ? = 'admin'
-          BEGIN
-            DELETE FROM students WHERE user_id = ?;
-            DELETE FROM teachers WHERE user_id = ?;
-            
-            IF EXISTS (SELECT 1 FROM admins WHERE user_id = ?)
-              UPDATE admins 
-              SET full_name = ?, email = ?, phone_number = ?, updated_at = GETDATE()
-              WHERE user_id = ?
-            ELSE
-              INSERT INTO admins (user_id, full_name, email, phone_number, created_at, updated_at)
-              VALUES (?, ?, ?, ?, GETDATE(), GETDATE());
-          END
 
-          COMMIT TRANSACTION;
-        END TRY
-        BEGIN CATCH
-          IF @@TRANCOUNT > 0
-            ROLLBACK TRANSACTION;
-          THROW;
-        END CATCH
-      `;
 
-      const values = [
-        // Update users values
-        username, role, userId,
-        // Student check
-        role, userId, userId, userId,
-        // Student update/insert values
-        full_name, email, phone_number, userId,
-        userId, full_name, email, phone_number,
-        // Teacher check
-        role, userId, userId, userId,
-        // Teacher update/insert values
-        full_name, email, phone_number, userId,
-        userId, full_name, email, phone_number,
-        // Admin check
-        role, userId, userId, userId,
-        // Admin update/insert values
-        full_name, email, phone_number, userId,
-        userId, full_name, email, phone_number
-      ];
 
-      await new Promise((resolve, reject) => {
-        sql.query(connectionString, updateQuery, values, (err, result) => {
-          if (err) {
-            console.error("SQL Error:", err);
-            reject(err);
-          } else {
-            resolve(result);
-          }
-        });
-      });
-      if (req.user.role !== "admin") {
-        return res.redirect("/profile");
-      }else {
-      res.redirect("/users");}
-    } catch (error) {
-      console.error("Error updating user:", error);
-      res.status(500).send("Failed to update user. Error: " + error.message);
-    }
-  }
-);
-
-app.delete(
-  "/users/:id",
-  checkAuthenticated,
-  authenticateRole("admin"),
-  (req, res) => {
-    const query = "DELETE FROM users WHERE id = ?";
-    sql.query(connectionString, query, [req.params.id], (err) => {
-      if (err) return res.status(500).send("Delete failed");
-      res.redirect("/users");
-    });
-  }
-);
-
-app.post(
-  "/courses/:id",
-  checkAuthenticated,
-  authenticateRole("admin"),
-  (req, res) => {
-    const { course_name, description, start_date, end_date } = req.body;
-    const role = req.user.role;
-
-    // Check authorization first
-    if (role !== "admin" && role !== "teacher") {
-      return res.status(403).send("Unauthorized access");
-    }
-
-    // Validate input
-    if (!course_name || !start_date || !end_date) {
-      return res.status(400).send("Missing required fields");
-    }
-
-    const query = `
-    UPDATE courses 
-    SET course_name = ?,
-        description = ?,
-        start_date = ?,
-        end_date = ?,
-        tuition_fee = ?,
-        updated_at = GETDATE()
-    WHERE id = ?
-  `;
-
-    const values = [
-      course_name,
-      description,
-      start_date,
-      end_date,
-      req.params.id,
-    ];
-
-    // Execute query with proper error handling
-    sql.query(connectionString, query, values, (err, result) => {
-      try {
-        try {
-          if (err) {
-            console.error("Update error:", err);
-            return res.status(500).send("Update failed");
-          }
-          if (!result || result.rowsAffected === 0) {
-            return res.status(404).send("Course not found");
-          }
-          res.redirect("/courses");
-        } catch (error) {
-          if (error.code !== "ERR_HTTP_HEADERS_SENT") {
-            console.error("Unhandled error:", error);
-          }
-        }
-      } catch (error) {
-        // Ignore headers already sent error
-        if (error.code !== "ERR_HTTP_HEADERS_SENT") {
-          console.error("Unhandled error:", error);
-        }
-      }
-    });
-  }
-);
-
-app.delete(
-  "/courses/:id",
-  checkAuthenticated,
-  authenticateRole("admin"),
-  (req, res) => {
-    const query = "DELETE FROM courses WHERE id = ?";
-    sql.query(connectionString, query, [req.params.id], (err) => {
-      if (err) {
-        console.error("Delete error:", err);
-        return res.status(500).send("Delete failed");
-      }
-      res.redirect("/courses");
-    });
-  }
-);
 
 /*
 link bình thường
@@ -3595,21 +2609,7 @@ app.set("views", path.join(__dirname, "views"));
 
 //route end
 
-function checkAuthenticated(req, res, next) {
-  if (req.isAuthenticated()) {
-    return next();
-  }
-  
 
-  res.redirect("/login");
-}
-
-function checkNotAuthenticated(req, res, next) {
-  if (req.isAuthenticated()) {
-    return res.redirect("/");
-  }
-  next();
-}
 
 app.listen(3000, () => {
   console.log("Server is online at http://localhost:3000");
