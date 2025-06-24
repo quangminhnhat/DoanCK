@@ -15,140 +15,7 @@
 </head>
 
 <body>
-  <header>
-    <div class="header-container">
-      <div class="logo">
-        <img src="/images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png" alt="Logo" width="90"
-          height="90">
-      </div>
-      <nav>
-        <ul>
-          <li><a href="/">Trang Chủ</a></li>
-          <li><a href="/school">Trung Tâm</a></li>
-          <li>
-            <a href="#0">Thư Viện</a>
-            <ul>
-              <li><a href="https://drive.google.com/drive/folders/1j_lNKViTx_UUyZNXRlkhRd-w9ghDxAYB">Sách Giáo Khoa</a>
-              </li>
-              <li><a href="#0">Tài Liệu Tham Khảo</a></li>
-              <li><a href="#0">Tài Liệu Tiếng Anh</a></li>
-            </ul>
-          </li>
-          <li>
-            <a href="/news">Tin Tức - Sự Kiện</a>
-          </li>
-        </ul>
-      </nav>
-
-      <% if (!user) { %>
-        <a href="/login" class="login-btn">
-          <i class="fa-solid fa-user"></i> Login
-        </a>
-        <% } else { %>
-          <div id="nav-bar">
-            <input type="checkbox" id="nav-toggle" />
-            <div id="nav-header">
-              <a id="nav-title" href="https://codepen.io" target="_blank"
-                style="display:flex;align-items:center;gap:12px;">
-                <img class="logo" src="/images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png"
-                  alt="Logo" style="width:40px;height:40px;object-fit:contain;">
-
-              </a>
-              <label for="nav-toggle">
-                <span id="nav-toggle-burger"></span>
-              </label>
-              <hr>
-            </div>
-            <div id="nav-content">
-              <a href="/" class="nav-button"><i class="fas fa-house"></i><span>Home</span></a>
-
-          <!-- Common options for all authenticated users -->
-          <% if (user.role === 'teacher' || user.role === 'student') { %>
-          <a href="/schedule" class="nav-button"><i class="fas fa-calendar"></i><span>My Schedule</span></a>
-          <a href="/my-courses" class="nav-button"><i class="fas fa-chalkboard"></i><span>My
-              courses</span></a>
-          <% } %>
-          <a href="/notifications" class="nav-button"><i class="fas fa-bell"></i><span>Notifications</span></a>
-          <a href="/profile" class="nav-button"><i class="fas fa-user"></i><span>Profile</span></a>
-          <% if (user.role === 'student') { %>
-          <a href="/available-courses" class="nav-button">
-            <i class="fas fa-book-reader"></i><span>Available Courses</span>
-          </a>
-          <% } %>
-          
-
-          <a href="/materials" class="nav-button"><i class="fas fa-file"></i><span>Materials</span></a>
-                      <!-- Teacher & Admin only options -->
-                      <% if (user.role==='admin' || user.role==='teacher' ) { %>
-                        <a href="/classes" class="nav-button"><i class="fas fa-users"></i><span>Classes</span></a>
-                        <a href="/upload" class="nav-button"><i class="fas fa-upload"></i><span>Upload
-                            Material</span></a>
-                        <% } %>
-      
-        <!-- Admin only options -->
-          <% if (user.role === 'admin') { %>
-            <a href="/courses" class="nav-button"><i class="fas fa-book"></i><span>Courses</span></a>
-          <a href="/users" class="nav-button"><i class="fas fa-user-cog"></i><span>User List</span></a>
-          <a href="/register" class="nav-button"><i class="fas fa-user-plus"></i><span>Register User</span></a>
-          <a href="/enrollments" class="nav-button"><i class="fas fa-user-plus"></i><span>Enrollments</span></a>
-           
-          <a href="/schedules" class="nav-button"><i class="fas fa-money-bill"></i><span>schedules list</span></a>
-          <a href="/courses/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Course</span></a>
-          <a href="/classes/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Class</span></a>
-          <a href="/enrollments/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Enrollment</span></a>
-           
-          <a href="/schedule/new" class="nav-button"><i class="fas fa-plus"></i><span>Add Schedule</span></a>
-          <% } %>
-
-                              <!-- Logout button for all authenticated users -->
-                              <div class="nav-button">
-                                <form action="/logout?_method=DELETE" method="POST">
-                                  <button type="submit" class="nav-button">
-                                    <i class="fas fa-right-from-bracket"></i><span>Logout</span>
-                                  </button>
-                                </form>
-                              </div>
-
-                              <div id="nav-content-highlight"></div>
-            </div>
-
-
-
-            <input type="checkbox" id="nav-footer-toggle" />
-            <div id="nav-footer">
-              <div id="nav-footer-heading">
-                <div id="nav-footer-avatar">
-                  <img src="/images/gv1.png" />
-                </div>
-                <div id="nav-footer-titlebox">
-                  <a id="nav-footer-title" href="https://codepen.io/uahnbu/pens/public" target="_blank">User</a>
-                  <span id="nav-footer-subtitle">Role</span>
-                </div>
-                <label for="nav-footer-toggle">
-                  <i class="fas fa-caret-up"></i>
-                </label>
-              </div>
-              <div id="nav-footer-content">
-
-              </div>
-            </div>
-          </div>
-
-          <% } %>
-
-
-
-    </div>
-
-  </header>
-
-
-
-
-
-
-
-
+  <%- include('../views/shared/header.ejs') %>
 
   <div class="slider-container index-slider">
 
@@ -242,40 +109,34 @@
     <button class="news-slider-arrow left"><i class="fas fa-chevron-left"></i></button>
     <div class="news-section swiper news-swiper">
       <div class="swiper-wrapper">
-        <% const newsList=[ { img: "/images/slide1.jpg" , link: "/Toan,Ly,Hoaclass" ,
-          title: "Khoá học Toán, Lý, Hoá, Anh" ,
-          desc: "Các khoá học Toán, Lý, Hoá, Anh được thiết kế phù hợp với từng trình độ, giúp học sinh củng cố kiến thức nền tảng, phát triển tư duy logic và nâng cao kỹ năng ngoại ngữ. Đội ngũ giáo viên chuyên môn, phương pháp giảng dạy hiện đại, hỗ trợ học sinh đạt kết quả cao trong học tập."
-          }, { img: "/images/slide2.jpg" , link: "/AnhVanClass" , title: "Khoá học Anh Văn" ,
-          desc: "Chương trình Anh văn giúp học sinh phát triển toàn diện các kỹ năng nghe, nói, đọc, viết với giáo viên giàu kinh nghiệm và phương pháp hiện đại."
-          }, { img: "/images/slide3.jpg" , link: "/VanClass" , title: "Khoá học Văn" ,
-          desc: "Khoá học Văn giúp học sinh nâng cao khả năng cảm thụ, phân tích tác phẩm và phát triển kỹ năng viết, trình bày ý tưởng một cách logic, sáng tạo."
-          }, { img: "/images/slide4.jpg" , link: "/ToanClass" , title: "Khoá học Toán" ,
-          desc: "Khoá học Toán xây dựng nền tảng vững chắc, phát triển tư duy logic và khả năng giải quyết vấn đề cho học sinh ở mọi cấp độ."
-          }, { img: "/images/slide5.png" , link: "/LyClass" , title: "Khoá học Lý" ,
-          desc: "Khoá học Vật lý giúp học sinh hiểu sâu các khái niệm, vận dụng kiến thức vào thực tiễn và đạt kết quả cao trong các kỳ thi."
-          }, { img: "/images/slide6.png" , link: "/HoaClass" , title: "Khoá học Hoá" ,
-          desc: "Chương trình Hoá học chú trọng thực hành, giúp học sinh nắm vững lý thuyết và ứng dụng vào các bài tập, thí nghiệm thực tế."
-          }, { img: "/images/slide7.jpg" , link: "/SuClass" , title: "Khoá học Sử" ,
-          desc: "Khoá học Lịch sử giúp học sinh hiểu rõ các sự kiện, nhân vật lịch sử và phát triển tư duy phản biện, phân tích."
-        }
-      ]; %>
-      <% newsList.forEach(function(news) { %>
+        <% if (courses && courses.length) { %>
+        <% courses.forEach(function(course) { %>
         <div class="news-item2 swiper-slide">
-          <img src="<%= news.img %>" alt="News Image">
+          <img src="/images/<%= course.img %>" alt="Course Image">
+          <% console.log(course.img ) %>
           <div class="news-content">
             <div class="news-title">
-              <a href="<%= news.link %>"><%= news.title %></a>
+              <a href="<%= course.link %>"><%= course.title %></a>
             </div>
             <div class="news-description">
-              <%= news.desc %>
+              <%= course.course_desc %>
             </div>
           </div>
         </div>
-      <% }); %>
+        <% }); %>
+        <% } else { %>
+        <div class="news-item2 swiper-slide">
+          <div class="news-content">
+            <div class="news-title">No courses available</div>
+          </div>
+        </div>
+        <% } %>
+      </div>
     </div>
+    <button class="news-slider-arrow right"><i class="fas fa-chevron-right"></i></button>
   </div>
   <button class="news-slider-arrow right"><i class="fas fa-chevron-right"></i></button>
-</div>
+  </div>
 
   <div class="slider-title" style="
   font-size: 2.5rem;
@@ -300,14 +161,14 @@
     position: relative;
     z-index: 1;
   ">
-    <i class="fas fa-star" style="color:#facc15;margin-right:12px;"></i>
-    Khoá học kỹ năng
-    <i class="fas fa-star" style="color:#facc15;margin-left:12px;"></i>
-  </span>
-</div>
-  
-<!-- news-slider-container dưới khoá học kỹ năng -->
-<% 
+      <i class="fas fa-star" style="color:#facc15;margin-right:12px;"></i>
+      Khoá học kỹ năng
+      <i class="fas fa-star" style="color:#facc15;margin-left:12px;"></i>
+    </span>
+  </div>
+
+  <!-- news-slider-container dưới khoá học kỹ năng -->
+  <% 
   const skillList2 = [
   { img: "/images/kn1.jpg", title: "Khoá Học Giao Tiếp", desc: "Khoá học giúp học viên phát triển kỹ năng giao tiếp hiệu quả, tự tin trong các tình huống hàng ngày và môi trường học tập, làm việc." },
   { img: "/images/kn2.png", title: "Khoá Học Thuyết Trình", desc: "Trang bị cho học viên kỹ năng thuyết trình chuyên nghiệp, diễn đạt ý tưởng rõ ràng, thuyết phục trước đám đông." },
@@ -318,31 +179,31 @@
   { img: "/images/kn7.jpg", title: "Khoá Học Piano", desc: "Hướng dẫn kỹ thuật chơi piano, đọc bản nhạc, phát triển khả năng cảm thụ âm nhạc và biểu diễn tự tin." }
   ];
 %>
-<div class="news-slider-container">
-  <button class="news-slider-arrow left"><i class="fas fa-chevron-left"></i></button>
-  <div class="news-section swiper kn2-swiper">
-    <div class="swiper-wrapper">
-      <% skillList2.forEach(function(skill) { %>
+  <div class="news-slider-container">
+    <button class="news-slider-arrow left"><i class="fas fa-chevron-left"></i></button>
+    <div class="news-section swiper kn2-swiper">
+      <div class="swiper-wrapper">
+        <% skillList2.forEach(function(skill) { %>
         <div class="news-item2 swiper-slide">
           <img src="<%= skill.img %>" alt="Skill Image">
           <div class="news-content">
             <div class="news-title">
               <% if (skill.title === "Khoá Học Giao Tiếp") { %>
-                <a href="/GiaoTiepClass"><%= skill.title %></a>
+              <a href="/GiaoTiepClass"><%= skill.title %></a>
               <% } else if (skill.title === "Khoá Học Thuyết Trình") { %>
-                <a href="/ThuyetTrinhClass"><%= skill.title %></a>
+              <a href="/ThuyetTrinhClass"><%= skill.title %></a>
               <% } else if (skill.title === "Khoá Học MC") { %>
-                <a href="/MCClass"><%= skill.title %></a>
+              <a href="/MCClass"><%= skill.title %></a>
               <% } else if (skill.title === "Khoá Học Hát") { %>
-                <a href="/HatClass"><%= skill.title %></a>
+              <a href="/HatClass"><%= skill.title %></a>
               <% } else if (skill.title === "Khoá Học Vẽ Tranh") { %>
-                <a href="/VeTranhClass"><%= skill.title %></a>
+              <a href="/VeTranhClass"><%= skill.title %></a>
               <% } else if (skill.title === "Khoá Học Guitar") { %>
-                <a href="/GuitarClass"><%= skill.title %></a>
+              <a href="/GuitarClass"><%= skill.title %></a>
               <% } else if (skill.title === "Khoá Học Piano") { %>
-                <a href="/PianoClass"><%= skill.title %></a>
+              <a href="/PianoClass"><%= skill.title %></a>
               <% } else { %>
-                <%= skill.title %>
+              <%= skill.title %>
               <% } %>
             </div>
             <div class="news-description">
@@ -350,75 +211,16 @@
             </div>
           </div>
         </div>
-      <% }); %>
-    </div>
-  </div>
-  <button class="news-slider-arrow right"><i class="fas fa-chevron-right"></i></button>
-</div>
-
-    <footer class="relative bg-blueGray-200 pt-8 pb-6">
-      <div class="container mx-auto px-4">
-        <div class="flex flex-wrap text-left lg:text-left">
-          <div class="w-full lg:w-6/12 px-4">
-            <h4 class="text-3xl fonat-semibold text-blueGray-700">Liên hệ với chúng tôi!</h4>
-            <h5 class="text-lg mt-0 mb-2 text-blueGray-600">
-              Tìm kiếm chúng tôi trên bất kỳ mạng xã hội nào và gửi cho chúng tôi một tin nhắn! Chúng tôi sẽ trả lời bạn
-              ngay khi có thể.
-            </h5>
-            <div class="mt-6 lg:mb-0 mb-6">
-              <button
-                class="bg-white text-lightBlue-400 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
-                type="button">
-                <i class="fab fa-twitter"></i></button><button
-                class="bg-white text-lightBlue-600 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
-                type="button">
-                <i class="fab fa-facebook-square"></i></button><button
-                class="bg-white text-pink-400 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
-                type="button">
-                <i class="fab fa-dribbble"></i></button><button
-                class="bg-white text-blueGray-800 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
-                type="button">
-                <i class="fab fa-github"></i>
-              </button>
-            </div>
-          </div>
-          <div class="w-full lg:w-6/12 px-4">
-            <div class="flex flex-wrap items-top mb-6">
-              <div class="w-full lg:w-4/12 px-4 ml-auto">
-                <span class="block uppercase text-blueGray-500 text-sm font-semibold mb-2">Bạn Đang Tìm Kiếm</span>
-                <ul class="list-unstyled">
-                  <li>
-                    <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm" href="">Liên
-                      Hệ</a>
-                  </li>
-                  <li>
-                    <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm" href="">Thông
-                      Tin Mới</a>
-                  </li>
-                  <li>
-                    <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm" href="">Tuyển
-                      Dụng</a>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-        <hr class="my-6 border-blueGray-300">
-        <div class="flex flex-wrap items-center md:justify-between justify-center">
-          <div class="w-full md:w-4/12 px-4 mx-auto text-center">
-            <div class="text-sm text-blueGray-500 font-semibold py-1">
-              Copyright © <span id="get-current-year">2025</span><a href="https://www.facebook.com/ttgdvpttnht"
-                class="text-blueGray-500 hover:text-gray-800" target="_blank"> Talent Education</a>. Made by
-              <a href="https://github.com/Rin-0808" class="text-blueGray-500 hover:text-blueGray-800">Rin</a>.
-            </div>
-          </div>
-        </div>
+        <% }); %>
       </div>
-    </footer>
-    <!-- link swiper-->
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-    <script src="/js/script.js"></script>
+    </div>
+    <button class="news-slider-arrow right"><i class="fas fa-chevron-right"></i></button>
+  </div>
+
+  <%- include('../views/shared/footer.ejs') %>
+  <!-- link swiper-->
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  <script src="/js/script.js"></script>
 </body>
 
 </html>

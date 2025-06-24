@@ -72,7 +72,8 @@ CREATE TABLE courses (
     tuition_fee int,
     created_at DATETIME DEFAULT GETDATE(),
     updated_at DATETIME DEFAULT GETDATE(),
-    image_path NVARCHAR(500) 
+    image_path NVARCHAR(500),
+    link NVARCHAR(255) 
 );
 
 
@@ -301,15 +302,29 @@ VALUES
  (3, 'vvvvvvvvvv', 'test3@gmail.com', '5646456363', '2025-05-12 09:37:00.567');
 
 -- Insert courses (with image_path)
-INSERT INTO courses (course_name, description, start_date, end_date, tuition_fee, image_path)
+INSERT INTO courses (course_name, description, start_date, end_date, tuition_fee, image_path, link)
 VALUES 
-(N'Khoá học Toán, Lý, Hoá, Anh', N'...', '2025-08-01', '2025-08-31', 3000000, 'uploads\image\course-1.jpg'), -- id = 1
-(N'Khoá học Anh Văn', N'...', '2025-09-01', '2025-09-30', 1500000, 'uploads\image\course-2.jpg'),             -- id = 2
-(N'Khoá học Văn', N'...', '2025-10-01', '2025-10-31', 1800000, 'uploads\image\course-3.jpg'),                 -- id = 3
-(N'Khoá học Toán', N'...', '2025-08-15', '2025-09-15', 2000000, 'uploads\image\course-4.jpg'),                -- id = 4
-(N'Khoá học Lý', N'...', '2025-09-05', '2025-10-05', 2000000, 'uploads\image\course-5.jpg'),                  -- id = 5
-(N'Khoá học Hoá', N'...', '2025-10-10', '2025-11-10', 2000000, 'uploads\image\course-6.jpg'),                 -- id = 6
-(N'Khoá học Sử', N'...', '2025-11-01', '2025-11-30', 1700000, 'uploads\image\course-7.jpg');                  -- id = 7
+(N'Khoá học Toán, Lý, Hoá, Anh', 
+ N'Các khoá học Toán, Lý, Hoá, Anh được thiết kế phù hợp với từng trình độ, giúp học sinh củng cố kiến thức nền tảng, phát triển tư duy logic và nâng cao kỹ năng ngoại ngữ. Đội ngũ giáo viên chuyên môn, phương pháp giảng dạy hiện đại, hỗ trợ học sinh đạt kết quả cao trong học tập.', 
+ '2025-08-01', '2025-08-31', 3000000, 'slide1.jpg', '/Toan,Ly,Hoaclass'),
+(N'Khoá học Anh Văn', 
+ N'Chương trình Anh văn giúp học sinh phát triển toàn diện các kỹ năng nghe, nói, đọc, viết với giáo viên giàu kinh nghiệm và phương pháp hiện đại.', 
+ '2025-09-01', '2025-09-30', 1500000, 'slide2.jpg', '/AnhVanClass'),
+(N'Khoá học Văn', 
+ N'Khoá học Văn giúp học sinh nâng cao khả năng cảm thụ, phân tích tác phẩm và phát triển kỹ năng viết, trình bày ý tưởng một cách logic, sáng tạo.', 
+ '2025-10-01', '2025-10-31', 1800000, 'slide3.jpg', '/VanClass'),
+(N'Khoá học Toán', 
+ N'Khoá học Toán xây dựng nền tảng vững chắc, phát triển tư duy logic và khả năng giải quyết vấn đề cho học sinh ở mọi cấp độ.', 
+ '2025-08-15', '2025-09-15', 2000000, 'slide4.jpg', '/ToanClass'),
+(N'Khoá học Lý', 
+ N'Khoá học Vật lý giúp học sinh hiểu sâu các khái niệm, vận dụng kiến thức vào thực tiễn và đạt kết quả cao trong các kỳ thi.', 
+ '2025-09-05', '2025-10-05', 2000000, 'slide5.png', '/LyClass'),
+(N'Khoá học Hoá', 
+ N'Chương trình Hoá học chú trọng thực hành, giúp học sinh nắm vững lý thuyết và ứng dụng vào các bài tập, thí nghiệm thực tế.', 
+ '2025-10-10', '2025-11-10', 2000000, 'slide6.png', '/HoaClass'),
+(N'Khoá học Sử', 
+ N'Khoá học Lịch sử giúp học sinh hiểu rõ các sự kiện, nhân vật lịch sử và phát triển tư duy phản biện, phân tích.', 
+ '2025-11-01', '2025-11-30', 1700000, 'slide7.jpg', '/SuClass');
 
 
 

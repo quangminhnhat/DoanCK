@@ -38,7 +38,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 const connectionString =
-  "Driver={ODBC Driver 17 for SQL Server};Server=DESKTOP-M7HENCK;Database=DOANCS;Trusted_Connection=Yes;";
+  "Driver={ODBC Driver 17 for SQL Server};Server=LAPTOP-ND7KAD0J;Database=DOANCS;Trusted_Connection=Yes;";
 const initalizePassport = require("./middleware/pass-config");
 const { time } = require("console");
 const e = require("express");
@@ -634,9 +634,28 @@ app.get(
   }
 );
 
-app.get("/", (req, res) => {
-  res.render("index.ejs", { user: req.user });
+
+app.get("/", async (req, res) => {
+  try {
+    const query = `
+      SELECT 
+        course_name AS title,
+        description AS course_desc,
+        image_path AS img,
+        link
+      FROM courses
+      ORDER BY created_at DESC
+    `;
+    const courses = await executeQuery(query);
+
+    res.render("index.ejs", { user: req.user, courses });
+  } catch (error) {
+    console.error("Error loading homepage courses:", error);
+    res.render("index.ejs", { user: req.user, courses: [] });
+  }
 });
+
+
 
 app.get("/school", (req, res) => {
   res.render("school.ejs", { user: req.user });
