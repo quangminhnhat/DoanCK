@@ -627,6 +627,99 @@ router.post(
   }
 );
 
+router.get("/my-courses", checkAuthenticated, async (req, res) => {
+  try {
+    let query;
+    let params = [];
+
+    if (req.user.role === "student") {
+      query = `
+          SELECT 
+            c.course_name,
+            c.description AS course_description,
+            c.tuition_fee,
+            c.image_path,
+            t.full_name AS teacher_name,
+            t.email AS teacher_email,
+            t.phone_number AS teacher_phone,   
+            cls.class_name,
+            CONVERT(VARCHAR(5), cls.start_time, 108) as class_start_time,
+            CONVERT(VARCHAR(5), cls.end_time, 108) as class_end_time,
+            cls.weekly_schedule,
+            e.payment_status,
+            e.payment_date,
+            CONVERT(VARCHAR(10), e.enrollment_date, 23) as formatted_enrollment_date
+          FROM enrollments e
+          JOIN students st ON e.student_id = st.id
+          JOIN classes cls ON e.class_id = cls.id
+          JOIN teachers t ON cls.teacher_id = t.id
+          JOIN courses c ON cls.course_id = c.id
+          WHERE st.user_id = ?
+          ORDER BY t.full_name, c.course_name
+        `;
+      params = [req.user.id];
+    } else if (req.user.role === "teacher") {
+      query = `
+          SELECT 
+            c.course_name,
+            c.description AS course_description,
+            c.tuition_fee,
+            c.image_path,
+            t.full_name AS teacher_name,
+            t.email AS teacher_email,
+            t.phone_number AS teacher_phone,   
+            cls.class_name,
+            CONVERT(VARCHAR(5), cls.start_time, 108) as class_start_time,
+            CONVERT(VARCHAR(5), cls.end_time, 108) as class_end_time,
+            cls.weekly_schedule,
+            (SELECT COUNT(*) FROM enrollments e WHERE e.class_id = cls.id) as student_count,
+            (SELECT COUNT(*) FROM enrollments e WHERE e.class_id = cls.id AND e.payment_status = 1) as paid_students
+          FROM teachers t
+          JOIN classes cls ON t.id = cls.teacher_id
+          JOIN courses c ON cls.course_id = c.id
+          WHERE t.user_id = ?
+          ORDER BY c.course_name
+        `;
+      params = [req.user.id];
+    }
+
+    const courses = await executeQuery(query, params);
+
+    // Process weekly schedule for display
+    const processedCourses = courses.map((course) => ({
+      ...course,
+      schedule: course.weekly_schedule
+        ? course.weekly_schedule
+            .split(",")
+            .map(
+              (day) =>
+                ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][
+                  parseInt(day) - 1
+                ]
+            )
+            .join(", ")
+        : "No schedule set",
+      formatted_tuition: course.tuition_fee
+        ? course.tuition_fee.toLocaleString("vi-VN", {
+            style: "currency",
+            currency: "VND",
+          })
+        : "Not set",
+    }));
+
+    res.render("my-courses.ejs", {
+      user: req.user,
+      courses: processedCourses,
+      messages: {
+        error: req.flash("error"),
+        success: req.flash("success"),
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching courses:", error);
+    res.status(500).send("Error loading courses");
+  }
+});
 
 
 module.exports = router;

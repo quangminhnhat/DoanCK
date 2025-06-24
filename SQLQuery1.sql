@@ -344,11 +344,11 @@ VALUES (N'Math A1', 1, 1, '08:00', '10:00', '2,4,6');  -- Tue, Thu, Sat
 INSERT INTO schedules (class_id, course_id, day_of_week, schedule_date, start_time, end_time)
 VALUES
 -- Monday
-(1, 1, N'Monday', '2025-06-02', '08:00', '10:00'),
+(1, 1, N'Monday', '2025-08-02', '08:00', '10:00'),
 -- Wednesday
-(1, 1, N'Wednesday', '2025-06-04', '08:00', '10:00'),
+(1, 1, N'Wednesday', '2025-08-04', '08:00', '10:00'),
 -- Friday
-(1, 1, N'Friday', '2025-06-06', '08:00', '10:00');
+(1, 1, N'Friday', '2025-08-06', '08:00', '10:00');
 
 
 

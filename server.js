@@ -39,6 +39,7 @@ const uploadmaterialRoutes = require("./routes/upload-materialRoutes");
 const scheduleRoutes = require("./routes/scheduleRoutes");
 const classesRoutes = require("./routes/classesRoutes");
 const enrollmentsRoutes = require("./routes/enrollmentsRoutes");
+const miscroutes = require("./routes/MiscRoute");
 
 // Essential middleware
 app.use(express.json());
@@ -119,8 +120,10 @@ app.use(uploadmaterialRoutes);
 app.use(scheduleRoutes);
 app.use(classesRoutes);
 app.use(enrollmentsRoutes);
+app.use(miscroutes);
 
-app.post( "/login",
+app.post(
+  "/login",
   checkNotAuthenticated,
   passport.authenticate("local", {
     successRedirect: "/",
@@ -171,148 +174,11 @@ const mapRole = {
   subject3: "admin",
 };
 
-app.get("/download/:id", checkAuthenticated, async (req, res) => {
-  try {
-    const materialId = req.params.id;
-    const query = "SELECT file_name, file_path FROM materials WHERE id = ?";
-    const result = await executeQuery(query, [materialId]);
-    if (!result.length) {
-      return res.status(404).send("File not found");
-    }
-    const filePath = path.join(__dirname, result[0].file_path);
-    res.download(filePath, result[0].file_name);
-  } catch (error) {
-    console.error("Download error:", error);
-    res.status(500).send("Download failed");
-  }
-});
-
-app.get("/my-courses", checkAuthenticated, async (req, res) => {
-  try {
-    let query;
-    let params = [];
-
-    if (req.user.role === "student") {
-      query = `
-          SELECT 
-            c.course_name,
-            c.description AS course_description,
-            c.tuition_fee,
-            c.image_path,
-            t.full_name AS teacher_name,
-            t.email AS teacher_email,
-            t.phone_number AS teacher_phone,   
-            cls.class_name,
-            CONVERT(VARCHAR(5), cls.start_time, 108) as class_start_time,
-            CONVERT(VARCHAR(5), cls.end_time, 108) as class_end_time,
-            cls.weekly_schedule,
-            e.payment_status,
-            e.payment_date,
-            CONVERT(VARCHAR(10), e.enrollment_date, 23) as formatted_enrollment_date
-          FROM enrollments e
-          JOIN students st ON e.student_id = st.id
-          JOIN classes cls ON e.class_id = cls.id
-          JOIN teachers t ON cls.teacher_id = t.id
-          JOIN courses c ON cls.course_id = c.id
-          WHERE st.user_id = ?
-          ORDER BY t.full_name, c.course_name
-        `;
-      params = [req.user.id];
-    } else if (req.user.role === "teacher") {
-      query = `
-          SELECT 
-            c.course_name,
-            c.description AS course_description,
-            c.tuition_fee,
-            c.image_path,
-            t.full_name AS teacher_name,
-            t.email AS teacher_email,
-            t.phone_number AS teacher_phone,   
-            cls.class_name,
-            CONVERT(VARCHAR(5), cls.start_time, 108) as class_start_time,
-            CONVERT(VARCHAR(5), cls.end_time, 108) as class_end_time,
-            cls.weekly_schedule,
-            (SELECT COUNT(*) FROM enrollments e WHERE e.class_id = cls.id) as student_count,
-            (SELECT COUNT(*) FROM enrollments e WHERE e.class_id = cls.id AND e.payment_status = 1) as paid_students
-          FROM teachers t
-          JOIN classes cls ON t.id = cls.teacher_id
-          JOIN courses c ON cls.course_id = c.id
-          WHERE t.user_id = ?
-          ORDER BY c.course_name
-        `;
-      params = [req.user.id];
-    }
-
-    const courses = await executeQuery(query, params);
-
-    // Process weekly schedule for display
-    const processedCourses = courses.map((course) => ({
-      ...course,
-      schedule: course.weekly_schedule
-        ? course.weekly_schedule
-            .split(",")
-            .map(
-              (day) =>
-                ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][
-                  parseInt(day) - 1
-                ]
-            )
-            .join(", ")
-        : "No schedule set",
-      formatted_tuition: course.tuition_fee
-        ? course.tuition_fee.toLocaleString("vi-VN", {
-            style: "currency",
-            currency: "VND",
-          })
-        : "Not set",
-    }));
-
-    res.render("my-courses.ejs", {
-      user: req.user,
-      courses: processedCourses,
-      messages: {
-        error: req.flash("error"),
-        success: req.flash("success"),
-      },
-    });
-  } catch (error) {
-    console.error("Error fetching courses:", error);
-    res.status(500).send("Error loading courses");
-  }
-});
-
-app.get("/", async (req, res) => {
-  try {
-    const query = `
-      SELECT 
-        course_name AS title,
-        description AS course_desc,
-        image_path AS img,
-        link
-      FROM courses
-      ORDER BY created_at DESC
-    `;
-    const courses = await executeQuery(query);
-
-    res.render("index.ejs", { user: req.user, courses });
-  } catch (error) {
-    console.error("Error loading homepage courses:", error);
-    res.render("index.ejs", { user: req.user, courses: [] });
-  }
-});
-
-app.get("/school", (req, res) => {
-  res.render("school.ejs", { user: req.user });
-});
-
-app.get("/news", (req, res) => {
-  res.render("news.ejs", { user: req.user });
-});
-
 app.get("/login", checkNotAuthenticated, (req, res) => {
   res.render("login.ejs");
 });
-app.get( "/register",
+app.get(
+  "/register",
   checkAuthenticated,
   authenticateRole("admin"),
   (req, res) => {
@@ -322,54 +188,8 @@ app.get( "/register",
   }
 );
 
-app.get( "/upload",
-  authenticateRole(["admin", "teacher"]),
-  checkAuthenticated,
-  (req, res) => {
-    res.render("uploadMaterial.ejs", { user: req.user });
-  }
-);
-
-app.get("/profile", checkAuthenticated, (req, res) => {
-  const userId = req.user.id;
-  const role = req.user.role;
-
-  let query = "";
-  if (role === "student") {
-    query = `
-      SELECT full_name, email, phone_number
-      FROM students
-      WHERE user_id = ?
-    `;
-  } else if (role === "teacher") {
-    query = `
-      SELECT full_name, email, phone_number
-      FROM teachers
-      WHERE user_id = ?
-    `;
-  } else if (role === "admin") {
-    query = `
-      SELECT full_name, email, phone_number
-      FROM admins
-      WHERE user_id = ?
-    `;
-  } else {
-    return res.render("profile", { user: req.user, details: null });
-  }
-
-  sql.query(connectionString, query, [userId], (err, result) => {
-    if (err || result.length === 0) {
-      console.error("Profile fetch error:", err);
-      return res.status(500).send("Error fetching profile");
-    }
-    res.render("profile.ejs", {
-      user: req.user,
-      details: result[0],
-    });
-  });
-});
-
-app.post( "/register",
+app.post(
+  "/register",
   checkAuthenticated,
   authenticateRole("admin"),
   async (req, res) => {
@@ -583,7 +403,6 @@ app.get("/HoaClass", (req, res) => {
 app.get("/SuClass", (req, res) => {
   res.render("SuClass.ejs", { user: req.user });
 });
-
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
