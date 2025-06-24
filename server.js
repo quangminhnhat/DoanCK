@@ -1,7 +1,7 @@
 if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }
-require('events').EventEmitter.defaultMaxListeners = 20;
+require("events").EventEmitter.defaultMaxListeners = 20;
 
 //lib import
 const express = require("express");
@@ -16,7 +16,7 @@ const methodOverride = require("method-override");
 const { authenticateRole } = require("./middleware/roleAuth");
 const multer = require("multer");
 const fs = require("fs");
-const connectionString = process.env.CONNECTION_STRING; 
+const connectionString = process.env.CONNECTION_STRING;
 const upload = require("./middleware/upload");
 const courseImageUpload = require("./middleware/courseImageUpload");
 const executeQuery = require("./middleware/executeQuery");
@@ -25,11 +25,6 @@ const {
   checkNotAuthenticated,
 } = require("./middleware/auth");
 const validateSchedule = require("./middleware/validateSchedule");
-
-
-
-
-
 
 // Static files
 app.use(express.static(path.join(__dirname, "public")));
@@ -44,7 +39,6 @@ const uploadmaterialRoutes = require("./routes/upload-materialRoutes");
 const scheduleRoutes = require("./routes/scheduleRoutes");
 const classesRoutes = require("./routes/classesRoutes");
 const enrollmentsRoutes = require("./routes/enrollmentsRoutes");
- 
 
 // Essential middleware
 app.use(express.json());
@@ -113,11 +107,7 @@ initalizePassport(
 
 // Add this near the top of server.js
 
-
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
-
-
 
 //routing
 app.use(materialRoutes);
@@ -130,10 +120,7 @@ app.use(scheduleRoutes);
 app.use(classesRoutes);
 app.use(enrollmentsRoutes);
 
-
-
-app.post(
-  "/login",
+app.post( "/login",
   checkNotAuthenticated,
   passport.authenticate("local", {
     successRedirect: "/",
@@ -184,27 +171,21 @@ const mapRole = {
   subject3: "admin",
 };
 
-
-
-app.get(
-  "/download/:id",
-  checkAuthenticated,
-  async (req, res) => {
-    try {
-      const materialId = req.params.id;
-      const query = "SELECT file_name, file_path FROM materials WHERE id = ?";
-      const result = await executeQuery(query, [materialId]);
-      if (!result.length) {
-        return res.status(404).send("File not found");
-      }
-      const filePath = path.join(__dirname, result[0].file_path);
-      res.download(filePath, result[0].file_name);
-    } catch (error) {
-      console.error("Download error:", error);
-      res.status(500).send("Download failed");
+app.get("/download/:id", checkAuthenticated, async (req, res) => {
+  try {
+    const materialId = req.params.id;
+    const query = "SELECT file_name, file_path FROM materials WHERE id = ?";
+    const result = await executeQuery(query, [materialId]);
+    if (!result.length) {
+      return res.status(404).send("File not found");
     }
+    const filePath = path.join(__dirname, result[0].file_path);
+    res.download(filePath, result[0].file_name);
+  } catch (error) {
+    console.error("Download error:", error);
+    res.status(500).send("Download failed");
   }
-);
+});
 
 app.get("/my-courses", checkAuthenticated, async (req, res) => {
   try {
@@ -300,10 +281,6 @@ app.get("/my-courses", checkAuthenticated, async (req, res) => {
   }
 });
 
-
-
-
-
 app.get("/", async (req, res) => {
   try {
     const query = `
@@ -324,8 +301,6 @@ app.get("/", async (req, res) => {
   }
 });
 
-
-
 app.get("/school", (req, res) => {
   res.render("school.ejs", { user: req.user });
 });
@@ -337,8 +312,7 @@ app.get("/news", (req, res) => {
 app.get("/login", checkNotAuthenticated, (req, res) => {
   res.render("login.ejs");
 });
-app.get(
-  "/register",
+app.get( "/register",
   checkAuthenticated,
   authenticateRole("admin"),
   (req, res) => {
@@ -348,16 +322,13 @@ app.get(
   }
 );
 
-app.get(
-  "/upload",
+app.get( "/upload",
   authenticateRole(["admin", "teacher"]),
   checkAuthenticated,
   (req, res) => {
     res.render("uploadMaterial.ejs", { user: req.user });
   }
 );
-
-
 
 app.get("/profile", checkAuthenticated, (req, res) => {
   const userId = req.user.id;
@@ -398,9 +369,7 @@ app.get("/profile", checkAuthenticated, (req, res) => {
   });
 });
 
-
-app.post(
-  "/register",
+app.post( "/register",
   checkAuthenticated,
   authenticateRole("admin"),
   async (req, res) => {
@@ -567,13 +536,6 @@ app.post(
   }
 );
 
-
-
-
-
-
-
-
 /*
 link bình thường
 app.get("link ở đây", (req, res) => {
@@ -596,18 +558,6 @@ app.delete("/logout", (req, res) => {
     res.redirect("/");
   });
 });
-
-
-
-
-
-
-
-
-
-
-
-
 
 app.get("/GiaoTiepClass", (req, res) => {
   res.render("GiaoTiepClass.ejs", { user: req.user });
@@ -633,153 +583,12 @@ app.get("/HoaClass", (req, res) => {
 app.get("/SuClass", (req, res) => {
   res.render("SuClass.ejs", { user: req.user });
 });
-app.get(
-  "/available-courses",
-  checkAuthenticated,
-  authenticateRole("student"),
-  async (req, res) => {
-    try {
-      const query = `
-        SELECT DISTINCT
-          c.id as course_id,
-          c.course_name,
-          c.description,
-          c.start_date,
-          c.end_date,
-          c.tuition_fee,
-          cls.id as class_id,
-          cls.class_name,
-          cls.start_time,
-          cls.end_time,
-          cls.weekly_schedule,
-          t.full_name as teacher_name,
-          (SELECT COUNT(*) FROM enrollments WHERE class_id = cls.id) as enrolled_count
-        FROM courses c
-        JOIN classes cls ON c.id = cls.course_id
-        JOIN teachers t ON cls.teacher_id = t.id
-        WHERE c.start_date > GETDATE()
-        AND NOT EXISTS (
-          SELECT 1 
-          FROM enrollments e
-          JOIN students s ON e.student_id = s.id
-          WHERE s.user_id = ?
-          AND e.class_id = cls.id
-        )
-        ORDER BY c.start_date ASC
-      `;
-
-      const courses = await executeQuery(query, [req.user.id]);
-
-      // Get student information
-      const studentQuery = `
-        SELECT id, full_name, email 
-        FROM students 
-        WHERE user_id = ?
-      `;
-      const studentInfo = await executeQuery(studentQuery, [req.user.id]);
-
-      res.render("availableCourses.ejs", {
-        courses: courses,
-        student: studentInfo[0],
-        user: req.user
-      });
-    } catch (err) {
-      console.error("Error fetching available courses:", err);
-      res.status(500).send("Error loading available courses");
-    }
-  }
-);
-
-
-
-
-app.post("/enroll-course", checkAuthenticated, authenticateRole("student"), async (req, res) => {
-  try {
-    const { class_id } = req.body;
-    
-    // Get student ID
-    const studentQuery = "SELECT id FROM students WHERE user_id = ?";
-    const student = await executeQuery(studentQuery, [req.user.id]);
-    
-    if (!student.length) {
-      return res.status(404).send("Student not found");
-    }
-
-    // Check if class exists and if student is already enrolled
-    const checkEnrollmentQuery = `
-      SELECT 
-        c.id as class_id,
-        c.course_id,
-        co.tuition_fee,
-        (SELECT COUNT(*) FROM enrollments WHERE class_id = c.id) as enrolled_count,
-        CASE 
-          WHEN EXISTS (
-            SELECT 1 FROM enrollments e 
-            WHERE e.class_id = c.id 
-            AND e.student_id = ?
-          ) THEN 1 
-          ELSE 0 
-        END as is_enrolled
-      FROM classes c
-      JOIN courses co ON c.course_id = co.id
-      WHERE c.id = ?
-    `;
-    
-    const classInfo = await executeQuery(checkEnrollmentQuery, [student[0].id, class_id]);
-    
-    if (!classInfo.length) {
-      return res.status(404).send("Class not found");
-    }
-
-    if (classInfo[0].is_enrolled) {
-      return res.status(400).send("You are already enrolled in this class");
-    }
-
-    // Create enrollment
-    const insertQuery = `
-      INSERT INTO enrollments (
-        student_id, 
-        class_id, 
-        enrollment_date,
-        payment_status,
-        updated_at
-      )
-      VALUES (?, ?, GETDATE(), 0, GETDATE())
-    `;
-    
-    await executeQuery(insertQuery, [student[0].id, class_id]);
-
-    // Create notification
-    const notifyQuery = `
-      INSERT INTO notifications (
-        user_id,
-        message,
-        sent_at,
-        created_at,
-        updated_at
-      )
-      VALUES (?, ?, GETDATE(), GETDATE(), GETDATE())
-    `;
-    
-    await executeQuery(notifyQuery, [
-      req.user.id,
-      'You have successfully enrolled in a new course. Please complete the payment.'
-    ]);
-
-    res.redirect("/my-courses");
-  } catch (err) {
-    console.error("Enrollment error:", err);
-    res.status(500).send("Failed to enroll in course");
-  }
-});
 
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
 //route end
-
-
 
 app.listen(3000, () => {
   console.log("Server is online at http://localhost:3000");
