@@ -282,27 +282,7 @@ CREATE INDEX IX_Responses_AttemptQ ON Responses(attempt_id, question_id);
 GO
 
 -- Hàm chấm tự động MCQ cho một attempt
-CREATE OR ALTER FUNCTION dbo.fn_AutoScoreAttempt (@attempt_id BIGINT)
-RETURNS DECIMAL(10,2)
-AS
-BEGIN
-DECLARE @score DECIMAL(10,2);
-;WITH picked AS (
-SELECT r.question_id,
-oi.is_correct_snapshot,
-aq.points
-FROM Responses r
-JOIN AttemptQuestions aq
-ON aq.attempt_id = r.attempt_id AND aq.question_id = r.question_id
-LEFT JOIN OptionInstances oi
-ON oi.option_instance_id = r.chosen_option_instance_id
-WHERE r.attempt_id = @attempt_id
-)
-SELECT @score = ISNULL(SUM(CASE WHEN is_correct_snapshot = 1 THEN points ELSE 0 END), 0)
-FROM picked;
-RETURN @score;
-END;
-GO
+-- fn_AutoScoreAttempt removed: auto-grading can be implemented in application code or re-added later with a correct implementation.
 CREATE TABLE RequestTypes (
     type_id INT IDENTITY PRIMARY KEY,
     type_name NVARCHAR(100) NOT NULL, -- Ví dụ: Hủy tiết, Đổi tiết, Tạm hoãn học, Gia hạn học phí
