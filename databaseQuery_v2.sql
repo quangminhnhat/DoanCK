@@ -119,7 +119,7 @@ payment_date DATETIME NULL,
 updated_at DATETIME DEFAULT GETDATE() NOT NULL,
 created_at DATETIME DEFAULT GETDATE() NOT NULL,
 CONSTRAINT FK_enrollments_student FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE ON UPDATE NO ACTION,
-CONSTRAINT FK_enrollments_class FOREIGN KEY (class_id) REFERENCES classes(id) 
+CONSTRAINT FK_enrollments_class FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE CASCADE
 );
 
 CREATE TABLE QuestionTypes (
@@ -309,7 +309,7 @@ CREATE TABLE RequestVotes (
     is_accepted BIT NOT NULL,
     voted_at DATETIME DEFAULT GETDATE(),
     CONSTRAINT FK_votes_request FOREIGN KEY (request_id) REFERENCES Requests(request_id) ON DELETE CASCADE,
-    CONSTRAINT FK_votes_student FOREIGN KEY (student_id) REFERENCES students(id),
+    CONSTRAINT FK_votes_student FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
     CONSTRAINT UQ_votes UNIQUE (request_id, student_id)
 );
 
