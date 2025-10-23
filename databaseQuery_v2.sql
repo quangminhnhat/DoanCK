@@ -6,7 +6,7 @@ go
 CREATE TABLE users (
 id INT IDENTITY PRIMARY KEY,
 username NVARCHAR(50) NOT NULL,
-password_hash VARCHAR(128) NOT NULL,
+password VARCHAR(128) NOT NULL,
 role NVARCHAR(20) NOT NULL,
 full_name NVARCHAR(100) NULL,
 email NVARCHAR(100) NULL,
@@ -118,7 +118,7 @@ payment_status BIT DEFAULT 0 NOT NULL,
 payment_date DATETIME NULL,
 updated_at DATETIME DEFAULT GETDATE() NOT NULL,
 created_at DATETIME DEFAULT GETDATE() NOT NULL,
-CONSTRAINT FK_enrollments_student FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE ON UPDATE NO ACTION,
+CONSTRAINT FK_enrollments_student FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE NO ACTION ON UPDATE NO ACTION,
 CONSTRAINT FK_enrollments_class FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE CASCADE
 );
 
@@ -309,7 +309,7 @@ CREATE TABLE RequestVotes (
     is_accepted BIT NOT NULL,
     voted_at DATETIME DEFAULT GETDATE(),
     CONSTRAINT FK_votes_request FOREIGN KEY (request_id) REFERENCES Requests(request_id) ON DELETE CASCADE,
-    CONSTRAINT FK_votes_student FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
+    CONSTRAINT FK_votes_student FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE NO ACTION,
     CONSTRAINT UQ_votes UNIQUE (request_id, student_id)
 );
 
@@ -319,3 +319,79 @@ VALUES
 (N'Đổi tiết', 'teacher'),
 (N'Tạm hoãn học', 'student'),
 (N'Gia hạn học phí', 'student');
+
+
+
+
+
+
+
+
+-- Insert users (use correct column name password and provide unique emails)
+INSERT INTO users (username, password, role, email, created_at, updated_at)
+VALUES 
+('aaaaaaaaa', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', 'test@gmail.com', '2025-05-11 17:23:17.473', '2025-05-11 17:23:17.473'),
+('bbbbbbbbbb', '$2b$10$TPE79JXdRYc3c9EnKLLTPe4iSkP.SB3D79RMIIhxmh/tQkS7ezQ.C', 'teacher', 'test2@gmail.com', '2025-05-11 17:23:32.367', '2025-05-11 17:23:32.367'),
+('cccccccccc', '$2b$10$yppnS1aDECiNoIOp76Z4B.2FnkvgAS96liJXsYfemQTpGoISHFVey', 'admin', 'test3@gmail.com', '2025-05-12 09:37:00.560', '2025-05-12 09:50:10.277');
+
+-- Insert student (user_id = 1)
+INSERT INTO students (user_id) VALUES (1);
+
+-- Insert teacher (user_id = 2)
+INSERT INTO teachers (user_id, salary) VALUES (2, 10000000000000.00);
+
+-- Insert admin (user_id = 3)
+INSERT INTO admins (user_id) VALUES (3);
+
+-- Insert courses (with image_path)
+INSERT INTO courses (course_name, description, start_date, end_date, tuition_fee, image_path, link)
+VALUES 
+(N'Khoá học Toán, Lý, Hoá, Anh', 
+ N'Các khoá học Toán, Lý, Hoá, Anh được thiết kế phù hợp với từng trình độ, giúp học sinh củng cố kiến thức nền tảng, phát triển tư duy logic và nâng cao kỹ năng ngoại ngữ. Đội ngũ giáo viên chuyên môn, phương pháp giảng dạy hiện đại, hỗ trợ học sinh đạt kết quả cao trong học tập.', 
+ '2025-08-01', '2025-08-31', 3000000, 'slide1.jpg', '/Toan,Ly,Hoaclass'),
+(N'Khoá học Anh Văn', 
+ N'Chương trình Anh văn giúp học sinh phát triển toàn diện các kỹ năng nghe, nói, đọc, viết với giáo viên giàu kinh nghiệm và phương pháp hiện đại.', 
+ '2025-09-01', '2025-09-30', 1500000, 'slide2.jpg', '/AnhVanClass'),
+(N'Khoá học Văn', 
+ N'Khoá học Văn giúp học sinh nâng cao khả năng cảm thụ, phân tích tác phẩm và phát triển kỹ năng viết, trình bày ý tưởng một cách logic, sáng tạo.', 
+ '2025-10-01', '2025-10-31', 1800000, 'slide3.jpg', '/VanClass'),
+(N'Khoá học Toán', 
+ N'Khoá học Toán xây dựng nền tảng vững chắc, phát triển tư duy logic và khả năng giải quyết vấn đề cho học sinh ở mọi cấp độ.', 
+ '2025-08-15', '2025-09-15', 2000000, 'slide4.jpg', '/ToanClass'),
+(N'Khoá học Lý', 
+ N'Khoá học Vật lý giúp học sinh hiểu sâu các khái niệm, vận dụng kiến thức vào thực tiễn và đạt kết quả cao trong các kỳ thi.', 
+ '2025-09-05', '2025-10-05', 2000000, 'slide5.png', '/LyClass'),
+(N'Khoá học Hoá', 
+ N'Chương trình Hoá học chú trọng thực hành, giúp học sinh nắm vững lý thuyết và ứng dụng vào các bài tập, thí nghiệm thực tế.', 
+ '2025-10-10', '2025-11-10', 2000000, 'slide6.png', '/HoaClass'),
+(N'Khoá học Sử', 
+ N'Khoá học Lịch sử giúp học sinh hiểu rõ các sự kiện, nhân vật lịch sử và phát triển tư duy phản biện, phân tích.', 
+ '2025-11-01', '2025-11-30', 1700000, 'slide7.jpg', '/SuClass');
+
+-- Insert materials
+INSERT INTO materials (course_id, file_name, file_path)
+VALUES 
+(1, 'Slide bài giảng 1', '/materials/csharp_slide1.pdf');
+
+-- Insert classes
+INSERT INTO classes (class_name, course_id, teacher_id, start_time, end_time, weekly_schedule)
+VALUES (N'Math A1', 1, 1, '08:00', '10:00', '2,4,6');  -- Tue, Thu, Sat
+
+-- Schedules table does NOT have course_id; insert only the columns that exist
+INSERT INTO schedules (class_id, day_of_week, schedule_date, start_time, end_time)
+VALUES
+(1, N'Monday', '2025-08-02', '08:00', '10:00'),
+(1, N'Wednesday', '2025-08-04', '08:00', '10:00'),
+(1, N'Friday', '2025-08-06', '08:00', '10:00');
+
+-- Insert sample enrollment (comment said unpaid -> set payment_status = 0 and payment_date NULL)
+INSERT INTO enrollments (student_id, class_id, enrollment_date, payment_status, payment_date)
+VALUES (1, 1, GETDATE(), 0, NULL);
+
+-- Insert notifications
+INSERT INTO notifications (user_id, message)
+VALUES 
+(1, N'Bạn đã được đăng ký vào lớp LTC001.'),
+(2, N'Bạn có lớp mới: LTC001.');
+
+

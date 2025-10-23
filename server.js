@@ -40,6 +40,7 @@ const scheduleRoutes = require("./routes/scheduleRoutes");
 const classesRoutes = require("./routes/classesRoutes");
 const enrollmentsRoutes = require("./routes/enrollmentsRoutes");
 const miscroutes = require("./routes/MiscRoute");
+const requestRoute = require("./routes/requestRoute");
 
 // Essential middleware
 app.use(express.json());
@@ -65,17 +66,14 @@ initalizePassport(
   passport,
   (email) => {
     console.log("Looking up user by email:", email);
-    // Query modified to include admin emails and join with role-specific tables
-    const query = ` 
-      SELECT u.*, COALESCE(s.email, t.email, a.email) as email
+    // Lookup directly on users.email (students/teachers/admins don't have an email column)
+    const query = `
+      SELECT u.*
       FROM users u
-      LEFT JOIN students s ON u.id = s.user_id
-      LEFT JOIN teachers t ON u.id = t.user_id
-      LEFT JOIN admins a ON u.id = a.user_id
-      WHERE s.email = ? OR t.email = ? OR a.email = ?
+      WHERE u.email = ?
     `;
     return new Promise((resolve, reject) => {
-      sql.query(connectionString, query, [email, email, email], (err, rows) => {
+      sql.query(connectionString, query, [email], (err, rows) => {
         if (err) {
           console.error("SQL error:", err);
           return reject(new Error(err));
@@ -121,6 +119,7 @@ app.use(scheduleRoutes);
 app.use(classesRoutes);
 app.use(enrollmentsRoutes);
 app.use(miscroutes);
+app.use(requestRoute);
 
 app.post(
   "/login",

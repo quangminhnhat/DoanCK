@@ -1,0 +1,77 @@
+<%- include('../views/shared/header.ejs') %>
+ 
+
+<section class="home">
+    <div class="content">
+        <h2><%= title %></h2>
+        
+        <div class="form-container">
+            <form action="/requestAdd" method="POST" id="requestForm">
+                <div class="input-box">
+                    <label for="requestType">Request Type</label>
+                    <select name="requestType" id="requestType" required>
+                        <option value="">Select Request Type</option>
+                        <% requestTypes.forEach(function(type) { %>
+                            <option value="<%= type.type_name %>"><%= type.type_name %></option>
+                        <% }); %>
+                    </select>
+                </div>
+
+                <div class="input-box">
+                    <label for="classId">Class</label>
+                    <select name="classId" id="classId">
+                        <option value="">None</option>
+                        <% classes.forEach(function(class_) { %>
+                            <option value="<%= class_.id %>"><%= class_.class_name %></option>
+                        <% }); %>
+                    </select>
+                </div>
+
+                <div class="input-box">
+                    <label for="details">Details</label>
+                    <textarea name="details" id="details" rows="4" required></textarea>
+                </div>
+
+                <input type="hidden" name="userId" value="<%= user.id %>">
+                
+                <div class="button-container">
+                    <button type="submit" class="btn">Submit Request</button>
+                    <a href="/requests" class="btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<script>
+document.getElementById('requestForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    try {
+        const response = await fetch('/requestAdd', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                userId: this.userId.value,
+                requestType: this.requestType.value,
+                details: this.details.value,
+                classId: this.classId.value || null
+            })
+        });
+
+        const data = await response.json();
+        
+        if (response.ok) {
+            window.location.href = '/requests';
+        } else {
+            alert(data.error || 'Failed to submit request');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error submitting request');
+    }
+});
+</script>
+
+<%- include('../shared/footer') %>
