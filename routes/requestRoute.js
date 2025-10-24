@@ -194,10 +194,10 @@ router.post(
     const senderRole = req.user.role;
 
     try {
-      // Get request type ID from RequestTypes table
-      const typeQuery = `SELECT type_id FROM RequestTypes WHERE type_name = @requestType AND applicable_to = @role`;
+      // Get request type ID from RequestTypes table (use named params so Unicode matches)
+      const typeQuery = `SELECT type_id FROM RequestTypes WHERE type_name = @typeName AND applicable_to = @role`;
       const typeResult = await executeQuery(typeQuery, {
-        requestType: requestType,
+        typeName: requestType,
         role: senderRole
       });
 

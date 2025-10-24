@@ -10,7 +10,15 @@ function executeQuery(query, params = {}) {
     
     // Add SET statements to assign values to parameters
     const assignments = Object.keys(params)
-      .map(key => `SET @${key} = '${params[key]}'`)
+      .map(key => {
+        const val = params[key];
+        if (val === null || val === undefined) {
+          return `SET @${key} = NULL`;
+        }
+        // Escape single quotes to avoid breaking the SQL and prefix with N for Unicode
+        const escaped = String(val).replace(/'/g, "''");
+        return `SET @${key} = N'${escaped}'`;
+      })
       .join(';\n');
     
     // Combine declarations, assignments, and the original query

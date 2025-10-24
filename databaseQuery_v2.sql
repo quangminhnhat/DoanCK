@@ -328,11 +328,11 @@ VALUES
 
 
 -- Insert users (use correct column name password and provide unique emails)
-INSERT INTO users (username, password, role, email, created_at, updated_at)
+INSERT INTO users (username, password, role, full_name, email, phone_number, address, date_of_birth, created_at, updated_at)
 VALUES 
-('aaaaaaaaa', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', 'test@gmail.com', '2025-05-11 17:23:17.473', '2025-05-11 17:23:17.473'),
-('bbbbbbbbbb', '$2b$10$TPE79JXdRYc3c9EnKLLTPe4iSkP.SB3D79RMIIhxmh/tQkS7ezQ.C', 'teacher', 'test2@gmail.com', '2025-05-11 17:23:32.367', '2025-05-11 17:23:32.367'),
-('cccccccccc', '$2b$10$yppnS1aDECiNoIOp76Z4B.2FnkvgAS96liJXsYfemQTpGoISHFVey', 'admin', 'test3@gmail.com', '2025-05-12 09:37:00.560', '2025-05-12 09:50:10.277');
+('aaaaaaaaa', '$2b$10$lWy/3Ogl73Z9eMBxuG3HyuAUbEVCCgCUix6m941PoJEYSKtEfQWdK', 'student', N'Nguyen Anh', 'test@gmail.com', '0123456789', N'123 Example St, Hanoi', '2005-01-10', '2025-05-11 17:23:17.473', '2025-05-11 17:23:17.473'),
+('bbbbbbbbbb', '$2b$10$TPE79JXdRYc3c9EnKLLTPe4iSkP.SB3D79RMIIhxmh/tQkS7ezQ.C', 'teacher', N'Le Binh', 'test2@gmail.com', '0987654321', N'456 Sample Rd, Ho Chi Minh City', '1980-03-15', '2025-05-11 17:23:32.367', '2025-05-11 17:23:32.367'),
+('cccccccccc', '$2b$10$yppnS1aDECiNoIOp76Z4B.2FnkvgAS96liJXsYfemQTpGoISHFVey', 'admin', N'Tran Cuong', 'test3@gmail.com', '0912345678', N'789 Demo Ave, Da Nang', '1990-07-20', '2025-05-12 09:37:00.560', '2025-05-12 09:50:10.277');
 
 -- Insert student (user_id = 1)
 INSERT INTO students (user_id) VALUES (1);
