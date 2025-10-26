@@ -32,6 +32,7 @@
                     <thead>
                         <tr>
                             <th>Type</th>
+                            <th>User</th>
                             <th>Description</th>
                             <th>Class</th>
                             <th>Status</th>
@@ -43,6 +44,7 @@
                         <% requests.forEach(function(request) { %>
                         <tr>
                             <td><%= request.type_name %></td>
+                            <td><%= request.full_name %> (<%= request.username %>)</td>
                             <td><%= request.description %></td>
                             <td><%= request.class_name || 'N/A' %></td>
                             <td>
@@ -52,10 +54,34 @@
                             </td>
                             <td><%= new Date(request.created_at).toLocaleDateString() %></td>
                             <td class="actions">
-                                <% if (request.status === 'pending') { %>
-                                <a href="/requests/<%= request.request_id %>/edit" class="edit-btn">Edit</a>
-                                <button onclick="deleteRequest('<%= request.request_id %>')"
-                                    class="delete-btn">Delete</button>
+                                <% if (userRole === 'admin') { %>
+                                    <% if (request.status !== 'pending') { %>
+                                        <button onclick="toggleStatus('<%= request.request_id %>')" 
+                                                class="toggle-btn <%= request.status %>">
+                                            <%= request.status === 'approved' ? 'Reject' : 'Approve' %>
+                                        </button>
+                                    <% } else { %>
+                                        <button onclick="toggleStatus('<%= request.request_id %>')" 
+                                                class="approve-btn">Approve</button>
+                                        <button onclick="toggleStatus('<%= request.request_id %>')" 
+                                                class="reject-btn">Reject</button>
+                                    <% } %>
+                                <% } else if (userRole === 'teacher' && request.role === 'student') { %>
+                                    <% if (request.status !== 'pending') { %>
+                                        <button onclick="toggleStatus('<%= request.request_id %>')" 
+                                                class="toggle-btn <%= request.status %>">
+                                            <%= request.status === 'approved' ? 'Reject' : 'Approve' %>
+                                        </button>
+                                    <% } else { %>
+                                        <button onclick="toggleStatus('<%= request.request_id %>')" 
+                                                class="approve-btn">Approve</button>
+                                        <button onclick="toggleStatus('<%= request.request_id %>')" 
+                                                class="reject-btn">Reject</button>
+                                    <% } %>
+                                <% } else if (request.status === 'pending' && request.user_id === user.id) { %>
+                                    <a href="/requests/<%= request.request_id %>/edit" class="edit-btn">Edit</a>
+                                    <button onclick="deleteRequest('<%= request.request_id %>')"
+                                            class="delete-btn">Delete</button>
                                 <% } %>
                             </td>
                         </tr>
@@ -65,6 +91,62 @@
             </div>
         </div>
     </section>
+
+    <style>
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        .status-badge.pending {
+            background-color: #FEF3C7;
+            color: #92400E;
+        }
+        .status-badge.approved {
+            background-color: #D1FAE5;
+            color: #065F46;
+        }
+        .status-badge.rejected {
+            background-color: #FEE2E2;
+            color: #991B1B;
+        }
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+        .approve-btn, .reject-btn, .toggle-btn {
+            padding: 4px 12px;
+            border-radius: 4px;
+            border: none;
+            color: white;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .approve-btn, .toggle-btn.rejected {
+            background-color: #059669;
+        }
+        .reject-btn, .toggle-btn.approved {
+            background-color: #DC2626;
+        }
+        .approve-btn:hover, .reject-btn:hover, .toggle-btn:hover {
+            opacity: 0.8;
+        }
+        .edit-btn, .delete-btn {
+            padding: 4px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .edit-btn {
+            background-color: #3B82F6;
+            color: white;
+            text-decoration: none;
+        }
+        .delete-btn {
+            background-color: #DC2626;
+            color: white;
+            border: none;
+        }
+    </style>
 
     <script>
         async function deleteRequest(requestId) {
@@ -87,6 +169,27 @@
                     console.error('Error:', error);
                     alert('Error deleting request');
                 }
+            }
+        }
+
+        async function toggleStatus(requestId) {
+            try {
+                const response = await fetch(`/requestToggleStatus/${requestId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    const data = await response.json();
+                    alert(data.error || 'Failed to update request status');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error updating request status');
             }
         }
     </script>

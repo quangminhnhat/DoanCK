@@ -28,6 +28,9 @@ function executeQuery(query, params = {}) {
       ${query}
     `;
 
+    console.log("---Executing query:\n", fullQuery);
+
+
     sql.query(connectionString, fullQuery, [], (err, result) => {
       if (err) {
         console.error("Database query error:", err);
