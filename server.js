@@ -41,6 +41,7 @@ const classesRoutes = require("./routes/classesRoutes");
 const enrollmentsRoutes = require("./routes/enrollmentsRoutes");
 const miscroutes = require("./routes/MiscRoute");
 const requestRoute = require("./routes/requestRoute");
+const examRoutes = require("./routes/examRoutes");
 
 // Essential middleware
 app.use(express.json());
@@ -104,7 +105,7 @@ initalizePassport(
   }
 );
 
-// Add this near the top of server.js
+// Serve uploaded files statically
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
@@ -120,6 +121,7 @@ app.use(classesRoutes);
 app.use(enrollmentsRoutes);
 app.use(miscroutes);
 app.use(requestRoute);
+app.use(examRoutes);
 
 app.post(
   "/login",
