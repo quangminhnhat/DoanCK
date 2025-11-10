@@ -153,6 +153,7 @@ CREATE TABLE Exams
     duration_min INT NOT NULL,
     -- thời lượng phút
     total_points DECIMAL(10,2) NOT NULL DEFAULT 0,
+    passing_points INT NULL,
     allow_multi_attempt BIT NOT NULL DEFAULT 0,
     shuffle_questions BIT NOT NULL DEFAULT 1,
     shuffle_options BIT NOT NULL DEFAULT 1,
@@ -527,13 +528,6 @@ VALUES
     (1, N'Wednesday', '2025-08-04', '08:00', '10:00'),
     (1, N'Friday', '2025-08-06', '08:00', '10:00');
 
--- Insert sample enrollment (comment said unpaid -> set payment_status = 0 and payment_date NULL)
-INSERT INTO enrollments
-    (student_id, class_id, enrollment_date, payment_status, payment_date)
-VALUES
-    ((SELECT id FROM students WHERE user_id = (SELECT id FROM users WHERE username = 'aaaaaaaaa')),
-     (SELECT id FROM classes WHERE class_name = N'Math A1'),
-     GETDATE(), 0, NULL);
 
 -- Enroll all students in the Math A1 class
 INSERT INTO enrollments (student_id, class_id, enrollment_date, payment_status)
@@ -985,15 +979,15 @@ VALUES
     IF @untested_exam_id IS NOT NULL AND @untested_class_id IS NOT NULL
     BEGIN
         -- Create the assignment for the exam
-        INSERT INTO ExamAssignments (exam_id, classes_id, open_at, close_at, max_attempts)
-        VALUES (
-            @untested_exam_id,
-            @untested_class_id,
-            DATEADD(day, 0, GETDATE()),  -- Starts now
-            DATEADD(day, 7, GETDATE()),  -- Ends in 7 days
-            2
-        );
-    END;
+            INSERT INTO ExamAssignments (exam_id, classes_id, open_at, close_at, max_attempts)
+            VALUES (
+                @untested_exam_id,
+                @untested_class_id,
+                DATEADD(day, -1, GETDATE()),  -- Started yesterday 
+                DATEADD(day, 6, GETDATE()),  -- Ends in 6 days
+                2
+            );
+            END;
 
     -- Add questions to the untested exam
     IF @untested_exam_id IS NOT NULL AND @untested_practice_mcq_type_id IS NOT NULL
@@ -1032,87 +1026,3 @@ END;
 
 
 
-
-
-
-
-
-
--- Query for getting exam information with latest attempts
-WITH LatestAttempts AS (
-          SELECT 
-            assignment_id,
-            attempt_id,
-            total_score,
-            status as attempt_status,
-            COUNT(*) OVER (PARTITION BY assignment_id, student_id) as attempt_count,
-            ROW_NUMBER() OVER (PARTITION BY assignment_id, student_id ORDER BY attempt_no DESC) as rn
-          FROM Attempts
-          WHERE status != 'in_progress' AND student_id = (
-            SELECT id FROM students WHERE user_id = 5
-          )
-        )
-        SELECT DISTINCT
-          e.*,
-          t.full_name as teacher_name,
-          CASE 
-            WHEN a.attempt_status = 'completed' THEN 'Completed'
-            WHEN a.attempt_status = 'in_progress' THEN 'In Progress'
-            WHEN ea.open_at <= GETDATE() AND ea.close_at >= GETDATE() AND 
-                 (a.attempt_count IS NULL OR 
-                  (ea.max_attempts IS NULL OR a.attempt_count < ea.max_attempts)) THEN 'Available'
-            WHEN ea.open_at > GETDATE() THEN 'Upcoming'
-            ELSE 'Expired'
-          END as exam_status,
-          CASE 
-            WHEN a.attempt_status = 'in_progress' THEN 0
-            WHEN ea.open_at <= GETDATE() AND ea.close_at >= GETDATE() AND 
-                 (a.attempt_count IS NULL OR 
-                  (ea.max_attempts IS NULL OR a.attempt_count < ea.max_attempts)) THEN 1
-            WHEN ea.open_at > GETDATE() THEN 2
-            ELSE 3
-          END as status_order,
-          a.total_score,
-          a.attempt_status,
-          ea.open_at,
-          ea.close_at,
-          ea.assignment_id,
-          ea.max_attempts,
-          ISNULL(a.attempt_count, 0) as attempt_count,
-          s.id as student_id,
-          en.class_id,
-          c.class_name
-        FROM Exams e 
-        JOIN teachers te ON e.teachers_id = te.id
-        JOIN users t ON te.user_id = t.id
-        JOIN ExamAssignments ea ON e.exam_id = ea.exam_id
-        JOIN classes c ON ea.classes_id = c.id
-        JOIN enrollments en ON c.id = en.class_id AND en.student_id = (
-          SELECT id FROM students WHERE user_id = 5
-        )
-        JOIN students s ON s.id = en.student_id
-        LEFT JOIN LatestAttempts a ON ea.assignment_id = a.assignment_id AND a.rn = 1
-        WHERE s.user_id = 5
-        ORDER BY status_order, ea.open_at ASC
-
-
-
-
-
-
-		  SELECT q.*, qt.type_name, 
-             (SELECT JSON_QUERY((
-               SELECT mo.* 
-               FROM MCQOptions mo 
-               WHERE mo.question_id = q.question_id 
-               FOR JSON PATH
-             ))) as options,
-             (SELECT JSON_QUERY((
-               SELECT qm.* 
-               FROM QuestionMedia qm 
-               WHERE qm.question_id = q.question_id 
-               FOR JSON PATH
-             ))) as media
-      FROM Questions q
-      JOIN QuestionTypes qt ON q.type_id = qt.type_id
-      WHERE q.exam_id = 1

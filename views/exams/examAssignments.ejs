@@ -1,0 +1,243 @@
+<%- include('../shared/header') %>
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <div class="d-flex align-items-center gap-3">
+                <a href="/exams" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Exam List
+                </a>
+                <div>
+                    <h2>Exam: <%= exam.exam_title %></h2>
+                    <p class="text-muted">Code: <%= exam.exam_code %></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-auto">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#assignExamModal">
+                <i class="fas fa-plus"></i> Assign to New Class
+            </button>
+        </div>
+    </div>
+
+    <% if (flashMessage) { %>
+        <div class="alert alert-<%= flashMessage.type %> alert-dismissible fade show" role="alert">
+            <%= flashMessage.message %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <% } %>
+
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Current Assignments</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Class</th>
+                            <th>Open From</th>
+                            <th>Close At</th>
+                            <th>Max Attempts</th>
+                            <th>Students</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% assignments.forEach(assignment => { %>
+                            <tr>
+                                <td><%= assignment.class_name %></td>
+                                <td>
+                                    <%= new Date(assignment.open_at).toLocaleString('en-US', { 
+                                        year: 'numeric', 
+                                        month: 'short', 
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    }) %>
+                                </td>
+                                <td>
+                                    <%= new Date(assignment.close_at).toLocaleString('en-US', { 
+                                        year: 'numeric', 
+                                        month: 'short', 
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    }) %>
+                                </td>
+                                <td><%= assignment.max_attempts || 'Unlimited' %></td>
+                                <td><%= assignment.student_count %></td>
+                                <td>
+                                    <a href="/exams/assignments/<%= assignment.assignment_id %>/scores" class="btn btn-sm btn-info me-2">
+                                        <i class="fas fa-chart-bar"></i> View Scores
+                                    </a>
+                                </td>
+                                <td>
+                                    <button data-assignment-id="<%= assignment.assignment_id %>" class="btn btn-sm btn-danger btn-delete-assignment">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        <% }) %>
+                        <% if (assignments.length === 0) { %>
+                            <tr>
+                                <td colspan="6" class="text-center">No classes assigned yet</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for assigning to new class -->
+<div class="modal fade" id="assignExamModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Assign Exam to Class</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="assignExamForm">
+                    <div class="alert alert-info mb-3">
+                        Fields marked with <span class="text-danger">*</span> are required.
+                    </div>
+                    <div class="mb-3">
+                        <label for="classSelect" class="form-label">Select Class <span class="text-danger">*</span></label>
+                        <select class="form-select" id="classSelect" required>
+                            <option value="">Choose a class...</option>
+                            <% availableClasses.forEach(cls => { %>
+                                <option value="<%= cls.id %>"><%= cls.class_name %></option>
+                            <% }) %>
+                        </select>
+                        <div class="form-text text-danger d-none" id="classSelectError">Please select a class</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="openAt" class="form-label">Open From <span class="text-danger">*</span></label>
+                        <input type="datetime-local" class="form-control" id="openAt" required>
+                        <div class="form-text text-danger d-none" id="openAtError">Please specify when the exam opens</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="closeAt" class="form-label">Close At <span class="text-danger">*</span></label>
+                        <input type="datetime-local" class="form-control" id="closeAt" required>
+                        <div class="form-text text-danger d-none" id="closeAtError">Please specify when the exam closes</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="maxAttempts" class="form-label">Maximum Attempts</label>
+                        <input type="number" class="form-control" id="maxAttempts" min="1">
+                        <div class="form-text">Leave empty for unlimited attempts</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="assignExam()">Assign</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function assignExam() {
+    const classId = document.getElementById('classSelect').value;
+    const openAt = document.getElementById('openAt').value;
+    const closeAt = document.getElementById('closeAt').value;
+    const maxAttempts = document.getElementById('maxAttempts').value;
+
+    // Reset error messages
+    document.getElementById('classSelectError').classList.add('d-none');
+    document.getElementById('openAtError').classList.add('d-none');
+    document.getElementById('closeAtError').classList.add('d-none');
+
+    let hasError = false;
+
+    if (!classId) {
+        document.getElementById('classSelectError').classList.remove('d-none');
+        hasError = true;
+    }
+    if (!openAt) {
+        document.getElementById('openAtError').classList.remove('d-none');
+        hasError = true;
+    }
+    if (!closeAt) {
+        document.getElementById('closeAtError').classList.remove('d-none');
+        hasError = true;
+    }
+
+    if (hasError) {
+        return;
+    }
+
+    // Validate that close date is after open date
+    if (new Date(closeAt) <= new Date(openAt)) {
+        document.getElementById('closeAtError').textContent = 'Close date must be after open date';
+        document.getElementById('closeAtError').classList.remove('d-none');
+        return;
+    }
+
+    try {
+        const response = await fetch(`/exams/<%= exam.exam_id %>/assign`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                class_id: classId,
+                open_at: openAt,
+                close_at: closeAt,
+                max_attempts: maxAttempts || null
+            })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            window.location.reload();
+        } else {
+            alert(data.message || 'Error assigning exam');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error assigning exam');
+    }
+}
+
+async function deleteAssignment(assignmentId) {
+    if (!confirm('Are you sure you want to remove this assignment? Students will no longer have access to this exam.')) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/exams/assignments/${assignmentId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            window.location.reload();
+        } else {
+            alert(data.message || 'Error removing assignment');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error removing assignment');
+    }
+}
+
+// attach click handlers to buttons that carry the assignment id in a data- attribute
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.btn-delete-assignment').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            const id = this.dataset.assignmentId;
+            deleteAssignment(id);
+        });
+    });
+});
+</script>
+
+<%- include('../shared/footer') %>

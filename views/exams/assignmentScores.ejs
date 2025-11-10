@@ -1,0 +1,104 @@
+<%- include('../shared/header') %>
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Exam Scores: <%= assignment.exam_title %></h2>
+            <p class="text-muted">
+                Class: <%= assignment.class_name %><br>
+                Exam Code: <%= assignment.exam_code %>
+            </p>
+        </div>
+        <div class="col-auto">
+            <a href="/exams/<%= assignment.assignment_id %>/assign" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Assignment
+            </a>
+        </div>
+    </div>
+
+    <% if (flashMessage) { %>
+        <div class="alert alert-<%= flashMessage.type %> alert-dismissible fade show" role="alert">
+            <%= flashMessage.message %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <% } %>
+
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Student Scores</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Latest Attempt</th>
+                            <th>Score</th>
+                            <th>Started</th>
+                            <th>Submitted</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% scores.forEach(score => { %>
+                            <tr>
+                                <td><%= score.student_name %></td>
+                                <td><%= score.attempt_no || 'Not attempted' %></td>
+                                <td>
+                                    <% if (score.score !== null) { %>
+                                        <%= score.score %>
+                                    <% } else if (score.submitted_at) { %>
+                                        Pending grading
+                                    <% } else if (score.started_at) { %>
+                                        In progress
+                                    <% } else { %>
+                                        Not started
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <%= score.started_at ? new Date(score.started_at).toLocaleString('en-US', { 
+                                        year: 'numeric', 
+                                        month: 'short', 
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    }) : 'N/A' %>
+                                </td>
+                                <td>
+                                    <%= score.submitted_at ? new Date(score.submitted_at).toLocaleString('en-US', { 
+                                        year: 'numeric', 
+                                        month: 'short', 
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    }) : 'N/A' %>
+                                </td>
+                                <td>
+                                    <% if (!score.started_at) { %>
+                                        <span class="badge bg-secondary">Not Started</span>
+                                    <% } else if (!score.submitted_at) { %>
+                                        <span class="badge bg-warning text-dark">In Progress</span>
+                                    <% } else if (!score.graded_at && score.needs_manual_grading) { %>
+                                        <span class="badge bg-info">Awaiting Manual Grading</span>
+                                    <% } else if (!score.graded_at) { %>
+                                        <span class="badge bg-primary">Auto Graded</span>
+                                    <% } else { %>
+                                        <span class="badge bg-success">Manual Graded</span>
+                                    <% } %>
+                                </td>
+                            </tr>
+                        <% }) %>
+                        <% if (scores.length === 0) { %>
+                            <tr>
+                                <td colspan="6" class="text-center">No students enrolled in this class</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../shared/footer') %>

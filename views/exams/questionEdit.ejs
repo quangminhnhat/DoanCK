@@ -1,0 +1,314 @@
+<%- include('../shared/header') %>
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Edit Question</h2>
+        </div>
+        <div class="col-auto">
+            <a href="/exams/<%= examId %>/edit" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Exam
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <form id="questionForm" enctype="multipart/form-data">
+                <input type="hidden" name="questionId" value="<%= question.question_id %>">
+                <input type="hidden" name="typeId" value="<%= question.type_id %>">
+
+                <div class="mb-3">
+                    <label for="questionText" class="form-label">Question Text*</label>
+                    <textarea class="form-control" id="questionText" name="question_text" rows="3" required><%= question.body_text %></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label for="points" class="form-label">Points*</label>
+                    <input type="number" class="form-control" id="points" name="points" 
+                           value="<%= question.points %>" min="1" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="difficulty" class="form-label">Difficulty Level</label>
+                    <select class="form-select" id="difficulty" name="difficulty">
+                        <option value="">Select Difficulty</option>
+                        <option value="1" <%= question.difficulty === 1 ? 'selected' : '' %>>Easy</option>
+                        <option value="2" <%= question.difficulty === 2 ? 'selected' : '' %>>Medium</option>
+                        <option value="3" <%= question.difficulty === 3 ? 'selected' : '' %>>Hard</option>
+                    </select>
+                </div>
+
+                <% if (question.type_id === 1) { /* MCQ Question */ %>
+                    <div id="mcqOptions">
+                        <h4>Multiple Choice Options</h4>
+                        <div id="optionsList">
+                            <% (question.options || []).forEach((option, index) => { %>
+                                <div class="option-item mb-3">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="row align-items-center">
+                                                <div class="col">
+                                                    <div class="form-floating mb-2">
+                                                        <input type="text" class="form-control option-text" 
+                                                               value="<%= option.option_text %>" required
+                                                               id="option<%= index %>Text"
+                                                               placeholder="Option text">
+                                                        <label for="option<%= index %>Text">Option <%= String.fromCharCode(65 + index) %></label>
+                                                    </div>
+                                                    <div class="form-floating">
+                                                        <input type="text" class="form-control option-explanation" 
+                                                               value="<%= option.explanation || '' %>"
+                                                               id="option<%= index %>Explanation"
+                                                               placeholder="Explanation">
+                                                        <label for="option<%= index %>Explanation">Explanation (Optional)</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-auto">
+                                                    <div class="form-check mt-2">
+                                                        <input class="form-check-input option-correct" type="radio" 
+                                                               name="correctOption" 
+                                                               <%= option.is_correct ? 'checked' : '' %>
+                                                               id="option<%= index %>Correct">
+                                                        <label class="form-check-label" for="option<%= index %>Correct">
+                                                            Correct
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-auto">
+                                                    <button type="button" class="btn btn-danger btn-sm delete-option"
+                                                            <%= index < 2 ? 'disabled' : '' %>>
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% }); %>
+                        </div>
+                        <button type="button" id="addOption" class="btn btn-outline-primary mb-3">
+                            <i class="fas fa-plus"></i> Add Option
+                        </button>
+                    </div>
+                <% } %>
+
+                <div class="mb-3">
+                    <label class="form-label">Current Media Files</label>
+                    <div class="row" id="currentMedia">
+                        <% (question.media || []).forEach(media => { %>
+                            <div class="col-md-4 mb-3" data-media-id="<%= media.media_id %>">
+                                <div class="card">
+                                    <% if (media.file_url.match(/\.(jpg|jpeg|png|gif)$/i)) { %>
+                                        <img src="/uploads/<%= media.file_url.split('/').pop() %>" class="card-img-top" alt="Question media">
+                                    <% } else { %>
+                                        <div class="card-body">
+                                            <i class="fas fa-file"></i> <%= media.file_name %>
+                                        </div>
+                                    <% } %>
+                                    <div class="card-footer">
+                                        <button type="button" class="btn btn-danger btn-sm"
+                                                onclick="deleteMedia('<%= media.media_id %>')">
+                                            <i class="fas fa-trash"></i> Remove
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="media" class="form-label">Add New Media Files</label>
+                    <input type="file" class="form-control" id="media" name="media" multiple>
+                    <div class="form-text">You can upload multiple images or documents</div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+const questionForm = document.getElementById('questionForm');
+const optionsList = document.getElementById('optionsList');
+const addOptionBtn = document.getElementById('addOption');
+
+// For MCQ questions
+if (addOptionBtn) {
+    addOptionBtn.addEventListener('click', () => {
+        const optionIndex = optionsList.children.length;
+        const optionLetter = String.fromCharCode(65 + optionIndex);
+        
+        const optionHtml = `
+            <div class="option-item mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <div class="form-floating mb-2">
+                                    <input type="text" class="form-control option-text" 
+                                           required
+                                           id="option${optionIndex}Text"
+                                           placeholder="Option text">
+                                    <label for="option${optionIndex}Text">Option ${optionLetter}</label>
+                                </div>
+                                <div class="form-floating">
+                                    <input type="text" class="form-control option-explanation" 
+                                           id="option${optionIndex}Explanation"
+                                           placeholder="Explanation">
+                                    <label for="option${optionIndex}Explanation">Explanation (Optional)</label>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input option-correct" type="radio" 
+                                           name="correctOption"
+                                           id="option${optionIndex}Correct">
+                                    <label class="form-check-label" for="option${optionIndex}Correct">
+                                        Correct
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <button type="button" class="btn btn-danger btn-sm delete-option">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        optionsList.insertAdjacentHTML('beforeend', optionHtml);
+    });
+
+    // Delete option handler
+    optionsList.addEventListener('click', (e) => {
+        if (e.target.closest('.delete-option')) {
+            const optionItem = e.target.closest('.option-item');
+            if (optionsList.children.length > 2) {
+                optionItem.remove();
+                // Update option letters
+                Array.from(optionsList.children).forEach((item, index) => {
+                    const letter = String.fromCharCode(65 + index);
+                    item.querySelector('.form-floating label').textContent = `Option ${letter}`;
+                });
+            }
+        }
+    });
+}
+
+function deleteMedia(mediaId) {
+    if (confirm('Are you sure you want to delete this media file?')) {
+        fetch(`/questions/media/${mediaId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const mediaElement = document.querySelector(`[data-media-id="${mediaId}"]`);
+                if (mediaElement) {
+                    mediaElement.remove();
+                }
+            } else {
+                alert(data.message || 'Error deleting media file');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error deleting media file');
+        });
+    }
+}
+
+questionForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    // Validate MCQ options if applicable
+    const typeId = document.querySelector('[name="typeId"]').value;
+    if (typeId === '1') {
+        const options = document.querySelectorAll('.option-item');
+        if (options.length < 2) {
+            alert('MCQ questions must have at least 2 options');
+            return;
+        }
+        
+        const hasCorrectAnswer = Array.from(options).some(option => 
+            option.querySelector('.option-correct').checked
+        );
+        
+        if (!hasCorrectAnswer) {
+            alert('Please select a correct answer for the MCQ question');
+            return;
+        }
+    }
+    
+    const formData = new FormData();
+    const questionId = document.querySelector('[name="questionId"]').value;
+    
+    // Add basic question data
+    formData.append('question_text', document.getElementById('questionText').value);
+    formData.append('points', document.getElementById('points').value);
+    formData.append('difficulty', document.getElementById('difficulty').value || null);
+    formData.append('type_id', typeId);
+
+    // Add MCQ options if applicable
+    if (typeId === '1') {
+        const options = [];
+        const optionItems = document.querySelectorAll('.option-item');
+        
+        optionItems.forEach((item, index) => {
+            options.push({
+                text: item.querySelector('.option-text').value,
+                isCorrect: item.querySelector('.option-correct').checked,
+                explanation: item.querySelector('.option-explanation').value || null
+            });
+        });
+        
+        formData.append('options', JSON.stringify(options));
+    }
+
+    // Add media files
+    const mediaFiles = document.getElementById('media').files;
+    for (let i = 0; i < mediaFiles.length; i++) {
+        formData.append('media', mediaFiles[i]);
+    }
+
+    try {
+        // Get CSRF token if you have it in your meta tags
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+        
+        const response = await fetch(`/questions/${questionId}`, {
+            method: 'PUT',
+            body: formData,
+            headers: {
+                // Don't set Content-Type header when using FormData
+                ...(csrfToken ? { 'CSRF-Token': csrfToken } : {})
+            }
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+            window.location.href = `/exams/<%= examId %>/edit`;
+        } else {
+            alert(data.message || 'Error updating question');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error updating question');
+    }
+});
+</script>
+
+<%- include('../shared/footer') %>

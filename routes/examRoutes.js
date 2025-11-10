@@ -8,6 +8,7 @@ const multer = require("multer");
 const fs = require("fs");
 const { authenticateRole } = require("../middleware/roleAuth");
 const executeQuery = require("../middleware/executeQuery");
+const { createMCQQuestion, editMCQQuestion, deleteMCQQuestion } = require("../middleware/mcqQuestionHelper");
 const {
   checkAuthenticated,
   checkNotAuthenticated,
@@ -29,8 +30,8 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// Get exams based on user role
-router.get('/exams/all', checkAuthenticated, async (req, res) => {
+// Render exam list page
+router.get('/exams', checkAuthenticated, async (req, res) => {
   try {
     let query = '';
     const userRole = req.user.role.toLowerCase();
@@ -116,11 +117,25 @@ router.get('/exams/all', checkAuthenticated, async (req, res) => {
     }
 
     const exams = await executeQuery(query);
-    res.json(exams);
+    
+    res.render('exams/examList', {
+      user: req.user,
+      exams: exams,
+      flashMessage: req.flash('message')
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Error fetching exams" });
+    req.flash('message', { type: 'danger', message: 'Error fetching exams' });
+    res.redirect('/');
   }
+});
+
+// Render new exam page
+router.get('/exams/new', checkAuthenticated, authenticateRole(['teacher']), async (req, res) => {
+  res.render('exams/examNew', {
+    user: req.user,
+    flashMessage: req.flash('message')
+  });
 });
 
 // Create new exam
@@ -144,29 +159,527 @@ router.post('/exam/new', checkAuthenticated, authenticateRole(['teacher']), asyn
     const examCode = 'EXAM' + Date.now().toString().slice(-6);
     
     const query = `
-      INSERT INTO Exams (teachers_id, exam_code, exam_title, description, duration_min, total_points, created_at)
-      VALUES (${teacher[0].id}, '${examCode}', '${exam_title}', '${description}', ${duration_minutes}, ${total_marks}, GETDATE())
+      INSERT INTO Exams (teachers_id, exam_code, exam_title, description, duration_min, total_points, passing_points, created_at)
+      OUTPUT INSERTED.exam_id
+      VALUES (${teacher[0].id}, '${examCode}', '${exam_title}', '${description}', ${duration_minutes}, ${total_marks}, ${passing_marks || 'NULL'}, GETDATE())
     `;
-    await executeQuery(query);
-    res.status(201).json({ message: "Exam created successfully" });
+    const result = await executeQuery(query);
+    res.status(201).json({ 
+      message: "Exam created successfully",
+      examId: result[0].exam_id
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error creating exam" });
   }
 });
 
+// Get new question page
+router.get('/exams/:examId/questions/new', checkAuthenticated, authenticateRole(['teacher']), async (req, res) => {
+  try {
+    const { examId } = req.params;
+
+    // Verify teacher owns this exam
+    const verifyQuery = `
+      SELECT e.*, t.user_id as teacher_user_id
+      FROM Exams e
+      JOIN teachers t ON e.teachers_id = t.id
+      WHERE e.exam_id = ${examId}
+    `;
+    const exam = await executeQuery(verifyQuery);
+
+    if (!exam || exam.length === 0) {
+      req.flash('message', { type: 'danger', message: 'Exam not found' });
+      return res.redirect('/exams');
+    }
+
+    if (exam[0].teacher_user_id !== req.user.id) {
+      req.flash('message', { type: 'danger', message: 'You do not have permission to add questions to this exam' });
+      return res.redirect('/exams');
+    }
+
+    res.render('exams/questionNew', {
+      user: req.user,
+      examId: examId,
+      flashMessage: req.flash('message')
+    });
+  } catch (error) {
+    console.error(error);
+    req.flash('message', { type: 'danger', message: 'Error loading question form' });
+    res.redirect('/exams');
+  }
+});
+
+// Get exam edit page
+router.get('/exams/:examId/edit', checkAuthenticated, authenticateRole(['teacher']), async (req, res) => {
+  try {
+    const { examId } = req.params;
+
+    // Get exam details
+    const examQuery = `
+      SELECT e.*, t.user_id as teacher_user_id
+      FROM Exams e
+      JOIN teachers t ON e.teachers_id = t.id
+      WHERE e.exam_id = ${examId}
+    `;
+    const exam = await executeQuery(examQuery);
+
+    if (!exam || exam.length === 0) {
+      req.flash('message', { type: 'danger', message: 'Exam not found' });
+      return res.redirect('/exams');
+    }
+
+    // Verify teacher owns this exam
+    if (exam[0].teacher_user_id !== req.user.id) {
+      req.flash('message', { type: 'danger', message: 'You do not have permission to edit this exam' });
+      return res.redirect('/exams');
+    }
+
+    // Get exam questions
+    const questionsQuery = `
+      SELECT q.*, qt.type_name
+      FROM Questions q
+      JOIN QuestionTypes qt ON q.type_id = qt.type_id
+      WHERE q.exam_id = ${examId}
+      ORDER BY q.created_at
+    `;
+    const questions = await executeQuery(questionsQuery);
+
+    res.render('exams/examEdit', {
+      user: req.user,
+      exam: exam[0],
+      questions: questions
+    });
+  } catch (error) {
+    console.error(error);
+    req.flash('message', { type: 'danger', message: 'Error loading exam' });
+    res.redirect('/exams');
+  }
+});
+
+// Update exam
+router.put('/exams/:examId', checkAuthenticated, authenticateRole(['teacher']), async (req, res) => {
+  try {
+    const { examId } = req.params;
+    const { exam_title, description, duration_minutes, total_marks, passing_marks } = req.body;
+
+    // Verify teacher owns this exam
+    const verifyQuery = `
+      SELECT e.*
+      FROM Exams e
+      JOIN teachers t ON e.teachers_id = t.id
+      WHERE e.exam_id = ${examId}
+      AND t.user_id = ${req.user.id}
+    `;
+    const exam = await executeQuery(verifyQuery);
+
+    if (!exam || exam.length === 0) {
+      return res.status(403).json({ 
+        success: false,
+        message: "You don't have permission to edit this exam" 
+      });
+    }
+
+    // Update exam
+    const updateQuery = `
+      UPDATE Exams 
+      SET exam_title = '${exam_title}',
+          description = '${description}',
+          duration_min = ${duration_minutes},
+          total_points = ${total_marks},
+          passing_points = ${passing_marks || 'NULL'},
+          updated_at = GETDATE()
+      WHERE exam_id = ${examId}
+    `;
+    await executeQuery(updateQuery);
+
+    res.json({ 
+      success: true,
+      message: "Exam updated successfully" 
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ 
+      success: false,
+      message: "Error updating exam" 
+    });
+  }
+});
+
+// Get question edit page
+router.get('/questions/:questionId/edit', checkAuthenticated, authenticateRole(['teacher']), async (req, res) => {
+  try {
+    const { questionId } = req.params;
+
+    // Get question details with media and options
+    const questionQuery = `
+      SELECT q.*, qt.type_name,
+             (SELECT ISNULL(
+               (SELECT mo.* 
+               FROM MCQOptions mo 
+               WHERE mo.question_id = q.question_id 
+               FOR JSON PATH), '[]')
+             ) as options,
+             (SELECT JSON_QUERY((
+               SELECT qm.* 
+               FROM QuestionMedia qm 
+               WHERE qm.question_id = q.question_id 
+               FOR JSON PATH
+             ))) as media,
+             e.exam_id,
+             t.user_id as teacher_user_id
+      FROM Questions q
+      JOIN QuestionTypes qt ON q.type_id = qt.type_id
+      LEFT JOIN Exams e ON q.exam_id = e.exam_id
+      LEFT JOIN teachers t ON e.teachers_id = t.id
+      WHERE q.question_id = ${questionId}
+    `;
+    
+    const question = await executeQuery(questionQuery);
+
+    if (!question || question.length === 0) {
+      req.flash('message', { type: 'danger', message: 'Question not found' });
+      return res.redirect('/exams');
+    }
+
+    // If question belongs to an exam, verify teacher owns it
+    if (question[0].exam_id && question[0].teacher_user_id !== req.user.id) {
+      req.flash('message', { type: 'danger', message: 'You do not have permission to edit this question' });
+      return res.redirect('/exams');
+    }
+
+    // Parse the JSON strings from SQL
+    const questionData = {
+      ...question[0],
+      options: JSON.parse(question[0].options || '[]'),
+      media: JSON.parse(question[0].media || '[]')
+    };
+
+    res.render('exams/questionEdit', {
+      user: req.user,
+      question: questionData,
+      examId: questionData.exam_id
+    });
+  } catch (error) {
+    console.error(error);
+    req.flash('message', { type: 'danger', message: 'Error loading question' });
+    res.redirect('/exams');
+  }
+});
+
+// Update question
+// Delete question media
+router.delete('/questions/media/:mediaId', checkAuthenticated, authenticateRole(['teacher']), async (req, res) => {
+    try {
+        const { mediaId } = req.params;
+
+        // Get media info and verify ownership
+        const mediaQuery = `
+            SELECT qm.*, q.exam_id, t.user_id as teacher_user_id 
+            FROM QuestionMedia qm
+            JOIN Questions q ON qm.question_id = q.question_id
+            LEFT JOIN Exams e ON q.exam_id = e.exam_id
+            LEFT JOIN teachers t ON e.teachers_id = t.id
+            WHERE qm.media_id = ${mediaId}
+        `;
+        
+        const media = await executeQuery(mediaQuery);
+
+        if (!media || media.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Media not found"
+            });
+        }
+
+        // If media belongs to an exam question, verify teacher owns it
+        if (media[0].exam_id && media[0].teacher_user_id !== req.user.id) {
+            return res.status(403).json({
+                success: false,
+                message: "You don't have permission to delete this media"
+            });
+        }
+
+        // Delete the file from disk if it exists
+        try {
+            const filePath = path.join(__dirname, '..', media[0].file_url);
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+            }
+        } catch (error) {
+            console.error('Error deleting file:', error);
+            // Continue with database deletion even if file deletion fails
+        }
+
+        // Delete from database
+        await executeQuery(`DELETE FROM QuestionMedia WHERE media_id = ${mediaId}`);
+
+        res.json({
+            success: true,
+            message: "Media deleted successfully"
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: "Error deleting media"
+        });
+    }
+});
+
+router.put('/questions/:questionId', checkAuthenticated, authenticateRole(['teacher']), upload.array('media'), async (req, res) => {
+  try {
+    const { questionId } = req.params;
+    const { question_text, points, difficulty, type_id } = req.body;
+    const files = req.files;
+
+    // Verify the question exists and belongs to the teacher
+    const verifyQuery = `
+      SELECT q.*, e.teachers_id 
+      FROM Questions q
+      LEFT JOIN Exams e ON q.exam_id = e.exam_id
+      WHERE q.question_id = ${questionId}
+    `;
+    const question = await executeQuery(verifyQuery);
+
+    if (!question || question.length === 0) {
+      return res.status(404).json({ message: "Question not found" });
+    }
+
+    // If it's an MCQ question
+    if (type_id === 1 || question[0].type_id === 1) {
+      const mcqResult = await editMCQQuestion(questionId, {
+        points,
+        body_text: question_text,
+        difficulty,
+        options: req.body.options
+      }, files);
+
+      if (!mcqResult.success) {
+        throw new Error(mcqResult.error);
+      }
+
+      return res.status(200).json({ 
+        message: mcqResult.message,
+        questionId: mcqResult.questionId 
+      });
+    }
+
+    // For other question types...
+    const updateQuery = `
+      UPDATE Questions 
+      SET points = ${points},
+          body_text = '${question_text}',
+          difficulty = ${difficulty || 'NULL'},
+          updated_at = GETDATE()
+      WHERE question_id = ${questionId}
+    `;
+    await executeQuery(updateQuery);
+
+    // Handle media files if any
+    if (files && files.length > 0) {
+      // Delete existing media
+      await executeQuery(`DELETE FROM QuestionMedia WHERE question_id = ${questionId}`);
+      
+      // Add new media files
+      for (const file of files) {
+        const mediaQuery = `
+          INSERT INTO QuestionMedia (question_id, file_name, file_url, caption, file_data, created_at)
+          VALUES (${questionId}, '${file.originalname}', '${file.path}', NULL, NULL, GETDATE())
+        `;
+        await executeQuery(mediaQuery);
+      }
+    }
+
+    res.status(200).json({ message: "Question updated successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error updating question" });
+  }
+});
+
+// Delete question
+router.delete('/questions/:questionId', checkAuthenticated, authenticateRole(['teacher']), async (req, res) => {
+  try {
+    const { questionId } = req.params;
+
+    // Verify the question exists and belongs to the teacher
+    const verifyQuery = `
+      SELECT q.*, e.teachers_id 
+      FROM Questions q
+      LEFT JOIN Exams e ON q.exam_id = e.exam_id
+      WHERE q.question_id = ${questionId}
+    `;
+    const question = await executeQuery(verifyQuery);
+
+    if (!question || question.length === 0) {
+      return res.status(404).json({ message: "Question not found" });
+    }
+
+    // Verify teacher owns this question
+    const teacherQuery = `
+      SELECT id FROM teachers 
+      WHERE user_id = ${req.user.id}
+    `;
+    const teacher = await executeQuery(teacherQuery);
+
+    if (question[0].exam_id && teacher[0].id !== question[0].teachers_id) {
+      return res.status(403).json({ message: "You don't have permission to delete this question" });
+    }
+
+    // If it's an MCQ question
+    if (question[0].type_id === 1) {
+      const mcqResult = await deleteMCQQuestion(questionId);
+
+      if (!mcqResult.success) {
+        throw new Error(mcqResult.error);
+      }
+
+      return res.status(200).json({ message: mcqResult.message });
+    }
+
+    // For other question types...
+    // Delete associated media first
+    await executeQuery(`DELETE FROM QuestionMedia WHERE question_id = ${questionId}`);
+    
+    // Delete the question
+    await executeQuery(`DELETE FROM Questions WHERE question_id = ${questionId}`);
+
+    res.status(200).json({ message: "Question deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error deleting question" });
+  }
+});
+
+// Delete exam
+router.delete('/exams/:examId', checkAuthenticated, authenticateRole(['admin', 'teacher']), async (req, res) => {
+  try {
+    const { examId } = req.params;
+
+    // If teacher, verify they own the exam
+    if (req.user.role === 'teacher') {
+      const verifyQuery = `
+        SELECT e.* 
+        FROM Exams e
+        JOIN teachers t ON e.teachers_id = t.id
+        WHERE e.exam_id = ${examId}
+        AND t.user_id = ${req.user.id}
+      `;
+      const exam = await executeQuery(verifyQuery);
+
+      if (!exam || exam.length === 0) {
+        return res.status(403).json({ 
+          success: false,
+          message: "You don't have permission to delete this exam" 
+        });
+      }
+    }
+
+    // Delete all related records in order
+    // First delete all responses and their media
+    await executeQuery(`
+      DELETE rm 
+      FROM ResponseMedia rm
+      JOIN Responses r ON rm.response_id = r.response_id
+      JOIN Attempts a ON r.attempt_id = a.attempt_id
+      JOIN ExamAssignments ea ON a.assignment_id = ea.assignment_id
+      WHERE ea.exam_id = ${examId}
+    `);
+
+    // Delete responses
+    await executeQuery(`
+      DELETE r
+      FROM Responses r
+      JOIN Attempts a ON r.attempt_id = a.attempt_id
+      JOIN ExamAssignments ea ON a.assignment_id = ea.assignment_id
+      WHERE ea.exam_id = ${examId}
+    `);
+
+    // Delete attempts
+    await executeQuery(`
+      DELETE a
+      FROM Attempts a
+      JOIN ExamAssignments ea ON a.assignment_id = ea.assignment_id
+      WHERE ea.exam_id = ${examId}
+    `);
+
+    // Delete assignments
+    await executeQuery(`
+      DELETE FROM ExamAssignments WHERE exam_id = ${examId}
+    `);
+
+    // Delete question media
+    await executeQuery(`
+      DELETE qm
+      FROM QuestionMedia qm
+      JOIN Questions q ON qm.question_id = q.question_id
+      WHERE q.exam_id = ${examId}
+    `);
+
+    // Delete MCQ options
+    await executeQuery(`
+      DELETE mo
+      FROM MCQOptions mo
+      JOIN Questions q ON mo.question_id = q.question_id
+      WHERE q.exam_id = ${examId}
+    `);
+
+    // Delete questions
+    await executeQuery(`
+      DELETE FROM Questions WHERE exam_id = ${examId}
+    `);
+
+    // Finally delete the exam
+    await executeQuery(`
+      DELETE FROM Exams WHERE exam_id = ${examId}
+    `);
+
+    res.json({ 
+      success: true,
+      message: "Exam deleted successfully" 
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ 
+      success: false,
+      message: "Error deleting exam" 
+    });
+  }
+});
+
 // Add question to exam or question bank
 router.post('/:examId/questions/add', checkAuthenticated, authenticateRole(['teacher']), upload.array('media'), async (req, res) => {
   try {
-    const { question_text, type_id, points, difficulty, body_text } = req.body;
+    const { question_text, type_id, points, difficulty } = req.body;
     const { examId } = req.params;
     const files = req.files;
 
-    // Insert question (can be part of exam or question bank)
+    // For MCQ questions, use the helper function
+    if (type_id === '1') {
+      const mcqResult = await createMCQQuestion(examId, {
+        points,
+        body_text: question_text,
+        difficulty,
+        options: req.body.options
+      }, files);
+
+      if (!mcqResult.success) {
+        throw new Error(mcqResult.error);
+      }
+
+      return res.status(201).json({ 
+        success: true,
+        message: mcqResult.message,
+        questionId: mcqResult.questionId 
+      });
+    }
+
+    // For other question types
     const questionQuery = `
       INSERT INTO Questions (exam_id, type_id, points, body_text, difficulty, created_at)
       OUTPUT INSERTED.question_id
-      VALUES (${examId === 'bank' ? 'NULL' : examId}, ${type_id}, ${points}, '${body_text}', ${difficulty || 'NULL'}, GETDATE())
+      VALUES (${examId === 'bank' ? 'NULL' : examId}, ${type_id}, ${points}, '${question_text}', ${difficulty || 'NULL'}, GETDATE())
     `;
     const question = await executeQuery(questionQuery);
     const questionId = question[0].question_id;
@@ -182,16 +695,23 @@ router.post('/:examId/questions/add', checkAuthenticated, authenticateRole(['tea
       }
     }
 
-    // If it's MCQ type, handle options
-    if (type_id === 1 && req.body.options) {
-      const options = JSON.parse(req.body.options);
-      for (const option of options) {
-        const optionQuery = `
-          INSERT INTO MCQOptions (question_id, option_text, is_correct, explanation)
-          VALUES (${questionId}, '${option.text}', ${option.isCorrect}, ${option.explanation ? `'${option.explanation}'` : 'NULL'})
-        `;
-        await executeQuery(optionQuery);
+    // If it's MCQ type, use the dedicated helper function
+    if (type_id === 1) {
+      const mcqResult = await createMCQQuestion(examId, {
+        points,
+        body_text,
+        difficulty,
+        options: req.body.options
+      }, files);
+
+      if (!mcqResult.success) {
+        throw new Error(mcqResult.error);
       }
+
+      return res.status(201).json({ 
+        message: mcqResult.message,
+        questionId: mcqResult.questionId 
+      });
     }
 
     res.status(201).json({ 
@@ -234,21 +754,234 @@ router.get('/:examId/questions', checkAuthenticated, async (req, res) => {
   }
 });
 
-// Assign exam to class
-router.post('/:examId/assign', checkAuthenticated, authenticateRole(['teacher']), async (req, res) => {
+// Get exam assignments page
+router.get('/exams/:examId/assign', checkAuthenticated, authenticateRole(['teacher']), async (req, res) => {
   try {
     const { examId } = req.params;
-    const { classId, start_time, end_time, max_attempts = 1 } = req.body;
 
-    const query = `
-      INSERT INTO ExamAssignments (exam_id, classes_id, open_at, close_at, max_attempts)
-      VALUES (${examId}, ${classId}, '${start_time}', '${end_time}', ${max_attempts})
+    // Get exam details
+    const examQuery = `
+      SELECT e.*, t.user_id as teacher_user_id
+      FROM Exams e
+      JOIN teachers t ON e.teachers_id = t.id
+      WHERE e.exam_id = ${examId}
     `;
-    await executeQuery(query);
-    res.status(201).json({ message: "Exam assigned successfully" });
+    const exam = await executeQuery(examQuery);
+
+    if (!exam || exam.length === 0) {
+      req.flash('message', { type: 'danger', message: 'Exam not found' });
+      return res.redirect('/exams');
+    }
+
+    // Verify teacher owns this exam
+    if (exam[0].teacher_user_id !== req.user.id) {
+      req.flash('message', { type: 'danger', message: 'Unauthorized access' });
+      return res.redirect('/exams');
+    }
+
+    // Get current assignments with student counts
+    const assignmentsQuery = `
+      SELECT ea.*, c.class_name,
+             (SELECT COUNT(*) FROM enrollments e WHERE e.class_id = c.id) as student_count
+      FROM ExamAssignments ea
+      JOIN classes c ON ea.classes_id = c.id
+      WHERE ea.exam_id = ${examId}
+      ORDER BY ea.open_at DESC
+    `;
+    const assignments = await executeQuery(assignmentsQuery);
+
+    // Get available classes (not yet assigned)
+    const availableClassesQuery = `
+      SELECT c.* 
+      FROM classes c
+      JOIN teachers t ON c.teacher_id = t.id
+      WHERE t.user_id = ${req.user.id}
+      AND NOT EXISTS (
+        SELECT 1 FROM ExamAssignments ea
+        WHERE ea.classes_id = c.id
+        AND ea.exam_id = ${examId}
+      )
+    `;
+    const availableClasses = await executeQuery(availableClassesQuery);
+
+    res.render('exams/examAssignments', {
+      user: req.user,
+      exam: exam[0],
+      assignments: assignments,
+      availableClasses: availableClasses,
+      flashMessage: req.flash('message')
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Error assigning exam" });
+    req.flash('message', { type: 'danger', message: 'Error loading assignments' });
+    res.redirect('/exams');
+  }
+});
+
+// Assign exam to class
+router.post('/exams/:examId/assign', checkAuthenticated, authenticateRole(['teacher']), async (req, res) => {
+  try {
+    const { examId } = req.params;
+    const { class_id, open_at, close_at, max_attempts } = req.body;
+
+    // Verify exam exists and belongs to teacher
+    const examQuery = `
+      SELECT e.*, t.user_id as teacher_user_id 
+      FROM Exams e
+      JOIN teachers t ON e.teachers_id = t.id
+      WHERE e.exam_id = ${examId}
+    `;
+    const exam = await executeQuery(examQuery);
+
+    if (!exam || exam.length === 0 || exam[0].teacher_user_id !== req.user.id) {
+      return res.status(403).json({ success: false, message: 'Unauthorized access' });
+    }
+
+    // Verify class exists and belongs to teacher
+    const classQuery = `
+      SELECT c.* 
+      FROM classes c
+      JOIN teachers t ON c.teacher_id = t.id
+      WHERE c.id = ${class_id}
+      AND t.user_id = ${req.user.id}
+    `;
+    const classResult = await executeQuery(classQuery);
+
+    if (!classResult || classResult.length === 0) {
+      return res.status(400).json({ success: false, message: 'Invalid class' });
+    }
+
+    // Create assignment
+    // Convert ISO datetime string to SQL Server datetime format
+    const formatDate = (dateString) => {
+      const date = new Date(dateString);
+      return date.toISOString().slice(0, 19).replace('T', ' ');
+    };
+
+    const insertQuery = `
+      INSERT INTO ExamAssignments (exam_id, classes_id, open_at, close_at, max_attempts, created_at)
+      VALUES (${examId}, ${class_id}, '${formatDate(open_at)}', '${formatDate(close_at)}', ${max_attempts || 'NULL'}, GETDATE())
+    `;
+    await executeQuery(insertQuery);
+
+    res.json({ success: true, message: 'Exam assigned successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Error assigning exam' });
+  }
+});
+
+// View exam assignment scores
+router.get('/exams/assignments/:assignmentId/scores', checkAuthenticated, authenticateRole(['teacher']), async (req, res) => {
+    try {
+        const { assignmentId } = req.params;
+
+        // Get assignment details with exam and class info
+        const assignmentQuery = `
+            SELECT ea.*, e.exam_title, e.exam_code, c.class_name,
+                   t.user_id as teacher_user_id
+            FROM ExamAssignments ea
+            JOIN Exams e ON ea.exam_id = e.exam_id
+            JOIN classes c ON ea.classes_id = c.id
+            JOIN teachers t ON e.teachers_id = t.id
+            WHERE ea.assignment_id = ${assignmentId}
+        `;
+        const assignments = await executeQuery(assignmentQuery);
+
+        if (!assignments || assignments.length === 0) {
+            req.flash('message', { type: 'danger', message: 'Assignment not found' });
+            return res.redirect('/exams');
+        }
+
+        // Verify teacher owns this exam
+        if (assignments[0].teacher_user_id !== req.user.id) {
+            req.flash('message', { type: 'danger', message: 'You do not have permission to view these scores' });
+            return res.redirect('/exams');
+        }
+
+        // Get student scores with latest attempts
+        const scoresQuery = `
+            WITH LatestAttempts AS (
+                SELECT 
+                    student_id,
+                    MAX(attempt_no) as latest_attempt_no,
+                    assignment_id
+                FROM Attempts
+                WHERE assignment_id = ${assignmentId}
+                GROUP BY student_id, assignment_id
+            )
+            SELECT DISTINCT
+                s.id as student_id,
+                u.full_name as student_name,
+                a.attempt_no,
+                a.auto_score as score,
+                a.started_at,
+                a.submitted_at,
+                CASE 
+                    WHEN a.status = 'graded' THEN 'Completed'
+                    WHEN a.submitted_at IS NOT NULL THEN 'Awaiting Grading'
+                    WHEN a.started_at IS NOT NULL THEN 'In Progress'
+                    ELSE 'Not Started'
+                END as status
+            FROM students s
+            JOIN users u ON s.user_id = u.id
+            JOIN enrollments e ON s.id = e.student_id
+            LEFT JOIN LatestAttempts la ON s.id = la.student_id
+            LEFT JOIN Attempts a ON (
+                s.id = a.student_id 
+                AND a.assignment_id = ${assignmentId}
+                AND a.attempt_no = la.latest_attempt_no
+                AND a.assignment_id = la.assignment_id
+            )
+            WHERE e.class_id = ${assignments[0].classes_id}
+            ORDER BY u.full_name
+        `;
+
+        const scores = await executeQuery(scoresQuery);
+
+        res.render('exams/assignmentScores', {
+            user: req.user,
+            assignment: assignments[0],
+            scores: scores,
+            flashMessage: req.flash('message')
+        });
+    } catch (error) {
+        console.error(error);
+        req.flash('message', { type: 'danger', message: 'Error loading scores' });
+        res.redirect('/exams');
+    }
+});
+
+// Delete exam assignment
+router.delete('/exams/assignments/:assignmentId', checkAuthenticated, authenticateRole(['teacher']), async (req, res) => {
+  try {
+    const { assignmentId } = req.params;
+
+    // Verify assignment exists and belongs to teacher
+    const verifyQuery = `
+      SELECT ea.*, t.user_id as teacher_user_id 
+      FROM ExamAssignments ea
+      JOIN Exams e ON ea.exam_id = e.exam_id
+      JOIN teachers t ON e.teachers_id = t.id
+      WHERE ea.assignment_id = ${assignmentId}
+    `;
+    const assignment = await executeQuery(verifyQuery);
+
+    if (!assignment || assignment.length === 0 || assignment[0].teacher_user_id !== req.user.id) {
+      return res.status(403).json({ success: false, message: 'Unauthorized access' });
+    }
+
+    // Delete assignment and all related attempts
+    await executeQuery(`
+      DELETE ea FROM ExamAssignments ea
+      LEFT JOIN Attempts a ON ea.assignment_id = a.assignment_id
+      WHERE ea.assignment_id = ${assignmentId}
+    `);
+
+    res.json({ success: true, message: 'Assignment removed successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Error removing assignment' });
   }
 });
 
@@ -401,8 +1134,7 @@ router.post('/:assignmentId/start', checkAuthenticated, authenticateRole(['stude
 
 
 // Submit exam attempt
-// Configure storage for response media uploads
-const responseMediaStorage = multer.diskStorage({
+const examResponseMediaStorage = multer.diskStorage({
   destination: function (req, file, cb) {
     const dir = 'uploads/response_media';
     if (!fs.existsSync(dir)) {
@@ -415,220 +1147,399 @@ const responseMediaStorage = multer.diskStorage({
   }
 });
 
-const uploadResponseMedia = multer({ storage: responseMediaStorage });
+const uploadExamResponse = multer({ storage: examResponseMediaStorage });
 
-router.post('/attempts/:attemptId/submit', checkAuthenticated, authenticateRole(['student']), uploadResponseMedia.array('files'), async (req, res) => {
-  try {
-    const { attemptId } = req.params;
-    const { responses } = req.body;
-    const files = req.files;
-    
-    // Save responses
-    for (const response of responses) {
-      let responseQuery;
-      if (response.type === 'MCQ') {
-        // For MCQ questions with single answer
-        responseQuery = `
-          INSERT INTO Responses (
-            attempt_id, 
-            question_id, 
-            chosen_option_instance_id, 
-            answered_at
-          )
-          OUTPUT INSERTED.response_id
-          VALUES (
-            ${attemptId}, 
-            ${response.questionId}, 
-            ${response.selectedOptions && response.selectedOptions.length > 0 ? response.selectedOptions[0] : 'NULL'},
-            GETDATE()
-          )
-        `;
-      } else {
-        // For essay questions
-        responseQuery = `
-          INSERT INTO Responses (
-            attempt_id, 
-            question_id, 
-            essay_text,
-            answered_at
-          )
-          OUTPUT INSERTED.response_id
-          VALUES (
-            ${attemptId}, 
-            ${response.questionId}, 
-            '${response.text}',
-            GETDATE()
-          )
-        `;
-      }
-      const responseResult = await executeQuery(responseQuery);
-      const responseId = responseResult[0].response_id;
+// Process an exam submission
+router.post('/exams/submit/:attemptId', checkAuthenticated, authenticateRole(['student']), uploadExamResponse.array('files'), async (req, res) => {
+    try {
+        const attemptId = req.params.attemptId;
+        const responses = JSON.parse(req.body.responses);
+        const isAutoSubmit = req.body.isAutoSubmit === 'true';
 
-      // Handle MCQ multiple selections if more than one option is selected
-      if (response.type === 'MCQ' && response.selectedOptions && response.selectedOptions.length > 1) {
-        for (const optionId of response.selectedOptions) {
-          await executeQuery(`
-            INSERT INTO ResponseMultiSelect (response_id, option_instance_id)
-            VALUES (${responseId}, ${optionId})
-          `);
+        // Get attempt details
+        const attemptQuery = `
+            SELECT a.*, ea.exam_id 
+            FROM Attempts a
+            INNER JOIN ExamAssignments ea ON a.assignment_id = ea.assignment_id
+            WHERE a.attempt_id = ${attemptId}`;
+        const [attempt] = await executeQuery(attemptQuery);
+
+        if (!attempt) {
+            return res.status(404).json({ success: false, message: "Attempt not found" });
         }
-      }
 
-      // Handle file attachments for this response if any
-      if (response.fileIds && response.fileIds.length > 0) {
-        const responseFiles = files.filter(f => response.fileIds.includes(f.originalname));
-        for (const file of responseFiles) {
-          await executeQuery(`
-            INSERT INTO ResponseMedia (
-              response_id,
-              file_name,
-              file_url,
-              uploaded_at
-            )
-            VALUES (
-              ${responseId},
-              '${file.originalname}',
-              '${file.path}',
-              GETDATE()
-            )
-          `);
+        // Get questions for this exam
+        const questionsQuery = `
+            SELECT q.*, qt.type_code 
+            FROM Questions q
+            INNER JOIN QuestionTypes qt ON q.type_id = qt.type_id
+            WHERE q.exam_id = ${attempt.exam_id}`;
+        const questions = await executeQuery(questionsQuery);
+
+        let totalScore = 0;
+        let hasEssayQuestion = false;
+
+        // Process each response
+        for (const questionId in responses) {
+            const question = questions.find(q => q.question_id === parseInt(questionId));
+            const response = responses[questionId];
+
+            if (question.type_code === 'MCQ') {
+                // For MCQ questions, get correct answer and check
+                const optionsQuery = `SELECT * FROM MCQOptions WHERE question_id = ${question.question_id}`;
+                const options = await executeQuery(optionsQuery);
+                const correctOption = options.find(opt => opt.is_correct);
+                const isCorrect = response.selectedOptionId === correctOption.option_id;
+
+                // Create option instance
+                const optionInstance = await executeQuery(`
+                    INSERT INTO OptionInstances (attempt_id, question_id, option_id, display_order, display_label, option_text_snapshot, is_correct_snapshot)
+                    OUTPUT INSERTED.option_instance_id
+                    VALUES (${attemptId}, ${question.question_id}, ${response.selectedOptionId}, 1, 'A', 
+                    N'${options.find(opt => opt.option_id === response.selectedOptionId).option_text}', 
+                    ${isCorrect ? 1 : 0})`);
+
+                // Record response with score
+                const score = isCorrect ? question.points : 0;
+                totalScore += score;
+
+                await executeQuery(`
+                    INSERT INTO Responses (attempt_id, question_id, chosen_option_instance_id, score_awarded, answered_at)
+                    VALUES (${attemptId}, ${question.question_id}, ${optionInstance[0].option_instance_id}, ${score}, GETDATE())`);
+
+            } else if (question.type_code === 'ESSAY') {
+                hasEssayQuestion = true;
+                // For essay questions, store response text and any uploaded files
+                // Create response without score (will be graded manually)
+                const responseResult = await executeQuery(`
+                    INSERT INTO Responses (attempt_id, question_id, response_text, answered_at)
+                    VALUES (${attemptId}, ${question.question_id}, N'${response.text || ''}', GETDATE())`);
+
+                // Handle file uploads if any
+                if (req.files && req.files.length > 0) {
+                    const responseFiles = req.files.filter(f => f.fieldname === `files_${questionId}`);
+                    for (const file of responseFiles) {
+                        await executeQuery(`
+                            INSERT INTO ResponseMedia (response_id, file_path, file_type)
+                            VALUES (${responseResult[0].response_id}, '${file.path}', '${file.mimetype}')`);
+                    }
+                }
+            }
         }
-      }
+
+        // Update attempt status and score
+        const status = hasEssayQuestion ? 'needs_grading' : 'graded';
+        await executeQuery(`
+            UPDATE Attempts 
+            SET submitted_at = GETDATE(),
+                auto_score = ${totalScore},
+                status = '${status}'
+            WHERE attempt_id = ${attemptId}`);
+
+        res.json({
+            success: true,
+            message: hasEssayQuestion ? 
+                "Exam submitted successfully. Essay questions will be graded by your teacher." :
+                "Exam submitted and graded successfully.",
+            score: hasEssayQuestion ? null : totalScore
+        });
+
+    } catch (error) {
+        console.error('Error submitting exam:', error);
+        res.status(500).json({
+            success: false,
+            message: "Error submitting exam"
+        });
     }
-
-    // Update attempt status to submitted
-    await executeQuery(`
-      UPDATE Attempts
-      SET status = 'submitted',
-          submitted_at = GETDATE()
-      WHERE attempt_id = ${attemptId}
-    `);
-
-    res.status(201).json({ message: "Exam submitted successfully" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error submitting exam" });
-  }
 });
 
-// Auto-grade MCQ responses for an attempt
-async function autoGradeMCQResponses(attemptId) {
-  // Get all MCQ responses for this attempt
-  const mcqResponsesQuery = `
-    SELECT r.response_id, r.question_id, r.chosen_option_instance_id, q.points, oi.is_correct_snapshot,
-           CASE WHEN EXISTS (
-             SELECT 1 FROM ResponseMultiSelect rms 
-             WHERE rms.response_id = r.response_id
-           ) THEN 1 ELSE 0 END as is_multi_select
-    FROM Responses r
-    JOIN Questions q ON r.question_id = q.question_id
-    JOIN QuestionTypes qt ON q.type_id = qt.type_id
-    LEFT JOIN OptionInstances oi ON r.chosen_option_instance_id = oi.option_instance_id
-    WHERE r.attempt_id = ${attemptId} 
-    AND qt.type_code = 'MCQ'
-  `;
-  
-  const mcqResponses = await executeQuery(mcqResponsesQuery);
-  let totalAutoScore = 0;
 
-  // Grade each MCQ response
-  for (const response of mcqResponses) {
-    let score = 0;
-    if (response.is_multi_select) {
-      // For multiple select questions, check if all selected options are correct
-      const multiSelectQuery = `
-        SELECT COUNT(*) as total_selected,
-               SUM(CASE WHEN oi.is_correct_snapshot = 1 THEN 1 ELSE 0 END) as correct_selected
-        FROM ResponseMultiSelect rms
-        JOIN OptionInstances oi ON rms.option_instance_id = oi.option_instance_id
-        WHERE rms.response_id = ${response.response_id}
-      `;
-      const multiSelectResult = await executeQuery(multiSelectQuery);
-      if (multiSelectResult[0].total_selected === multiSelectResult[0].correct_selected) {
-        score = response.points;
-      }
-    } else if (response.is_correct_snapshot) {
-      // For single select questions, check if the chosen option is correct
-      score = response.points;
-    }
 
-    // Update the response with the calculated score
-    await executeQuery(`
-      UPDATE Responses
-      SET score_awarded = ${score}
-      WHERE response_id = ${response.response_id}
-    `);
 
-    totalAutoScore += score;
-  }
+// New route to start taking an exam
+router.get('/exams/:assignmentId/take', checkAuthenticated, authenticateRole(['student']), async (req, res) => {
+    try {
+        const { assignmentId } = req.params;
+        
+        // Get student ID
+        const studentQuery = `SELECT id FROM students WHERE user_id = ${req.user.id}`;
+        const student = await executeQuery(studentQuery);
+        
+        if (!student || student.length === 0) {
+            console.log('Debug: Student not found for user_id:', req.user.id);
+            req.flash('message', { type: 'danger', message: 'Student not found' });
+            return res.redirect('/exams');
+        }
 
-  return {
-    mcqCount: mcqResponses.length,
-    totalAutoScore
-  };
-}
-
-// Grade exam attempt
-router.post('/attempts/:attemptId/grade', checkAuthenticated, authenticateRole(['teacher']), async (req, res) => {
-  try {
-    const { attemptId } = req.params;
-    const { marks } = req.body;
-
-    // Auto-grade MCQ questions first
-    const mcqResults = await autoGradeMCQResponses(attemptId);
-
-    // Check if there are any essay questions
-    const essayCountQuery = `
-      SELECT COUNT(*) as essay_count
-      FROM Responses r
-      JOIN Questions q ON r.question_id = q.question_id
-      JOIN QuestionTypes qt ON q.type_id = qt.type_id
-      WHERE r.attempt_id = ${attemptId}
-      AND qt.type_code = 'ESSAY'
-    `;
-    const essayCount = await executeQuery(essayCountQuery);
-
-    if (marks) {
-      // Update manual grades for essay questions
-      for (const questionMark of marks) {
-        const query = `
-          UPDATE Responses 
-          SET score_awarded = ${questionMark.marks}
-          WHERE attempt_id = ${attemptId} AND question_id = ${questionMark.questionId}
+        // Check if exam is available and student can take it
+        const examQuery = `
+            SELECT ea.*, e.*, t.user_id as teacher_user_id,
+                   (SELECT COUNT(*) FROM Attempts 
+                    WHERE assignment_id = ea.assignment_id 
+                    AND student_id = ${student[0].id}) as attempt_count
+            FROM ExamAssignments ea
+            JOIN Exams e ON ea.exam_id = e.exam_id
+            JOIN teachers t ON e.teachers_id = t.id
+            JOIN enrollments en ON ea.classes_id = en.class_id
+            WHERE ea.assignment_id = ${assignmentId}
+            AND en.student_id = ${student[0].id}
         `;
-        await executeQuery(query);
-      }
+        
+        const exam = await executeQuery(examQuery);
+        
+        console.log('Debug: Exam query result:', JSON.stringify(exam, null, 2));
+        
+        if (!exam || exam.length === 0) {
+            console.log('Debug: Exam not found for assignmentId:', assignmentId);
+            console.log('Debug: SQL Query:', examQuery);
+            req.flash('message', { type: 'danger', message: 'Exam not found' });
+            return res.redirect('/exams');
+        }
+
+        // Check if exam is within time window
+        const now = new Date();
+        const openAt = new Date(exam[0].open_at);
+        const closeAt = new Date(exam[0].close_at);
+        
+        console.log('Debug: Time check:', {
+            now: now.toISOString(),
+            openAt: openAt.toISOString(),
+            closeAt: closeAt.toISOString()
+        });
+        
+        if (now < openAt) {
+            console.log('Debug: Exam not yet open');
+            req.flash('message', { type: 'danger', message: 'Exam is not yet open' });
+            return res.redirect('/exams');
+        }
+        
+        if (now > closeAt) {
+            console.log('Debug: Exam has closed');
+            req.flash('message', { type: 'danger', message: 'Exam has closed' });
+            return res.redirect('/exams');
+        }
+        
+        console.log('Debug: Time check passed');
+
+        // Check attempt limits
+        console.log('Debug: Attempt check:', {
+            max_attempts: exam[0].max_attempts,
+            attempt_count: exam[0].attempt_count
+        });
+        
+        if (exam[0].max_attempts && exam[0].attempt_count >= exam[0].max_attempts) {
+            console.log('Debug: Maximum attempts reached');
+            req.flash('message', { type: 'danger', message: 'Maximum attempts reached' });
+            return res.redirect('/exams');
+        }
+        
+        console.log('Debug: Attempt check passed');
+
+        // Check for existing in-progress attempt
+        const inProgressQuery = `
+            SELECT attempt_id, started_at, DATEADD(minute, ${exam[0].duration_min}, started_at) as end_time
+            FROM Attempts 
+            WHERE assignment_id = ${assignmentId}
+            AND student_id = ${student[0].id}
+            AND status = 'in_progress'
+        `;
+        
+        const inProgress = await executeQuery(inProgressQuery);
+        let attemptId;
+        
+        if (inProgress && inProgress.length > 0) {
+            // Resume existing attempt
+            attemptId = inProgress[0].attempt_id;
+            
+            // Calculate remaining time
+            const endTime = new Date(inProgress[0].end_time);
+            const remainingTime = Math.max(0, Math.floor((endTime - now) / 1000));
+            
+            if (remainingTime <= 0) {
+                // Auto-submit if time has expired
+                await executeQuery(`
+                    UPDATE Attempts
+                    SET status = 'submitted',
+                        submitted_at = GETDATE()
+                    WHERE attempt_id = ${attemptId}
+                `);
+                
+                req.flash('message', { type: 'warning', message: 'Your attempt has expired and been automatically submitted' });
+                return res.redirect('/exams');
+            }
+            
+            exam[0].remaining_time = remainingTime;
+        } else {
+            // Create new attempt
+            const newAttemptQuery = `
+                INSERT INTO Attempts (
+                    assignment_id,
+                    student_id,
+                    attempt_no,
+                    started_at,
+                    status
+                )
+                OUTPUT INSERTED.attempt_id
+                VALUES (
+                    ${assignmentId},
+                    ${student[0].id},
+                    ${exam[0].attempt_count + 1},
+                    GETDATE(),
+                    'in_progress'
+                )
+            `;
+            
+            const newAttempt = await executeQuery(newAttemptQuery);
+            attemptId = newAttempt[0].attempt_id;
+            exam[0].remaining_time = exam[0].duration_min * 60; // Convert to seconds
+        }
+
+        // Get questions
+        const questionsQuery = `
+            SELECT q.*, qt.type_code, qt.type_name,
+                   (SELECT JSON_QUERY((
+                     SELECT mo.option_id, mo.option_text,
+                            oi.option_instance_id, oi.display_label, oi.option_text_snapshot, oi.is_correct_snapshot
+                     FROM MCQOptions mo 
+                     LEFT JOIN OptionInstances oi ON mo.option_id = oi.option_id
+                     WHERE mo.question_id = q.question_id 
+                     FOR JSON PATH
+                   ))) as options,
+                   (SELECT JSON_QUERY((
+                     SELECT qm.* 
+                     FROM QuestionMedia qm 
+                     WHERE qm.question_id = q.question_id 
+                     FOR JSON PATH
+                   ))) as media
+            FROM Questions q
+            JOIN QuestionTypes qt ON q.type_id = qt.type_id
+            WHERE q.exam_id = ${exam[0].exam_id}
+            ORDER BY ${exam[0].shuffle_questions ? 'NEWID()' : 'q.created_at'}
+        `;
+        
+        const questions = await executeQuery(questionsQuery);
+        
+        console.log('Debug: SQL Query:', questionsQuery);
+        console.log('Debug: Raw questions:', JSON.stringify(questions, null, 2));
+
+        // Parse JSON strings from SQL
+        // Process each question
+        questions.forEach(q => {
+            try {
+                console.log('Debug: Processing Question ID:', q.question_id, 'Type:', q.type_code);
+                console.log('Debug: Raw options:', q.options);
+                console.log('Debug: Raw media:', q.media);
+
+                // Parse options and media
+                try {
+                    q.options = q.options ? JSON.parse(q.options) : [];
+                } catch (parseError) {
+                    console.error('Error parsing options for question', q.question_id, ':', parseError);
+                    console.error('Raw options string:', q.options);
+                    q.options = [];
+                }
+
+                try {
+                    q.media = q.media ? JSON.parse(q.media) : [];
+                } catch (parseError) {
+                    console.error('Error parsing media for question', q.question_id, ':', parseError);
+                    console.error('Raw media string:', q.media);
+                    q.media = [];
+                }
+
+                // Debug output after parsing
+                if (q.type_code === 'MCQ') {
+                    console.log('Debug: Processed MCQ options for question', q.question_id, ':');
+                    console.log(JSON.stringify(q.options, null, 2));
+                    
+                    // Verify required fields
+                    q.options.forEach((opt, idx) => {
+                        if (!opt.option_text && !opt.option_text_snapshot) {
+                            console.warn(`Warning: Option ${idx} for question ${q.question_id} is missing text`);
+                        }
+                        if (!opt.display_label) {
+                            console.warn(`Warning: Option ${idx} for question ${q.question_id} is missing display_label`);
+                        }
+                    });
+                }
+
+                // Shuffle options if enabled
+                if (exam[0].shuffle_options && Array.isArray(q.options)) {
+                    q.options.sort(() => Math.random() - 0.5);
+                }
+            } catch (error) {
+                console.error('Error processing question', q.question_id, ':', error);
+                q.options = [];
+                q.media = [];
+            }
+        });
+        
+        console.log('Debug: Questions after parsing:', JSON.stringify(questions, null, 2));
+
+        // Get any existing responses
+        const responsesQuery = `
+            SELECT r.*, 
+                   rm.file_name, rm.file_url,
+                   oi.option_id, oi.display_label
+            FROM Responses r
+            LEFT JOIN ResponseMedia rm ON r.response_id = rm.response_id
+            LEFT JOIN OptionInstances oi ON r.chosen_option_instance_id = oi.option_instance_id
+            WHERE r.attempt_id = ${attemptId}
+        `;
+        
+        const responses = await executeQuery(responsesQuery);
+
+        // Group responses by question
+        const responseMap = {};
+        responses.forEach(r => {
+            if (!responseMap[r.question_id]) {
+                responseMap[r.question_id] = {
+                    essay_text: r.essay_text,
+                    chosen_options: [],
+                    files: []
+                };
+            }
+            
+            if (r.option_id) {
+                responseMap[r.question_id].chosen_options.push({
+                    option_id: r.option_id,
+                    display_label: r.display_label
+                });
+            }
+            
+            if (r.file_url) {
+                responseMap[r.question_id].files.push({
+                    name: r.file_name,
+                    url: r.file_url
+                });
+            }
+        });
+
+        // Final debug log before rendering
+        console.log('Debug: Questions being sent to template:', 
+            questions.map(q => ({
+                id: q.question_id,
+                type: q.type_code,
+                optionsCount: q.options ? q.options.length : 0,
+                hasOptions: Array.isArray(q.options) && q.options.length > 0
+            }))
+        );
+
+        res.render('exams/examTake', {
+            user: req.user,
+            exam: exam[0],
+            questions: questions,
+            attemptId: attemptId,
+            responses: responseMap,
+            duration: Math.floor(exam[0].remaining_time / 60)
+        });
+    } catch (error) {
+        console.error(error);
+        req.flash('message', { type: 'danger', message: 'Error starting exam' });
+        res.redirect('/exams');
+        console.log('Redirected to /exams due to error starting exam:', error);
     }
-
-    // Calculate total score
-    const totalScoreQuery = `
-      SELECT ISNULL(SUM(score_awarded), 0) as total_score
-      FROM Responses
-      WHERE attempt_id = ${attemptId}
-    `;
-    const totalScore = await executeQuery(totalScoreQuery);
-
-    // Update attempt with final scores
-    await executeQuery(`
-      UPDATE Attempts
-      SET auto_score = ${mcqResults.totalAutoScore},
-          status = ${essayCount[0].essay_count === 0 || marks ? "'graded'" : "'pending_manual_grade'"},
-          total_score = ${totalScore[0].total_score}
-      WHERE attempt_id = ${attemptId}
-    `);
-
-    res.json({ 
-      message: essayCount[0].essay_count === 0 ? 
-        "Exam auto-graded successfully" : 
-        (marks ? "Exam graded successfully" : "MCQ questions auto-graded, essay questions pending manual grade"),
-      autoScore: mcqResults.totalAutoScore,
-      totalScore: totalScore[0].total_score,
-      needsManualGrading: essayCount[0].essay_count > 0 && !marks
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error grading exam" });
-  }
 });
+
 
 module.exports = router;

@@ -1,0 +1,156 @@
+<%- include('../shared/header') %>
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Edit Exam</h2>
+        </div>
+        <div class="col-auto">
+            <a href="/exams" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Exams
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <form action="/exams/<%= exam.exam_id %>" method="POST" id="examForm">
+                <input type="hidden" name="_method" value="PUT">
+                
+                <div class="mb-3">
+                    <label for="exam_title" class="form-label">Exam Title*</label>
+                    <input type="text" class="form-control" id="exam_title" name="exam_title" 
+                           value="<%= exam.exam_title %>" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" name="description" 
+                              rows="3"><%= exam.description %></textarea>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="duration_minutes" class="form-label">Duration (minutes)*</label>
+                        <input type="number" class="form-control" id="duration_minutes" 
+                               name="duration_minutes" min="1" value="<%= exam.duration_min %>" required>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="total_marks" class="form-label">Total Marks*</label>
+                        <input type="number" class="form-control" id="total_marks" 
+                               name="total_marks" min="1" value="<%= exam.total_points %>" required>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="passing_marks" class="form-label">Passing Marks</label>
+                    <input type="number" class="form-control" id="passing_marks" 
+                           name="passing_marks" min="0" value="<%= exam.passing_points || 0 %>">
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-4">
+                <h3>Questions</h3>
+                <div class="d-flex justify-content-end mb-3">
+                    <a href="/exams/<%= exam.exam_id %>/questions/new" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Add Question
+                    </a>
+                </div>
+
+                <div class="question-list">
+                    <% if (questions && questions.length > 0) { %>
+                        <% questions.forEach(question => { %>
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <h5 class="card-title"><%= question.body_text %></h5>
+                                        <div class="badge bg-primary"><%= question.type_name %></div>
+                                    </div>
+                                    <p class="card-text">Points: <%= question.points %></p>
+                                    <div class="d-flex justify-content-end">
+                                        <a href="/questions/<%= question.question_id %>/edit" 
+                                           class="btn btn-sm btn-warning me-2">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </a>
+                                        <button onclick="deleteQuestion('<%= question.question_id %>')" 
+                                                class="btn btn-sm btn-danger">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <p class="text-muted">No questions added yet.</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('examForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const data = {};
+    formData.forEach((value, key) => {
+        if (key !== '_method') {
+            data[key] = value;
+        }
+    });
+
+    fetch('/exams/<%= exam.exam_id %>', {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = '/exams';
+        } else {
+            alert(data.message || 'Error updating exam');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error updating exam');
+    });
+});
+
+function deleteQuestion(questionId) {
+    if (confirm('Are you sure you want to delete this question? This action cannot be undone.')) {
+        fetch(`/questions/${questionId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert(data.message || 'Error deleting question');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error deleting question');
+        });
+    }
+}
+</script>
+
+<%- include('../shared/footer') %>
