@@ -1,0 +1,64 @@
+<%- include('../shared/header') %>
+
+<div class="container mt-4">
+  <div class="row mb-3">
+    <div class="col">
+      <h2>Grade Attempt for <%= student.full_name %></h2>
+      <p class="text-muted">Exam: <%= attempt.exam_title %> — Attempt #<%= attempt.attempt_no %></p>
+    </div>
+    <div class="col-auto">
+      <a href="/exams/<%= attempt.assignment_id %>/assign" class="btn btn-secondary">Back</a>
+    </div>
+  </div>
+
+  <form id="gradeForm" method="post" action="/exams/attempts/<%= attempt.attempt_id %>/grade">
+    <input type="hidden" name="attemptId" value="<%= attempt.attempt_id %>">
+
+    <div class="card mb-3">
+      <div class="card-body">
+        <h5>Auto Score: <strong><%= attempt.auto_score %></strong></h5>
+        <h5>Current Manual Score: <strong><%= attempt.manual_score %></strong></h5>
+      </div>
+    </div>
+
+    <% responses.forEach(r => { %>
+      <div class="card mb-3">
+        <div class="card-header">
+          Question: <%= r.body_text %>
+        </div>
+        <div class="card-body">
+          <% if (r.type_code === 'MCQ') { %>
+            <p><strong>Student chose:</strong> <%= r.display_label || 'N/A' %></p>
+          <% } else { %>
+            <p><strong>Essay answer:</strong></p>
+            <div class="border p-2 mb-2"><%= r.essay_text || '' %></div>
+            <% if (r.files && r.files.length > 0) { %>
+              <p><strong>Attachments:</strong></p>
+              <ul>
+                <% r.files.forEach(f => { %>
+                  <li><a href="/<%= f.url %>" target="_blank"><%= f.name %></a></li>
+                <% }) %>
+              </ul>
+            <% } %>
+
+            <div class="mb-2">
+              <label for="score_<%= r.response_id %>">Score</label>
+              <input type="number" step="0.01" min="0" class="form-control" name="scores[<%= r.response_id %>]" id="score_<%= r.response_id %>" value="<%= r.score_awarded || '' %>">
+            </div>
+
+            <div class="mb-2">
+              <label for="comment_<%= r.response_id %>">Comment</label>
+              <textarea class="form-control" name="comments[<%= r.response_id %>]" id="comment_<%= r.response_id %>"><%= r.grader_comment || '' %></textarea>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    <% }) %>
+
+    <div class="text-end">
+      <button type="submit" class="btn btn-primary">Save Grades</button>
+    </div>
+  </form>
+</div>
+
+<%- include('../shared/footer') %>

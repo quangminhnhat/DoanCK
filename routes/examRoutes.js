@@ -910,19 +910,22 @@ router.get('/exams/assignments/:assignmentId/scores', checkAuthenticated, authen
                 WHERE assignment_id = ${assignmentId}
                 GROUP BY student_id, assignment_id
             )
-            SELECT DISTINCT
-                s.id as student_id,
-                u.full_name as student_name,
-                a.attempt_no,
-                a.auto_score as score,
-                a.started_at,
-                a.submitted_at,
-                CASE 
-                    WHEN a.status = 'graded' THEN 'Completed'
-                    WHEN a.submitted_at IS NOT NULL THEN 'Awaiting Grading'
-                    WHEN a.started_at IS NOT NULL THEN 'In Progress'
-                    ELSE 'Not Started'
-                END as status
+      SELECT DISTINCT
+        s.id as student_id,
+        u.full_name as student_name,
+        a.attempt_id,
+        a.attempt_no,
+        a.total_score as score,
+        a.manual_score,
+        a.started_at,
+        a.submitted_at,
+        a.status,
+        CASE 
+          WHEN a.status = 'graded' THEN 'Completed'
+          WHEN a.submitted_at IS NOT NULL THEN 'Awaiting Grading'
+          WHEN a.started_at IS NOT NULL THEN 'In Progress'
+          ELSE 'Not Started'
+        END as status_text
             FROM students s
             JOIN users u ON s.user_id = u.id
             JOIN enrollments e ON s.id = e.student_id
@@ -950,6 +953,139 @@ router.get('/exams/assignments/:assignmentId/scores', checkAuthenticated, authen
         req.flash('message', { type: 'danger', message: 'Error loading scores' });
         res.redirect('/exams');
     }
+});
+
+// Teacher: view grading page for a specific attempt
+router.get('/exams/attempts/:attemptId/grade', checkAuthenticated, authenticateRole(['teacher']), async (req, res) => {
+  try {
+    const { attemptId } = req.params;
+
+    // Get attempt, assignment, exam and teacher
+    const attemptQuery = `
+      SELECT a.*, ea.assignment_id, ea.exam_id, e.exam_title, t.user_id as teacher_user_id, s.id as student_id, u.full_name
+      FROM Attempts a
+      JOIN ExamAssignments ea ON a.assignment_id = ea.assignment_id
+      JOIN Exams e ON ea.exam_id = e.exam_id
+      JOIN teachers t ON e.teachers_id = t.id
+      JOIN students s ON a.student_id = s.id
+      JOIN users u ON s.user_id = u.id
+      WHERE a.attempt_id = ${attemptId}
+    `;
+
+    const attemptRes = await executeQuery(attemptQuery);
+    if (!attemptRes || attemptRes.length === 0) {
+      req.flash('message', { type: 'danger', message: 'Attempt not found' });
+      return res.redirect('/exams');
+    }
+
+    const attempt = attemptRes[0];
+
+    // Verify teacher owns this exam
+    if (attempt.teacher_user_id !== req.user.id) {
+      req.flash('message', { type: 'danger', message: 'You do not have permission to grade this attempt' });
+      return res.redirect('/exams');
+    }
+
+    // Get responses and related data
+    const responsesQuery = `
+      SELECT r.*, q.body_text, qt.type_code, rm.file_name, rm.file_url, oi.display_label
+      FROM Responses r
+      JOIN Questions q ON r.question_id = q.question_id
+      JOIN QuestionTypes qt ON q.type_id = qt.type_id
+      LEFT JOIN ResponseMedia rm ON r.response_id = rm.response_id
+      LEFT JOIN OptionInstances oi ON r.chosen_option_instance_id = oi.option_instance_id
+      WHERE r.attempt_id = ${attemptId}
+      ORDER BY r.response_id
+    `;
+
+    const responsesRaw = await executeQuery(responsesQuery);
+
+    // Group files per response
+    const responsesMap = {};
+    responsesRaw.forEach(r => {
+      if (!responsesMap[r.response_id]) {
+        responsesMap[r.response_id] = {
+          response_id: r.response_id,
+          question_id: r.question_id,
+          body_text: r.body_text,
+          type_code: r.type_code,
+          essay_text: r.essay_text,
+          score_awarded: r.score_awarded,
+          grader_comment: r.grader_comment,
+          files: [],
+          display_label: r.display_label
+        };
+      }
+      if (r.file_url) {
+        responsesMap[r.response_id].files.push({ name: r.file_name, url: r.file_url });
+      }
+    });
+
+    const responses = Object.values(responsesMap);
+
+    res.render('exams/gradeAttempt', {
+      user: req.user,
+      attempt: attempt,
+      student: { id: attempt.student_id, full_name: attempt.full_name },
+      responses: responses
+    });
+
+  } catch (error) {
+    console.error(error);
+    req.flash('message', { type: 'danger', message: 'Error loading grading page' });
+    res.redirect('/exams');
+  }
+});
+
+// Teacher: submit manual grades for an attempt
+router.post('/exams/attempts/:attemptId/grade', checkAuthenticated, authenticateRole(['teacher']), async (req, res) => {
+  try {
+    const { attemptId } = req.params;
+    const scores = req.body.scores || {};
+    const comments = req.body.comments || {};
+
+    // Get attempt and verify teacher owns it
+    const attemptQuery = `
+      SELECT a.*, ea.assignment_id, ea.exam_id, e.exam_title, t.user_id as teacher_user_id
+      FROM Attempts a
+      JOIN ExamAssignments ea ON a.assignment_id = ea.assignment_id
+      JOIN Exams e ON ea.exam_id = e.exam_id
+      JOIN teachers t ON e.teachers_id = t.id
+      WHERE a.attempt_id = ${attemptId}
+    `;
+    const attemptRes = await executeQuery(attemptQuery);
+    if (!attemptRes || attemptRes.length === 0) {
+      req.flash('message', { type: 'danger', message: 'Attempt not found' });
+      return res.redirect('/exams');
+    }
+    const attempt = attemptRes[0];
+    if (attempt.teacher_user_id !== req.user.id) {
+      req.flash('message', { type: 'danger', message: 'You do not have permission to grade this attempt' });
+      return res.redirect('/exams');
+    }
+
+    // Update each response
+    let manualTotal = 0;
+    for (const responseId in scores) {
+      const rawScore = parseFloat(scores[responseId]);
+      const scoreVal = isNaN(rawScore) ? 0 : rawScore;
+      manualTotal += scoreVal;
+      const comment = (comments[responseId] || '').replace(/'/g, "''");
+
+      await executeQuery(`UPDATE Responses SET score_awarded = ${scoreVal}, grader_comment = N'${comment}' WHERE response_id = ${responseId}`);
+    }
+
+  // Update attempt manual_score, compute and store total_score and set status to graded
+  // total_score is now a regular column, so update it explicitly using the stored auto_score
+  await executeQuery(`UPDATE Attempts SET manual_score = ${manualTotal}, total_score = auto_score + ${manualTotal}, status = 'graded' WHERE attempt_id = ${attemptId}`);
+
+    req.flash('message', { type: 'success', message: 'Grades saved successfully' });
+    res.redirect(`/exams/assignments/${attempt.assignment_id}/scores`);
+  } catch (error) {
+    console.error('Error saving manual grades:', error);
+    req.flash('message', { type: 'danger', message: 'Error saving grades' });
+    res.redirect('/exams');
+  }
 });
 
 // Delete exam assignment
@@ -1211,18 +1347,20 @@ router.post('/exams/submit/:attemptId', checkAuthenticated, authenticateRole(['s
                 hasEssayQuestion = true;
                 // For essay questions, store response text and any uploaded files
                 // Create response without score (will be graded manually)
-                const responseResult = await executeQuery(`
-                    INSERT INTO Responses (attempt_id, question_id, response_text, answered_at)
-                    VALUES (${attemptId}, ${question.question_id}, N'${response.text || ''}', GETDATE())`);
+        const safeEssayText = (response.text || '').replace(/'/g, "''");
+        const responseResult = await executeQuery(`
+          INSERT INTO Responses (attempt_id, question_id, essay_text, answered_at)
+          VALUES (${attemptId}, ${question.question_id}, N'${safeEssayText}', GETDATE())`);
 
                 // Handle file uploads if any
                 if (req.files && req.files.length > 0) {
                     const responseFiles = req.files.filter(f => f.fieldname === `files_${questionId}`);
-                    for (const file of responseFiles) {
-                        await executeQuery(`
-                            INSERT INTO ResponseMedia (response_id, file_path, file_type)
-                            VALUES (${responseResult[0].response_id}, '${file.path}', '${file.mimetype}')`);
-                    }
+          for (const file of responseFiles) {
+            // Store original file name and the saved file path/url
+            await executeQuery(`
+              INSERT INTO ResponseMedia (response_id, file_name, file_url)
+              VALUES (${responseResult[0].response_id}, N'${file.originalname.replace(/'/g, "''")}', '${file.path.replace(/'/g, "''")}')`);
+          }
                 }
             }
         }

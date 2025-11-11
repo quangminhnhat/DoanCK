@@ -45,7 +45,8 @@ const examRoutes = require("./routes/examRoutes");
 
 // Essential middleware
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+// Use extended: true so nested form fields like scores[123] are parsed into objects
+app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 
 // Session setup

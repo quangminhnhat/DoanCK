@@ -239,7 +239,9 @@ CREATE TABLE Attempts
     -- điểm trắc nghiệm
     manual_score DECIMAL(10,2) NOT NULL DEFAULT 0,
     -- điểm tự luận chấm tay
-    total_score AS (auto_score + manual_score) PERSISTED,
+    -- total_score used to be a persisted computed column. Change to a regular column
+    -- so application can control when the total is updated (e.g. after manual grading).
+    total_score DECIMAL(10,2) NOT NULL DEFAULT 0,
     status VARCHAR(20) NOT NULL DEFAULT 'in_progress',
     -- in_progress, submitted, graded
     CONSTRAINT UQ_Attempt UNIQUE (assignment_id, student_id, attempt_no)
@@ -336,6 +338,51 @@ GO
 
 -- Hàm chấm tự động MCQ cho một attempt
 -- fn_AutoScoreAttempt removed: auto-grading can be implemented in application code or re-added later with a correct implementation.
+
+-- Trigger: when Responses are inserted or updated, recalculate the manual_score and total_score
+-- for the associated Attempts. Only Responses that belong to ESSAY questions are counted
+-- toward manual_score. The trigger also sets the status to 'needs_grading' if any
+-- essay response in the attempt still has a NULL score_awarded, otherwise sets 'graded'.
+CREATE TRIGGER trg_UpdateAttemptScores_OnResponses_Update
+ON Responses
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Determine affected attempts (from inserted or deleted pseudo-tables)
+    ;WITH affected_attempts AS (
+        SELECT DISTINCT attempt_id FROM inserted
+        UNION
+        SELECT DISTINCT attempt_id FROM deleted
+    )
+
+    UPDATE a
+    SET 
+        manual_score = ISNULL((
+            SELECT SUM(r.score_awarded)
+            FROM Responses r
+            JOIN Questions q ON r.question_id = q.question_id
+            JOIN QuestionTypes qt ON q.type_id = qt.type_id
+            WHERE r.attempt_id = a.attempt_id AND qt.type_code = 'ESSAY'
+        ), 0),
+        total_score = a.auto_score + ISNULL((
+            SELECT SUM(r.score_awarded)
+            FROM Responses r
+            JOIN Questions q ON r.question_id = q.question_id
+            JOIN QuestionTypes qt ON q.type_id = qt.type_id
+            WHERE r.attempt_id = a.attempt_id AND qt.type_code = 'ESSAY'
+        ), 0),
+        status = CASE WHEN EXISTS(
+            SELECT 1 FROM Responses r2
+            JOIN Questions q2 ON r2.question_id = q2.question_id
+            JOIN QuestionTypes qt2 ON q2.type_id = qt2.type_id
+            WHERE r2.attempt_id = a.attempt_id AND qt2.type_code = 'ESSAY' AND r2.score_awarded IS NULL
+        ) THEN 'needs_grading' ELSE 'graded' END
+    FROM Attempts a
+    JOIN affected_attempts aa ON a.attempt_id = aa.attempt_id;
+END;
+GO
 CREATE TABLE RequestTypes
 (
     type_id INT IDENTITY PRIMARY KEY,

@@ -79,12 +79,15 @@
                                         <span class="badge bg-secondary">Not Started</span>
                                     <% } else if (!score.submitted_at) { %>
                                         <span class="badge bg-warning text-dark">In Progress</span>
-                                    <% } else if (!score.graded_at && score.needs_manual_grading) { %>
-                                        <span class="badge bg-info">Awaiting Manual Grading</span>
-                                    <% } else if (!score.graded_at) { %>
-                                        <span class="badge bg-primary">Auto Graded</span>
+                                    <% } else if (score.status === 'in_progress') { %>
+                                        <span class="badge bg-warning text-dark">In Progress</span>
+                                    <% } else if (score.status === 'graded') { %>
+                                        <span class="badge bg-success">Graded</span>
                                     <% } else { %>
-                                        <span class="badge bg-success">Manual Graded</span>
+                                        <!-- Awaiting grading -->
+                                        <span class="badge bg-info">Awaiting Manual Grading</span>
+                                        &nbsp;
+                                        <a href="/exams/attempts/<%= score.attempt_id %>/grade" class="btn btn-sm btn-outline-primary">Grade</a>
                                     <% } %>
                                 </td>
                             </tr>
