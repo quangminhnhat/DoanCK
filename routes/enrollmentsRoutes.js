@@ -1,13 +1,10 @@
 const express = require("express");
 const sql = require("msnodesqlv8");
 const { authenticateRole } = require("../middleware/roleAuth");
-const connectionString = process.env.CONNECTION_STRING; 
+const connectionString = process.env.CONNECTION_STRING;
 const executeQuery = require("../middleware/executeQuery");
-const {
-  checkAuthenticated,
-} = require("../middleware/auth");
+const { checkAuthenticated } = require("../middleware/auth");
 const router = express.Router();
-
 
 router.get(
   "/enrollments",
@@ -146,7 +143,6 @@ router.post(
   }
 );
 
-
 router.get(
   "/enrollments/:id/edit",
   checkAuthenticated,
@@ -214,8 +210,6 @@ router.get(
     }
   }
 );
-
-
 
 router.get(
   "/enrollments/new",
@@ -311,7 +305,6 @@ router.get(
   }
 );
 
-
 router.post(
   "/enrollments",
   checkAuthenticated,
@@ -381,7 +374,7 @@ router.post(
       )
       VALUES (?, ?, GETDATE(), 0, GETDATE())
     `;
-    
+
       await executeQuery(insertQuery, [student_id, class_id]);
 
       // 6. Add notification for student
@@ -395,7 +388,7 @@ router.post(
       )
       VALUES (?, ?, GETDATE(), GETDATE(), GETDATE())
     `;
-    
+
       await executeQuery(notifyQuery, [
         student_id,
         `You have been enrolled in ${classInfo[0].class_name}`,
@@ -420,6 +413,5 @@ router.post(
     }
   }
 );
-
 
 module.exports = router;
