@@ -15,16 +15,20 @@ const router = express.Router();
 router.get(
   "/materials",
   checkAuthenticated,
-  (req, res) => {
-    const query = `SELECT * FROM materials ORDER BY uploaded_at DESC`;
-
-    sql.query(connectionString, query, (err, rows) => {
-      if (err) {
-        console.error("Fetch materials error:", err);
-        return res.status(500).send("Database error");
-      }
-      res.render("materials.ejs", { materials: rows, user: req.user });
-    });
+  async (req, res) => {
+    try {
+      const query = `
+        SELECT m.*, c.course_name 
+        FROM materials m
+        JOIN courses c ON m.course_id = c.id
+        ORDER BY m.uploaded_at DESC
+      `;
+      const materials = await executeQuery(query);
+      res.render("materials/materials", { materials: materials, user: req.user });
+    } catch (error) {
+      console.error("Fetch materials error:", error);
+      res.status(500).send("Database error");
+    }
   }
 );
 
@@ -62,7 +66,7 @@ router.get(
         return res.status(404).send("Material not found");
       }
 
-      res.render("editMaterial.ejs", {
+      res.render("materials/editMaterial", {
         material: material[0],
         courses,
         user: req.user,
@@ -167,6 +171,21 @@ router.delete(
         });
       }
     );
+  }
+);
+
+router.get(
+  "/upload",
+  authenticateRole(["admin", "teacher"]),
+  checkAuthenticated,
+  async (req, res) => {
+    try {
+      const courses = await executeQuery("SELECT id, course_name FROM courses ORDER BY course_name");
+      res.render("materials/uploadMaterial", { user: req.user, courses: courses });
+    } catch (error) {
+      console.error("Error loading upload material page:", error);
+      res.status(500).send("Error loading page data.");
+    }
   }
 );
 

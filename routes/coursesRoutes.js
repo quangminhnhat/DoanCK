@@ -19,7 +19,7 @@ router.get(
   checkAuthenticated,
   authenticateRole("admin"),
   (req, res) => {
-    res.render("addCourse.ejs", { user: req.user });
+    res.render("courses/addCourse", { user: req.user });
   }
 );
 
@@ -145,7 +145,7 @@ router.get("/courses/:id", checkAuthenticated, authenticateRole(["admin", "teach
       materials: materialsResult
     };
 
-    res.render("courseDetail.ejs", {
+    res.render("courses/courseDetail", {
       course,
       user: req.user,
       messages: {
@@ -196,7 +196,7 @@ router.get("/courses/:id/edit", checkAuthenticated, authenticateRole("admin"), a
       end_date: new Date(courseResult[0].end_date)
     };
 
-    res.render("editCourse.ejs", {
+    res.render("courses/editCourse", {
       course,
       user: req.user,
       messages: {
@@ -242,7 +242,7 @@ router.get(
         teacherInfo: course.teachers_and_classes || "No classes assigned",
       }));
 
-      res.render("courses.ejs", {
+      res.render("courses/courses", {
         courses: processedCourses,
         user: req.user,
       });
@@ -453,7 +453,7 @@ router.get(
       `;
       const studentInfo = await executeQuery(studentQuery, [req.user.id]);
 
-      res.render("availableCourses.ejs", {
+      res.render("courses/availableCourses", {
         courses: courses,
         student: studentInfo[0],
         user: req.user,
@@ -635,7 +635,7 @@ router.get("/my-courses", checkAuthenticated, async (req, res) => {
         : "Not set",
     }));
 
-    res.render("my-courses.ejs", {
+    res.render("courses/my-courses", {
       user: req.user,
       courses: processedCourses,
       messages: {

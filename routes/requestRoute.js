@@ -66,7 +66,7 @@ router.get(
 
       const requests = await executeQuery(requestQuery, params);
 
-      res.render("requestsindex.ejs", {
+      res.render("request/requestsindex", {
         user: req.user,
         requests,
         userRole,
@@ -115,7 +115,7 @@ router.get(
         userId: req.user.id
       });
 
-      res.render("requestsnew.ejs", {
+      res.render("request/requestsnew", {
         user: req.user,
         requestTypes,
         classes,
@@ -177,7 +177,7 @@ router.get(
         userId
       });
 
-      res.render("requestsedit.ejs", {
+      res.render("request/requestsedit", {
         user: req.user,
         request,
         classes,

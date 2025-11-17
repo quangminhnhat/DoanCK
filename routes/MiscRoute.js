@@ -72,47 +72,9 @@ router.get("/news", (req, res) => {
   res.render("news.ejs", { user: req.user });
 });
 
-router.get(
-  "/upload",
-  authenticateRole(["admin", "teacher"]),
-  checkAuthenticated,
-  async (req, res) => {
-    try {
-      const courses = await executeQuery("SELECT id, course_name FROM courses ORDER BY course_name");
-      res.render("uploadMaterial.ejs", { user: req.user, courses: courses });
-    } catch (error) {
-      console.error("Error loading upload material page:", error);
-      res.status(500).send("Error loading page data.");
-    }
-  }
-);
 
-router.get("/profile", checkAuthenticated, async (req, res) => {
-  try {
-    const userId = req.user.id;
 
-    // The user's details are all in the 'users' table now.
-    const query = `
-      SELECT username, role, full_name, email, phone_number, address, CONVERT(varchar(10), date_of_birth, 23) as date_of_birth
-      FROM users
-      WHERE id = ?
-    `;
 
-    const [details] = await executeQuery(query, [userId]);
-
-    if (!details) {
-      return res.status(404).send("Profile not found.");
-    }
-
-    res.render("profile.ejs", {
-      user: req.user,
-      details: details,
-    });
-  } catch (error) {
-    console.error("Profile fetch error:", error);
-    res.status(500).send("Error fetching profile data.");
-  }
-});
 
 router.get(
   "/register",

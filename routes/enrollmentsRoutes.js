@@ -33,7 +33,7 @@ router.get(
         console.error("Fetch enrollments error:", err);
         return res.status(500).send("Database error");
       }
-      res.render("enrollments.ejs", {
+      res.render("enrollments/enrollments", {
         enrollments: rows,
         user: req.user,
       });
@@ -203,7 +203,7 @@ router.get(
         return res.status(404).send("Enrollment not found");
       }
 
-      res.render("editEnrollment.ejs", {
+      res.render("enrollments/editEnrollment", {
         enrollment: enrollment[0],
         students,
         classes,
@@ -288,7 +288,7 @@ router.get(
         timeSlot: `${cls.start_time} - ${cls.end_time}`,
       }));
 
-      res.render("Addenrollments.ejs", {
+      res.render("enrollments/Addenrollments", {
         students: students.map((s) => ({
           ...s,
           hasUnpaidFees: s.unpaid_enrollments > 0,

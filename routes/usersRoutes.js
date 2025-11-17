@@ -195,4 +195,34 @@ router.delete("/users/:id", checkAuthenticated, authenticateRole("admin"), async
   }
 });
 
+
+
+
+router.get("/profile", checkAuthenticated, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // The user's details are all in the 'users' table now.
+    const query = `
+      SELECT username, role, full_name, email, phone_number, address, CONVERT(varchar(10), date_of_birth, 23) as date_of_birth
+      FROM users
+      WHERE id = ?
+    `;
+
+    const [details] = await executeQuery(query, [userId]);
+
+    if (!details) {
+      return res.status(404).send("Profile not found.");
+    }
+
+    res.render("profile.ejs", {
+      user: req.user,
+      details: details,
+    });
+  } catch (error) {
+    console.error("Profile fetch error:", error);
+    res.status(500).send("Error fetching profile data.");
+  }
+});
+
 module.exports = router;

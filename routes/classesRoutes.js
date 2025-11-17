@@ -47,7 +47,7 @@ router.get(
         }
       });
 
-      res.render("classes.ejs", { classes, user: req.user });
+      res.render("class/classes", { classes, user: req.user });
     } catch (err) {
       console.error("Fetch classes error:", err);
       res.status(500).send("Error loading classes");
@@ -176,7 +176,7 @@ router.get(
         name: t.full_name
       }));
 
-      res.render("editClass.ejs", {
+      res.render("class/editClass.ejs", {
         user: req.user,
         classItem,
         courses: courseList,
@@ -382,7 +382,7 @@ router.get(
       ]);
 
       // Render with both courses and teachers data
-        res.render("addClass.ejs", {
+        res.render("class/addClass", {
           user: req.user,
           courses: courses,
           teachers: teachers,

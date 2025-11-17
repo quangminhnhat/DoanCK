@@ -72,7 +72,7 @@ router.get(
           : "No schedule set",
       }));
 
-      res.render("newSchedule.ejs", {
+      res.render("Schedule/newSchedule", {
         classes: processedClasses,
         user: req.user,
         currentDate: new Date().toISOString().split("T")[0],
@@ -145,7 +145,7 @@ router.get(
     `;
 
       const schedules = await executeQuery(query);
-      res.render("schedules.ejs", { schedules, user: req.user });
+      res.render("Schedule/schedules", { schedules, user: req.user });
     } catch (err) {
       console.error("Fetch schedules error:", err);
       res.status(500).send("Error loading schedules");
@@ -329,7 +329,7 @@ router.get("/schedules/:id/edit", checkAuthenticated, authenticateRole("admin"),
         'No schedule set'
     }));
 
-    res.render("editSchedule.ejs", {
+    res.render("Schedule/editSchedule", {
       schedule: {
         ...scheduleResults[0],
         day_name: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][
@@ -692,7 +692,7 @@ router.get("/schedule", checkAuthenticated, (req, res) => {
 
         const classes = await executeQuery(query);
 
-        res.render("newSchedule.ejs", {
+        res.render("Schedule/newSchedule", {
           user: req.user,
           classes: classes,
           currentDate: new Date().toISOString().split("T")[0],
