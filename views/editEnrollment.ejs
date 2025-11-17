@@ -114,18 +114,15 @@
 
 <body>
     <main>
-  <form method="POST" action="/enrollments/<%= enrollment.id %>" class="modern-form-container" autocomplete="off">
+  <form method="POST" action="/enrollments/<%= enrollment.id %>?_method=PUT" class="modern-form-container" autocomplete="off">
     <legend class="modern-form-title">
       <i class="fas fa-user-edit mr-2"></i>
       Edit Enrollment
     </legend>
     <div class="modern-form-group">
       <label for="student_id"><i class="fas fa-user-graduate mr-2"></i>Student</label>
-      <select id="student_id" name="student_id" class="modern-form-control" required>
-        <% students.forEach(s => { %>
-        <option value="<%= s.id %>" <% if (s.id === enrollment.student_id) { %>selected<% } %>><%= s.full_name %></option>
-        <% }) %>
-      </select>
+      <input type="text" id="student_name" name="student_name" class="modern-form-control" value="<%= enrollment.student_name %>" disabled>
+      <input type="hidden" name="student_id" value="<%= enrollment.student_id %>">
     </div>
     <div class="modern-form-group">
       <label for="class_id"><i class="fas fa-chalkboard-teacher mr-2"></i>Class</label>
@@ -137,8 +134,8 @@
     </div>
     <div class="modern-form-group">
       <label for="enrollment_date"><i class="fas fa-calendar-alt mr-2"></i>Enrollment Date</label>
-      <input type="date" id="enrollment_date" name="enrollment_date"
-        value="<%= enrollment.enrollment_date.toISOString().split('T')[0] %>" class="modern-form-control" required>
+      <input type="date" id="enrollment_date" name="enrollment_date" value="<%= enrollment.enrollment_date.toISOString().split('T')[0] %>"
+        class="modern-form-control" readonly>
     </div>
     <button type="submit" class="modern-btn-primary">
       <i class="fas fa-save"></i>

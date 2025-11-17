@@ -76,48 +76,42 @@ router.get(
   "/upload",
   authenticateRole(["admin", "teacher"]),
   checkAuthenticated,
-  (req, res) => {
-    res.render("uploadMaterial.ejs", { user: req.user });
+  async (req, res) => {
+    try {
+      const courses = await executeQuery("SELECT id, course_name FROM courses ORDER BY course_name");
+      res.render("uploadMaterial.ejs", { user: req.user, courses: courses });
+    } catch (error) {
+      console.error("Error loading upload material page:", error);
+      res.status(500).send("Error loading page data.");
+    }
   }
 );
 
-router.get("/profile", checkAuthenticated, (req, res) => {
-  const userId = req.user.id;
-  const role = req.user.role;
+router.get("/profile", checkAuthenticated, async (req, res) => {
+  try {
+    const userId = req.user.id;
 
-  let query = "";
-  if (role === "student") {
-    query = `
-      SELECT full_name, email, phone_number
-      FROM students
-      WHERE user_id = ?
+    // The user's details are all in the 'users' table now.
+    const query = `
+      SELECT username, role, full_name, email, phone_number, address, CONVERT(varchar(10), date_of_birth, 23) as date_of_birth
+      FROM users
+      WHERE id = ?
     `;
-  } else if (role === "teacher") {
-    query = `
-      SELECT full_name, email, phone_number
-      FROM teachers
-      WHERE user_id = ?
-    `;
-  } else if (role === "admin") {
-    query = `
-      SELECT full_name, email, phone_number
-      FROM admins
-      WHERE user_id = ?
-    `;
-  } else {
-    return res.render("profile", { user: req.user, details: null });
-  }
 
-  sql.query(connectionString, query, [userId], (err, result) => {
-    if (err || result.length === 0) {
-      console.error("Profile fetch error:", err);
-      return res.status(500).send("Error fetching profile");
+    const [details] = await executeQuery(query, [userId]);
+
+    if (!details) {
+      return res.status(404).send("Profile not found.");
     }
+
     res.render("profile.ejs", {
       user: req.user,
-      details: result[0],
+      details: details,
     });
-  });
+  } catch (error) {
+    console.error("Profile fetch error:", error);
+    res.status(500).send("Error fetching profile data.");
+  }
 });
 
 router.get(

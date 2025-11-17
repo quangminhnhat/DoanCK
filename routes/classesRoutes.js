@@ -21,13 +21,14 @@ router.get(
         c.class_name,
         c.weekly_schedule,
         co.course_name,
-        t.full_name AS teacher_name,
+        u.full_name AS teacher_name,
         CONVERT(VARCHAR(5), c.start_time, 108) as formatted_start_time,
         CONVERT(VARCHAR(5), c.end_time, 108) as formatted_end_time,
         (SELECT COUNT(*) FROM enrollments WHERE class_id = c.id) as student_count
       FROM classes c
       JOIN courses co ON c.course_id = co.id
       JOIN teachers t ON c.teacher_id = t.id
+      JOIN users u ON t.user_id = u.id
       ORDER BY c.created_at DESC
     `;
 
@@ -53,29 +54,6 @@ router.get(
     }
   }
 );
-
-router.get("/classes", checkAuthenticated, authenticateRole(["admin", "teacher"]), async (req, res) => {
-  try {
-    const query = `
-      SELECT 
-        c.*, 
-        co.course_name,
-        t.full_name AS teacher_name,
-        CONVERT(VARCHAR(5), c.start_time, 108) as formatted_start_time,
-        CONVERT(VARCHAR(5), c.end_time, 108) as formatted_end_time
-      FROM classes c
-      JOIN courses co ON c.course_id = co.id
-      JOIN teachers t ON c.teacher_id = t.id
-      ORDER BY c.created_at DESC
-    `;
-
-    const classes = await executeQuery(query);
-    res.render("classes.ejs", { classes, user: req.user });
-  } catch (err) {
-    console.error("Fetch classes error:", err);
-    res.status(500).send("Error loading classes");
-  }
-});
 
 
 router.post(
@@ -161,7 +139,11 @@ router.get(
       // Lấy danh sách khóa học
       const courseQuery = `SELECT id, course_name FROM courses ORDER BY course_name`;
       // Lấy danh sách giáo viên
-      const teacherQuery = `SELECT id, full_name FROM teachers ORDER BY full_name`;
+      const teacherQuery = `
+        SELECT t.id, u.full_name 
+        FROM teachers t
+        JOIN users u ON t.user_id = u.id
+        ORDER BY u.full_name`;
 
       const [classResult, courses, teachers] = await Promise.all([
         executeQuery(classQuery, [classId]),
@@ -317,27 +299,31 @@ router.post(
       }
 
       // Check teacher availability
+      // For a new class, we don't need to exclude any class ID from the check.
       const teacherQuery = `
       SELECT id FROM classes 
-      WHERE teacher_id = ? 
-      AND ((start_time <= ? AND end_time >= ?) 
-        OR (start_time <= ? AND end_time >= ?))
-      AND weekly_schedule LIKE ?
+      WHERE teacher_id = ?
+      AND (
+        (start_time < ? AND end_time > ?) OR -- Overlaps start
+        (start_time < ? AND end_time > ?) OR -- Overlaps end
+        (start_time >= ? AND end_time <= ?)  -- Is contained within
+      )
     `;
 
       const teacherConflicts = await executeQuery(teacherQuery, [
         teacher_id,
+        end_time, // Check if new class starts during an existing one
         start_time,
-        start_time,
+        end_time, // Check if new class ends during an existing one
         end_time,
+        start_time, // Check if new class contains an existing one
         end_time,
-        `%${weekly_schedule}%`,
       ]);
 
       if (teacherConflicts.length > 0) {
         req.flash(
           "error",
-          "Teacher has conflicting classes during these times"
+          "Schedule Conflict: The selected teacher is already assigned to another class during the chosen time slot."
         );
         return res.redirect("/classes/new");
       }
@@ -379,33 +365,36 @@ router.get(
   "/classes/new",
   checkAuthenticated,
   authenticateRole(["admin", "teacher"]),
-  (req, res) => {
-    // Get courses and teachers data
-    const courseQuery = "SELECT id, course_name FROM courses";
-    const teacherQuery = "SELECT id, full_name FROM teachers";
+  async (req, res) => {
+    try {
+      // Get courses and teachers data
+      const courseQuery = "SELECT id, course_name FROM courses ORDER BY course_name";
+      const teacherQuery = `
+        SELECT t.id, u.full_name 
+        FROM teachers t
+        JOIN users u ON t.user_id = u.id
+        ORDER BY u.full_name
+      `;
 
-    // First get courses
-    sql.query(connectionString, courseQuery, (err, courses) => {
-      if (err) {
-        console.error("Course fetch error:", err);
-        return res.status(500).send("Error fetching courses");
-      }
+      const [courses, teachers] = await Promise.all([
+        executeQuery(courseQuery),
+        executeQuery(teacherQuery),
+      ]);
 
-      // Then get teachers
-      sql.query(connectionString, teacherQuery, (err, teachers) => {
-        if (err) {
-          console.error("Teacher fetch error:", err);
-          return res.status(500).send("Error fetching teachers");
-        }
-
-        // Render with both courses and teachers data
+      // Render with both courses and teachers data
         res.render("addClass.ejs", {
           user: req.user,
           courses: courses,
           teachers: teachers,
+          messages: {
+            error: req.flash("error"),
+            success: req.flash("success"),
+          },
         });
-      });
-    });
+    } catch (err) {
+      console.error("Error loading new class form:", err);
+      res.status(500).send("Error loading form data");
+    }
   }
 );
 

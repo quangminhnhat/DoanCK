@@ -14,7 +14,7 @@ router.get(
     const query = `
     SELECT 
       e.id, 
-      s.full_name AS student_name, 
+      u.full_name AS student_name, 
       c.class_name,
       co.tuition_fee,
       e.enrollment_date,
@@ -22,6 +22,7 @@ router.get(
       e.payment_date
     FROM enrollments e
     JOIN students s ON e.student_id = s.id
+    JOIN users u ON s.user_id = u.id
     JOIN classes c ON e.class_id = c.id
     JOIN courses co ON c.course_id = co.id
     ORDER BY e.enrollment_date DESC
@@ -50,9 +51,10 @@ router.delete(
 
       // First check if enrollment exists
       const checkQuery = `
-        SELECT e.id, e.student_id, s.full_name, c.class_name 
+        SELECT e.id, e.student_id, u.full_name, c.class_name 
         FROM enrollments e
         JOIN students s ON e.student_id = s.id
+        JOIN users u ON s.user_id = u.id
         JOIN classes c ON e.class_id = c.id
         WHERE e.id = ?
       `;
@@ -77,7 +79,7 @@ router.delete(
       const deleteQuery = "DELETE FROM enrollments WHERE id = ?";
       await executeQuery(deleteQuery, [enrollmentId]);
 
-      // Add notification for student
+      // Add notification for student (use the related users.id)
       const notifyQuery = `
         INSERT INTO notifications (user_id, message, sent_at)
         VALUES ((SELECT user_id FROM students WHERE id = ?), ?, GETDATE())
@@ -155,12 +157,13 @@ router.get(
       const enrollmentQuery = `
         SELECT 
           e.*,
-          s.full_name AS student_name,
+          u.full_name AS student_name,
           c.class_name,
           co.course_name,
           co.tuition_fee
         FROM enrollments e
         JOIN students s ON e.student_id = s.id
+        JOIN users u ON s.user_id = u.id
         JOIN classes c ON e.class_id = c.id
         JOIN courses co ON c.course_id = co.id
         WHERE e.id = ?
@@ -168,10 +171,11 @@ router.get(
 
       // Get available students and classes for dropdown
       const studentQuery = `
-        SELECT s.id, s.full_name, s.email 
+        SELECT s.id, u.full_name, u.email 
         FROM students s
+        JOIN users u ON s.user_id = u.id
         LEFT JOIN enrollments e ON s.id = e.student_id
-        GROUP BY s.id, s.full_name, s.email
+        GROUP BY s.id, u.full_name, u.email
       `;
 
       const classQuery = `
@@ -179,12 +183,13 @@ router.get(
           c.id, 
           c.class_name,
           co.course_name,
-          t.full_name AS teacher_name,
+          tu.full_name AS teacher_name,
           co.start_date,
           co.end_date
         FROM classes c
         JOIN courses co ON c.course_id = co.id
         JOIN teachers t ON c.teacher_id = t.id
+        JOIN users tu ON t.user_id = tu.id
         WHERE co.end_date >= GETDATE()
       `;
 
@@ -221,19 +226,20 @@ router.get(
       const studentQuery = `
         SELECT 
           s.id, 
-          s.full_name, 
-          s.email,
-          s.phone_number,
+          u.full_name, 
+          u.email,
+          u.phone_number,
           COUNT(e.id) as enrolled_count,
           SUM(CASE WHEN e.payment_status = 0 THEN 1 ELSE 0 END) as unpaid_enrollments
         FROM students s
+        JOIN users u ON s.user_id = u.id
         LEFT JOIN enrollments e ON s.id = e.student_id
         GROUP BY 
           s.id, 
-          s.full_name, 
-          s.email,
-          s.phone_number
-        ORDER BY s.full_name
+          u.full_name, 
+          u.email,
+          u.phone_number
+        ORDER BY u.full_name
       `;
 
       // Get active classes with detailed info and capacity
@@ -243,7 +249,7 @@ router.get(
           c.class_name,
           co.course_name,
           co.tuition_fee,
-          t.full_name AS teacher_name,
+          tu.full_name AS teacher_name,
           co.start_date,
           co.end_date,
           c.weekly_schedule,
@@ -258,6 +264,7 @@ router.get(
         FROM classes c
         JOIN courses co ON c.course_id = co.id
         JOIN teachers t ON c.teacher_id = t.id
+        JOIN users tu ON t.user_id = tu.id
         WHERE co.end_date >= GETDATE()
         ORDER BY co.start_date ASC, c.class_name
       `;
@@ -271,13 +278,13 @@ router.get(
       const enhancedClasses = classes.map((cls) => ({
         ...cls,
         isAvailable: cls.status !== "Ended",
-        schedule: cls.weekly_schedule
+        schedule: cls.weekly_schedule ? cls.weekly_schedule
           .split(",")
           .map((day) => {
             const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
             return days[parseInt(day) - 1];
           })
-          .join(", "),
+          .join(", ") : 'No schedule',
         timeSlot: `${cls.start_time} - ${cls.end_time}`,
       }));
 
@@ -370,14 +377,15 @@ router.post(
         class_id, 
         enrollment_date,
         payment_status,
-        updated_at
+        updated_at,
+        created_at
       )
-      VALUES (?, ?, GETDATE(), 0, GETDATE())
+      VALUES (?, ?, GETDATE(), 0, GETDATE(), GETDATE())
     `;
 
       await executeQuery(insertQuery, [student_id, class_id]);
 
-      // 6. Add notification for student
+      // 6. Add notification for student (use users.id linked from students.user_id)
       const notifyQuery = `
       INSERT INTO notifications (
         user_id,
@@ -386,7 +394,7 @@ router.post(
         created_at,
         updated_at
       )
-      VALUES (?, ?, GETDATE(), GETDATE(), GETDATE())
+      VALUES ((SELECT user_id FROM students WHERE id = ?), ?, GETDATE(), GETDATE(), GETDATE())
     `;
 
       await executeQuery(notifyQuery, [
@@ -410,6 +418,74 @@ router.post(
         code: "CREATE_FAILED",
         message: error.message,
       });
+    }
+  }
+);
+
+router.put(
+  "/enrollments/:id",
+  checkAuthenticated,
+  authenticateRole("admin"),
+  async (req, res) => {
+    const enrollmentId = req.params.id;
+    const { class_id } = req.body;
+
+    try {
+      // 1. Validate input
+      if (!class_id) {
+        req.flash("error", "Class must be selected.");
+        return res.redirect(`/enrollments/${enrollmentId}/edit`);
+      }
+
+      // 2. Get current enrollment details
+      const enrollmentQuery = `
+        SELECT e.id, e.student_id, e.class_id, u.full_name as student_name,
+               (SELECT class_name FROM classes WHERE id = e.class_id) as old_class_name
+        FROM enrollments e
+        JOIN students s ON e.student_id = s.id
+        JOIN users u ON s.user_id = u.id
+        WHERE e.id = ?`;
+      const [enrollment] = await executeQuery(enrollmentQuery, [enrollmentId]);
+
+      if (!enrollment) {
+        req.flash("error", "Enrollment not found.");
+        return res.redirect("/enrollments");
+      }
+
+      // 3. Get new class name
+      const classQuery = `SELECT class_name FROM classes WHERE id = ?`;
+      const [newClass] = await executeQuery(classQuery, [class_id]);
+
+      if (!newClass) {
+        req.flash("error", "The selected class does not exist.");
+        return res.redirect(`/enrollments/${enrollmentId}/edit`);
+      }
+
+      // 4. Update the enrollment
+      const updateQuery = `
+        UPDATE enrollments
+        SET class_id = ?,
+            updated_at = GETDATE()
+        WHERE id = ?`;
+      await executeQuery(updateQuery, [class_id, enrollmentId]);
+
+      // 5. Notify the student of the change
+      const notifyQuery = `
+        INSERT INTO notifications (user_id, message)
+        VALUES ((SELECT user_id FROM students WHERE id = ?), ?)`;
+      const message = `Your enrollment has been changed from class '${enrollment.old_class_name}' to '${newClass.class_name}'.`;
+      await executeQuery(notifyQuery, [enrollment.student_id, message]);
+
+      req.flash("success", "Enrollment updated successfully.");
+      res.redirect("/enrollments");
+    } catch (error) {
+      console.error("Error updating enrollment:", {
+        enrollmentId,
+        error: error.message,
+        stack: error.stack,
+      });
+      req.flash("error", "Failed to update enrollment.");
+      res.redirect(`/enrollments/${enrollmentId}/edit`);
     }
   }
 );

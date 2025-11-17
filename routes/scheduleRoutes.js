@@ -9,6 +9,21 @@ const {
 const router = express.Router();
 const validateSchedule = require("../middleware/validateSchedule");
 
+// Helper: check if a column exists in a table (SQL Server)
+async function columnExists(tableName, columnName) {
+  try {
+    const q = `
+      SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE TABLE_NAME = ? AND COLUMN_NAME = ?
+    `;
+    const rows = await executeQuery(q, [tableName, columnName]);
+    return rows && rows.length > 0;
+  } catch (err) {
+    console.error('Failed to check column existence:', err);
+    return false;
+  }
+}
+
 
 
 
@@ -30,10 +45,11 @@ router.get(
           co.course_name,
           CONVERT(varchar(10), co.start_date, 23) as start_date,
           CONVERT(varchar(10), co.end_date, 23) as end_date,
-          t.full_name as teacher_name
+          tu.full_name as teacher_name
         FROM classes c
         INNER JOIN courses co ON c.course_id = co.id
         INNER JOIN teachers t ON c.teacher_id = t.id
+        INNER JOIN users tu ON t.user_id = tu.id
         WHERE co.end_date >= GETDATE()
         ORDER BY co.start_date ASC, c.class_name
       `;
@@ -71,30 +87,7 @@ router.get(
 
 
 
-router.post(
-  "/schedules",
-  checkAuthenticated,
-  authenticateRole("admin"),
-  (req, res) => {
-    const { class_id, day_of_week, schedule_date, start_time, end_time } =
-      req.body;
 
-    const query = `
-    INSERT INTO schedules (class_id, day_of_week, schedule_date, start_time, end_time)
-    VALUES (?, ?, ?, ?, ?)
-  `;
-
-    const values = [class_id, day_of_week, schedule_date, start_time, end_time];
-
-    sql.query(connectionString, query, values, (err) => {
-      if (err) {
-        console.error("Insert schedule error:", err);
-        return res.status(500).send("Insert failed");
-      }
-      res.redirect("/schedules");
-    });
-  }
-);
 
 
 
@@ -140,13 +133,14 @@ router.get(
         s.*,
         c.class_name,
         co.course_name,
-        t.full_name as teacher_name,
+        tu.full_name as teacher_name,
         CONVERT(VARCHAR(5), s.start_time, 108) as formatted_start_time,
         CONVERT(VARCHAR(5), s.end_time, 108) as formatted_end_time
       FROM schedules s
       JOIN classes c ON s.class_id = c.id
       JOIN courses co ON c.course_id = co.id
       JOIN teachers t ON c.teacher_id = t.id
+      JOIN users tu ON t.user_id = tu.id
       ORDER BY s.schedule_date DESC, s.start_time ASC
     `;
 
@@ -181,16 +175,6 @@ router.post(
         return res.status(400).send("Missing required fields");
       }
 
-      // Get course_id for the class
-      const courseQuery = "SELECT course_id FROM classes WHERE id = ?";
-      const courseResult = await executeQuery(courseQuery, [class_id]);
-
-      if (!courseResult.length) {
-        return res.status(404).send("Class not found");
-      }
-
-      const course_id = courseResult[0].course_id;
-
       // Check for schedule conflicts
       const conflictQuery = `
       SELECT id FROM schedules 
@@ -216,28 +200,56 @@ router.post(
         return res.status(409).send("Schedule conflict detected");
       }
 
-      const insertQuery = `
-      INSERT INTO schedules (
-        class_id, 
-        course_id,
-        day_of_week, 
-        schedule_date, 
-        start_time, 
-        end_time,
-        created_at,
-        updated_at
-      )
-      VALUES (?, ?, ?, ?, ?, ?, GETDATE(), GETDATE())
-    `;
+      // Adapt insert depending on whether `schedules.course_id` exists
+      const hasCourseCol = await columnExists('schedules', 'course_id');
 
-      await executeQuery(insertQuery, [
-        class_id,
-        course_id,
-        day_of_week,
-        schedule_date,
-        start_time,
-        end_time,
-      ]);
+      if (hasCourseCol) {
+        // Retrieve course_id from classes table and include it in the insert
+        const courseQuery = "SELECT course_id FROM classes WHERE id = ?";
+        const courseResult = await executeQuery(courseQuery, [class_id]);
+        if (!courseResult.length) return res.status(404).send('Class not found');
+        const course_id = courseResult[0].course_id;
+
+        const insertQuery = `
+        INSERT INTO schedules (
+          class_id,
+          course_id,
+          day_of_week,
+          schedule_date,
+          start_time,
+          end_time,
+          created_at,
+          updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, GETDATE(), GETDATE())`;
+
+        await executeQuery(insertQuery, [
+          class_id,
+          course_id,
+          day_of_week,
+          schedule_date,
+          start_time,
+          end_time,
+        ]);
+      } else {
+        const insertQuery = `
+        INSERT INTO schedules (
+          class_id,
+          day_of_week,
+          schedule_date,
+          start_time,
+          end_time,
+          created_at,
+          updated_at
+        ) VALUES (?, ?, ?, ?, ?, GETDATE(), GETDATE())`;
+
+        await executeQuery(insertQuery, [
+          class_id,
+          day_of_week,
+          schedule_date,
+          start_time,
+          end_time,
+        ]);
+      }
 
       res.redirect("/schedules");
     } catch (err) {
@@ -263,7 +275,7 @@ router.get("/schedules/:id/edit", checkAuthenticated, authenticateRole("admin"),
         co.course_name,
         co.start_date as course_start,
         co.end_date as course_end,
-        t.full_name as teacher_name,
+        tu.full_name as teacher_name,
         CONVERT(varchar(5), s.start_time, 108) as formatted_start_time,
         CONVERT(varchar(5), s.end_time, 108) as formatted_end_time,
         CONVERT(varchar(10), s.schedule_date, 23) as formatted_schedule_date
@@ -271,6 +283,7 @@ router.get("/schedules/:id/edit", checkAuthenticated, authenticateRole("admin"),
       JOIN classes c ON s.class_id = c.id
       JOIN courses co ON c.course_id = co.id
       JOIN teachers t ON c.teacher_id = t.id
+      JOIN users tu ON t.user_id = tu.id
       WHERE s.id = ?
     `;
 
@@ -280,13 +293,14 @@ router.get("/schedules/:id/edit", checkAuthenticated, authenticateRole("admin"),
         c.id,
         c.class_name,
         co.course_name,
-        t.full_name as teacher_name,
+        tu.full_name as teacher_name,
         CONVERT(varchar(10), co.start_date, 23) as start_date,
         CONVERT(varchar(10), co.end_date, 23) as end_date,
         c.weekly_schedule
       FROM classes c
       JOIN courses co ON c.course_id = co.id
       JOIN teachers t ON c.teacher_id = t.id
+      JOIN users tu ON t.user_id = tu.id
       WHERE co.end_date >= GETDATE()
       ORDER BY co.start_date ASC, c.class_name
     `;
@@ -389,7 +403,7 @@ router.get("/schedule", checkAuthenticated, (req, res) => {
             cls.id as class_id,
             cls.class_name,
             co.course_name,
-            t.full_name AS teacher,
+            tu.full_name AS teacher,
             CONVERT(VARCHAR(5), cls.start_time, 108) as start_time,
             CONVERT(VARCHAR(5), cls.end_time, 108) as end_time,
             cls.weekly_schedule,
@@ -403,6 +417,7 @@ router.get("/schedule", checkAuthenticated, (req, res) => {
           JOIN classes cls ON e.class_id = cls.id
           JOIN courses co ON cls.course_id = co.id
           JOIN teachers t ON cls.teacher_id = t.id
+          JOIN users tu ON t.user_id = tu.id
           LEFT JOIN schedules s ON cls.id = s.class_id 
             AND s.schedule_date BETWEEN ? AND ?
           WHERE st.user_id = ?
@@ -416,21 +431,26 @@ router.get("/schedule", checkAuthenticated, (req, res) => {
           cls.id as class_id,
           cls.class_name,
           co.course_name,
-          NULL AS teacher,
+          tu.full_name AS teacher,
           CONVERT(VARCHAR(5), cls.start_time, 108) as start_time,
           CONVERT(VARCHAR(5), cls.end_time, 108) as end_time,
           cls.weekly_schedule,
           s.schedule_date AS extra_date,
           s.start_time AS extra_start,
-          s.end_time AS extra_end
+          s.end_time AS extra_end,
+          co.start_date AS course_start,
+          co.end_date AS course_end
         FROM teachers t
         JOIN classes cls ON t.id = cls.teacher_id
         JOIN courses co ON cls.course_id = co.id
+        JOIN users tu ON t.user_id = tu.id
         LEFT JOIN schedules s ON cls.id = s.class_id 
           AND s.schedule_date BETWEEN ? AND ?
         WHERE t.user_id = ?
+          AND co.start_date <= ?
+          AND co.end_date >= ?
       `;
-      params = [days[0].iso, days[6].iso, userId];
+      params = [days[0].iso, days[6].iso, userId, days[6].iso, days[0].iso];
     } else {
       return res.status(403).send("Unauthorized role");
     }
@@ -544,30 +564,6 @@ router.get("/schedule", checkAuthenticated, (req, res) => {
   });
 
 
-  router.post(
-    "/schedules",
-    checkAuthenticated,
-    authenticateRole("admin"),
-    (req, res) => {
-      const { class_id, day_of_week, schedule_date, start_time, end_time } =
-        req.body;
-  
-      const query = `
-      INSERT INTO schedules (class_id, day_of_week, schedule_date, start_time, end_time)
-      VALUES (?, ?, ?, ?, ?)
-    `;
-  
-      const values = [class_id, day_of_week, schedule_date, start_time, end_time];
-  
-      sql.query(connectionString, query, values, (err) => {
-        if (err) {
-          console.error("Insert schedule error:", err);
-          return res.status(500).send("Insert failed");
-        }
-        res.redirect("/schedules");
-      });
-    }
-  );
 
 
   router.post(
@@ -606,39 +602,58 @@ router.get("/schedule", checkAuthenticated, (req, res) => {
           return res.redirect(`/schedules/${scheduleId}/edit`);
         }
 
-        // Get course_id for the class
-        const courseQuery = "SELECT course_id FROM classes WHERE id = ?";
-        const courseResult = await executeQuery(courseQuery, [class_id]);
+        // Update schedule. Include course_id if that column exists in the DB.
+        const hasCourseCol = await columnExists('schedules', 'course_id');
 
-        if (!courseResult.length) {
-          req.flash("error", "Class not found");
-          return res.redirect(`/schedules/${scheduleId}/edit`);
+        if (hasCourseCol) {
+          const courseQuery = "SELECT course_id FROM classes WHERE id = ?";
+          const courseResult = await executeQuery(courseQuery, [class_id]);
+          if (!courseResult.length) {
+            req.flash('error', 'Class not found');
+            return res.redirect(`/schedules/${scheduleId}/edit`);
+          }
+          const course_id = courseResult[0].course_id;
+
+          const updateQuery = `
+          UPDATE schedules 
+          SET class_id = ?,
+              course_id = ?,
+              day_of_week = ?,
+              schedule_date = ?,
+              start_time = ?,
+              end_time = ?,
+              updated_at = GETDATE()
+          WHERE id = ?`;
+
+          await executeQuery(updateQuery, [
+            class_id,
+            course_id,
+            day_of_week,
+            schedule_date,
+            start_time,
+            end_time,
+            scheduleId,
+          ]);
+        } else {
+          const updateQuery = `
+          UPDATE schedules 
+          SET class_id = ?,
+              day_of_week = ?,
+              schedule_date = ?,
+              start_time = ?,
+              end_time = ?,
+              updated_at = GETDATE()
+          WHERE id = ?`;
+
+          await executeQuery(updateQuery, [
+            class_id,
+            day_of_week,
+            schedule_date,
+            start_time,
+            end_time,
+            scheduleId,
+          ]);
         }
-
-        const course_id = courseResult[0].course_id;
-
-        // Update schedule
-        const updateQuery = `
-        UPDATE schedules 
-        SET class_id = ?,
-            course_id = ?,
-            day_of_week = ?,
-            schedule_date = ?,
-            start_time = ?,
-            end_time = ?,
-            updated_at = GETDATE()
-        WHERE id = ?
-      `;
-
-        await executeQuery(updateQuery, [
-          class_id,
-          course_id,
-          day_of_week,
-          schedule_date,
-          start_time,
-          end_time,
-          scheduleId,
-        ]);
 
         req.flash("success", "Schedule updated successfully");
         res.redirect("/schedules");
@@ -664,12 +679,13 @@ router.get("/schedule", checkAuthenticated, (req, res) => {
           c.class_name,
           co.id as course_id, 
           co.course_name,
-          t.full_name as teacher_name,
+          tu.full_name as teacher_name,
           co.start_date,
           co.end_date
         FROM classes c
         JOIN courses co ON c.course_id = co.id
         JOIN teachers t ON c.teacher_id = t.id
+        JOIN users tu ON t.user_id = tu.id
         WHERE co.end_date >= GETDATE()
         ORDER BY co.start_date ASC, c.class_name
       `;

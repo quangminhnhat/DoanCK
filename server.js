@@ -16,6 +16,8 @@ const methodOverride = require("method-override");
 const { authenticateRole } = require("./middleware/roleAuth");
 const multer = require("multer");
 const fs = require("fs");
+const os = require("os");
+const https = require("https");
 const connectionString = process.env.CONNECTION_STRING;
 const upload = require("./middleware/upload");
 const courseImageUpload = require("./middleware/courseImageUpload");
@@ -230,8 +232,71 @@ app.set("views", path.join(__dirname, "views"));
 
 //route end
 
-app.listen(3000, () => {
-  console.log("Server is online at http://localhost:3000");
+const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST || "0.0.0.0";
+const DOMAIN_NAME = process.env.DOMAIN_NAME || null;
+const dns = require("dns").promises;
+const multicastDns = require("multicast-dns");
+
+function getLocalIPs() {
+  const nets = os.networkInterfaces();
+  const results = [];
+  for (const name of Object.keys(nets)) {
+    for (const net of nets[name]) {
+      // Skip over non-IPv4 and internal (i.e. 127.0.0.1) addresses
+      if (net.family === "IPv4" && !net.internal) {
+        results.push(net.address);
+      }
+    }
+  }
+  return results;
+}
+
+app.listen(PORT, HOST, async () => {
+  console.log(`\nServer is online on port ${PORT}`);
+  console.log(`- Local: http://localhost:${PORT}`);
+
+  const ips = getLocalIPs();
+  if (ips.length > 0) {
+    for (const ip of ips) {
+      console.log(`- On Your Network: http://${ip}:${PORT}`);
+    }
+  } else {
+    console.warn("⚠ Warning: No non-internal network interfaces detected.");
+  }
+
+  // Broadcast service on the local network using mDNS (.local domain)
+  const serviceName = DOMAIN_NAME
+    ? DOMAIN_NAME.replace(/\.local$/, "")
+    : "my-app";
+  const localDomain = `${serviceName}.local`;
+
+  const mdns = multicastDns();
+
+  mdns.on("query", (query) => {
+    // Find all A (IPv4) and AAAA (IPv6) queries for our local domain
+    const questions = query.questions.filter(
+      (q) =>
+        (q.type === "A" || q.type === "AAAA") && q.name.toLowerCase() === localDomain.toLowerCase()
+    );
+
+    if (questions.length === 0) return;
+
+    // Respond with all local IP addresses
+    const localIPs = getLocalIPs();
+    const answers = localIPs.map((ip) => ({
+      name: localDomain,
+      type: "A",
+      ttl: 300, // 5 minutes
+      data: ip,
+    }));
+
+    mdns.respond({
+      answers: answers,
+    });
+  });
+  console.log(`- On Your Network (mDNS): http://${localDomain}:${PORT}`);
+  console.log(`  (Resolves on devices with mDNS/Bonjour support)`);
 });
 
 // Configure connection pool

@@ -86,9 +86,10 @@ router.get("/courses/:id", checkAuthenticated, authenticateRole(["admin", "teach
         (SELECT COUNT(*) FROM classes WHERE course_id = c.id) as class_count,
         (SELECT COUNT(*) FROM materials WHERE course_id = c.id) as material_count,
         (
-          SELECT STRING_AGG(CONCAT(t.full_name, ' (', cls.class_name, ')'), ', ')
+          SELECT STRING_AGG(CONCAT(u.full_name, ' (', cls.class_name, ')'), ', ')
           FROM classes cls
           JOIN teachers t ON cls.teacher_id = t.id
+          JOIN users u ON t.user_id = u.id
           WHERE cls.course_id = c.id
         ) as teachers_and_classes
       FROM courses c
@@ -106,13 +107,14 @@ router.get("/courses/:id", checkAuthenticated, authenticateRole(["admin", "teach
       SELECT 
         cls.id,
         cls.class_name,
-        t.full_name as teacher_name,
+        u.full_name as teacher_name,
         CONVERT(varchar(5), cls.start_time, 108) as start_time,
         CONVERT(varchar(5), cls.end_time, 108) as end_time,
         cls.weekly_schedule,
         (SELECT COUNT(*) FROM enrollments WHERE class_id = cls.id) as student_count
       FROM classes cls
       JOIN teachers t ON cls.teacher_id = t.id
+      JOIN users u ON t.user_id = u.id
       WHERE cls.course_id = ?
       ORDER BY cls.class_name
     `;
@@ -172,9 +174,10 @@ router.get("/courses/:id/edit", checkAuthenticated, authenticateRole("admin"), a
         (SELECT COUNT(*) FROM classes WHERE course_id = c.id) as class_count,
         (SELECT COUNT(*) FROM materials WHERE course_id = c.id) as material_count,
         (
-          SELECT STRING_AGG(CONCAT(t.full_name, ' (', cls.class_name, ')'), ', ') 
+          SELECT STRING_AGG(CONCAT(u.full_name, ' (', cls.class_name, ')'), ', ') 
           FROM classes cls
           JOIN teachers t ON cls.teacher_id = t.id
+          JOIN users u ON t.user_id = u.id
           WHERE cls.course_id = c.id
         ) as teachers_and_classes
       FROM courses c
@@ -220,9 +223,10 @@ router.get(
         (SELECT COUNT(*) FROM classes WHERE course_id = c.id) as class_count,
         (SELECT COUNT(*) FROM materials WHERE course_id = c.id) as material_count,
         (
-          SELECT STRING_AGG(CONCAT(t.full_name, ' (', cls.class_name, ')'), ', ')
+          SELECT STRING_AGG(CONCAT(u.full_name, ' (', cls.class_name, ')'), ', ')
           FROM classes cls
           JOIN teachers t ON cls.teacher_id = t.id
+          JOIN users u ON t.user_id = u.id
           WHERE cls.course_id = c.id
         ) as teachers_and_classes
       FROM courses c
@@ -306,8 +310,12 @@ router.post("/courses/:id",
   async (req, res) => {
   try {
       const courseId = req.params.id;
-    const { course_name, description, start_date, end_date, tuition_fee } = req.body;
+      let { course_name, description, start_date, end_date, tuition_fee } = req.body;
 
+      // Ensure single values for fields that might be submitted as arrays
+      course_name = Array.isArray(course_name) ? course_name[0] : course_name;
+      description = Array.isArray(description) ? description[0] : description;
+      
       // Get current course info
       const currentCourse = await executeQuery(
         "SELECT image_path FROM courses WHERE id = ?", 
@@ -398,90 +406,6 @@ router.delete("/courses/:id",
   }
 });
 
-
-
-router.post(
-  "/courses/:id",
-  checkAuthenticated,
-  authenticateRole("admin"),
-  (req, res) => {
-    const { course_name, description, start_date, end_date } = req.body;
-    const role = req.user.role;
-
-    // Check authorization first
-    if (role !== "admin" && role !== "teacher") {
-      return res.status(403).send("Unauthorized access");
-    }
-
-    // Validate input
-    if (!course_name || !start_date || !end_date) {
-      return res.status(400).send("Missing required fields");
-    }
-
-    const query = `
-    UPDATE courses 
-    SET course_name = ?,
-        description = ?,
-        start_date = ?,
-        end_date = ?,
-        tuition_fee = ?,
-        updated_at = GETDATE()
-    WHERE id = ?
-  `;
-
-    const values = [
-      course_name,
-      description,
-      start_date,
-      end_date,
-      req.params.id,
-    ];
-
-    // Execute query with proper error handling
-    sql.query(connectionString, query, values, (err, result) => {
-      try {
-        try {
-          if (err) {
-            console.error("Update error:", err);
-            return res.status(500).send("Update failed");
-          }
-          if (!result || result.rowsAffected === 0) {
-            return res.status(404).send("Course not found");
-          }
-          res.redirect("/courses");
-        } catch (error) {
-          if (error.code !== "ERR_HTTP_HEADERS_SENT") {
-            console.error("Unhandled error:", error);
-          }
-        }
-      } catch (error) {
-        // Ignore headers already sent error
-        if (error.code !== "ERR_HTTP_HEADERS_SENT") {
-          console.error("Unhandled error:", error);
-        }
-      }
-    });
-  }
-);
-
-
-router.delete(
-  "/courses/:id",
-  checkAuthenticated,
-  authenticateRole("admin"),
-  (req, res) => {
-    const query = "DELETE FROM courses WHERE id = ?";
-    sql.query(connectionString, query, [req.params.id], (err) => {
-      if (err) {
-        console.error("Delete error:", err);
-        return res.status(500).send("Delete failed");
-      }
-      res.redirect("/courses");
-    });
-  }
-);
-
-
 router.get(
   "/available-courses",
   checkAuthenticated,
@@ -501,11 +425,12 @@ router.get(
           cls.start_time,
           cls.end_time,
           cls.weekly_schedule,
-          t.full_name as teacher_name,
+          u.full_name as teacher_name,
           (SELECT COUNT(*) FROM enrollments WHERE class_id = cls.id) as enrolled_count
         FROM courses c
         JOIN classes cls ON c.id = cls.course_id
         JOIN teachers t ON cls.teacher_id = t.id
+        JOIN users u ON t.user_id = u.id
         WHERE c.start_date > GETDATE()
         AND NOT EXISTS (
           SELECT 1 
@@ -521,9 +446,10 @@ router.get(
 
       // Get student information
       const studentQuery = `
-        SELECT id, full_name, email 
-        FROM students 
-        WHERE user_id = ?
+        SELECT s.id, u.full_name, u.email 
+        FROM students s
+        JOIN users u ON s.user_id = u.id
+        WHERE s.user_id = ?
       `;
       const studentInfo = await executeQuery(studentQuery, [req.user.id]);
 
@@ -639,9 +565,9 @@ router.get("/my-courses", checkAuthenticated, async (req, res) => {
             c.description AS course_description,
             c.tuition_fee,
             c.image_path,
-            t.full_name AS teacher_name,
-            t.email AS teacher_email,
-            t.phone_number AS teacher_phone,   
+            u.full_name AS teacher_name,
+            u.email AS teacher_email,
+            u.phone_number AS teacher_phone,   
             cls.class_name,
             CONVERT(VARCHAR(5), cls.start_time, 108) as class_start_time,
             CONVERT(VARCHAR(5), cls.end_time, 108) as class_end_time,
@@ -653,9 +579,10 @@ router.get("/my-courses", checkAuthenticated, async (req, res) => {
           JOIN students st ON e.student_id = st.id
           JOIN classes cls ON e.class_id = cls.id
           JOIN teachers t ON cls.teacher_id = t.id
+          JOIN users u ON t.user_id = u.id
           JOIN courses c ON cls.course_id = c.id
           WHERE st.user_id = ?
-          ORDER BY t.full_name, c.course_name
+          ORDER BY u.full_name, c.course_name
         `;
       params = [req.user.id];
     } else if (req.user.role === "teacher") {
@@ -665,9 +592,9 @@ router.get("/my-courses", checkAuthenticated, async (req, res) => {
             c.description AS course_description,
             c.tuition_fee,
             c.image_path,
-            t.full_name AS teacher_name,
-            t.email AS teacher_email,
-            t.phone_number AS teacher_phone,   
+            u.full_name AS teacher_name,
+            u.email AS teacher_email,
+            u.phone_number AS teacher_phone,   
             cls.class_name,
             CONVERT(VARCHAR(5), cls.start_time, 108) as class_start_time,
             CONVERT(VARCHAR(5), cls.end_time, 108) as class_end_time,
@@ -676,6 +603,7 @@ router.get("/my-courses", checkAuthenticated, async (req, res) => {
             (SELECT COUNT(*) FROM enrollments e WHERE e.class_id = cls.id AND e.payment_status = 1) as paid_students
           FROM teachers t
           JOIN classes cls ON t.id = cls.teacher_id
+          JOIN users u ON t.user_id = u.id
           JOIN courses c ON cls.course_id = c.id
           WHERE t.user_id = ?
           ORDER BY c.course_name
