@@ -144,33 +144,40 @@ router.delete(
   "/materials/:id",
   checkAuthenticated,
   authenticateRole(["admin", "teacher"]),
-  (req, res) => {
+  async (req, res) => {
     const materialId = req.params.id;
+    try {
+      // 1. Get the file path from the database
+      const getFilePathQuery = "SELECT file_path FROM materials WHERE id = ?";
+      const result = await executeQuery(getFilePathQuery, [materialId]);
 
-    const getFilePathQuery = "SELECT file_path FROM materials WHERE id = ?";
-    sql.query(
-      connectionString,
-      getFilePathQuery,
-      [materialId],
-      (err, result) => {
-        if (err || result.length === 0)
-          return res.status(500).send("Not found");
-
-        const filePath = path.join(__dirname, result[0].file_path);
-
-        // Delete from DB
-        const deleteQuery = "DELETE FROM materials WHERE id = ?";
-        sql.query(connectionString, deleteQuery, [materialId], (err) => {
-          if (err) return res.status(500).send("Delete error");
-
-          // Remove file from disk
-          fs.unlink(filePath, (fsErr) => {
-            if (fsErr) console.error("File deletion error:", fsErr);
-            res.redirect("/materials");
-          });
-        });
+      if (!result || result.length === 0) {
+        req.flash("error", "Material not found.");
+        return res.redirect("/materials");
       }
-    );
+
+      const relativePath = result[0].file_path;
+      // Correctly construct the absolute path from the project root
+      const absolutePath = path.join(__dirname, "..", relativePath);
+
+      // 2. Delete the record from the database
+      const deleteQuery = "DELETE FROM materials WHERE id = ?";
+      await executeQuery(deleteQuery, [materialId]);
+
+      // 3. Delete the file from the disk
+      fs.unlink(absolutePath, (fsErr) => {
+        if (fsErr) {
+          // Log the error but don't block the user, as the DB record is gone.
+          console.error("File deletion error:", fsErr);
+        }
+        req.flash("success", "Material deleted successfully.");
+        res.redirect("/materials");
+      });
+    } catch (error) {
+      console.error("Error deleting material:", error);
+      req.flash("error", "Failed to delete material.");
+      res.redirect("/materials");
+    }
   }
 );
 

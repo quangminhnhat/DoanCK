@@ -49,7 +49,7 @@ router.get("/users/:id/edit", checkAuthenticated, async (req, res) => {
       return res.status(404).send("User not found");
     }
 
-    res.render("editUser.ejs", {
+    res.render("user/editUser", {
       user: req.user,
       editUser: result[0],
     });
@@ -215,7 +215,7 @@ router.get("/profile", checkAuthenticated, async (req, res) => {
       return res.status(404).send("Profile not found.");
     }
 
-    res.render("profile.ejs", {
+    res.render("user/profile", {
       user: req.user,
       details: details,
     });
