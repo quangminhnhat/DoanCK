@@ -108,7 +108,6 @@ CREATE TABLE schedules
 (
     id INT IDENTITY PRIMARY KEY,
     class_id INT NOT NULL,
-    course_id INT NULL,
     day_of_week NVARCHAR(20) NULL,
     schedule_date DATE NULL,
     start_time TIME NOT NULL,
@@ -116,12 +115,8 @@ CREATE TABLE schedules
     created_at DATETIME DEFAULT GETDATE() NOT NULL,
     updated_at DATETIME DEFAULT GETDATE() NOT NULL,
     CONSTRAINT FK_schedules_class FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE CASCADE,
-    CONSTRAINT FK_schedules_course FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
     CONSTRAINT CHK_schedule_times CHECK (end_time > start_time)
 );
-
--- Optional index for faster lookups by course
-CREATE INDEX idx_schedules_course_id ON schedules(course_id);
 
 CREATE TABLE enrollments
 (
@@ -530,32 +525,31 @@ INSERT INTO admins
 VALUES
     (3);
 
-
 -- Insert courses (with image_path)
 INSERT INTO courses
     (course_name, description, start_date, end_date, tuition_fee, image_path, link)
 VALUES
     (N'Khoá học Toán, Lý, Hoá, Anh',
         N'Các khoá học Toán, Lý, Hoá, Anh được thiết kế phù hợp với từng trình độ, giúp học sinh củng cố kiến thức nền tảng, phát triển tư duy logic và nâng cao kỹ năng ngoại ngữ. Đội ngũ giáo viên chuyên môn, phương pháp giảng dạy hiện đại, hỗ trợ học sinh đạt kết quả cao trong học tập.',
-        DATEADD(MONTH, -1, GETDATE()), DATEADD(MONTH, 1, GETDATE()), 3000000, 'slide1.jpg', '/Toan,Ly,Hoaclass'),
+        '2025-08-01', '2025-08-31', 3000000, 'slide1.jpg', '/Toan,Ly,Hoaclass'),
     (N'Khoá học Anh Văn',
         N'Chương trình Anh văn giúp học sinh phát triển toàn diện các kỹ năng nghe, nói, đọc, viết với giáo viên giàu kinh nghiệm và phương pháp hiện đại.',
-        DATEADD(MONTH, -1, GETDATE()), DATEADD(MONTH, 1, GETDATE()), 1500000, 'slide2.jpg', '/AnhVanClass'),
+        '2025-09-01', '2025-09-30', 1500000, 'slide2.jpg', '/AnhVanClass'),
     (N'Khoá học Văn',
         N'Khoá học Văn giúp học sinh nâng cao khả năng cảm thụ, phân tích tác phẩm và phát triển kỹ năng viết, trình bày ý tưởng một cách logic, sáng tạo.',
-        DATEADD(MONTH, -1, GETDATE()), DATEADD(MONTH, 1, GETDATE()), 1800000, 'slide3.jpg', '/VanClass'),
+        '2025-10-01', '2025-10-31', 1800000, 'slide3.jpg', '/VanClass'),
     (N'Khoá học Toán',
         N'Khoá học Toán xây dựng nền tảng vững chắc, phát triển tư duy logic và khả năng giải quyết vấn đề cho học sinh ở mọi cấp độ.',
-        DATEADD(MONTH, -1, GETDATE()), DATEADD(MONTH, 1, GETDATE()), 2000000, 'slide4.jpg', '/ToanClass'),
+        '2025-08-15', '2025-09-15', 2000000, 'slide4.jpg', '/ToanClass'),
     (N'Khoá học Lý',
         N'Khoá học Vật lý giúp học sinh hiểu sâu các khái niệm, vận dụng kiến thức vào thực tiễn và đạt kết quả cao trong các kỳ thi.',
-        DATEADD(MONTH, -1, GETDATE()), DATEADD(MONTH, 1, GETDATE()), 2000000, 'slide5.png', '/LyClass'),
+        '2025-09-05', '2025-10-05', 2000000, 'slide5.png', '/LyClass'),
     (N'Khoá học Hoá',
         N'Chương trình Hoá học chú trọng thực hành, giúp học sinh nắm vững lý thuyết và ứng dụng vào các bài tập, thí nghiệm thực tế.',
-        DATEADD(MONTH, -1, GETDATE()), DATEADD(MONTH, 1, GETDATE()), 2000000, 'slide6.png', '/HoaClass'),
+        '2025-10-10', '2025-11-10', 2000000, 'slide6.png', '/HoaClass'),
     (N'Khoá học Sử',
         N'Khoá học Lịch sử giúp học sinh hiểu rõ các sự kiện, nhân vật lịch sử và phát triển tư duy phản biện, phân tích.',
-        DATEADD(MONTH, -1, GETDATE()), DATEADD(MONTH, 1, GETDATE()), 1700000, 'slide7.jpg', '/SuClass');
+        '2025-11-01', '2025-11-30', 1700000, 'slide7.jpg', '/SuClass');
 
 -- Insert materials
 INSERT INTO materials
@@ -565,9 +559,7 @@ VALUES
 
 -- Insert classes
 DECLARE @teacher_id INT;
-SELECT @teacher_id = id 
-FROM teachers 
-WHERE user_id = (SELECT id FROM users WHERE username = 'bbbbbbbbbb');
+SELECT @teacher_id = id FROM teachers WHERE user_id = (SELECT id FROM users WHERE username = 'bbbbbbbbbb');
 
 INSERT INTO classes
     (class_name, course_id, teacher_id, start_time, end_time, weekly_schedule)
@@ -575,24 +567,13 @@ VALUES
     (N'Math A1', 1, @teacher_id, '08:00', '10:00', '2,4,6');
 -- Tue, Thu, Sat
 
+-- Schedules table does NOT have course_id; insert only the columns that existINSERT INTO ExamAssignments
 INSERT INTO schedules
     (class_id, day_of_week, schedule_date, start_time, end_time)
 VALUES
-    (1, N'Monday',
-        DATEADD(DAY, 
-            CAST((RAND(CHECKSUM(NEWID())) * DATEDIFF(DAY, DATEADD(MONTH, -1, GETDATE()), DATEADD(MONTH, 1, GETDATE()))) AS INT), 
-            DATEADD(MONTH, -1, GETDATE())),
-        '08:00', '10:00'),
-    (1, N'Wednesday',
-        DATEADD(DAY, 
-            CAST((RAND(CHECKSUM(NEWID())) * DATEDIFF(DAY, DATEADD(MONTH, -1, GETDATE()), DATEADD(MONTH, 1, GETDATE()))) AS INT), 
-            DATEADD(MONTH, -1, GETDATE())),
-        '08:00', '10:00'),
-    (1, N'Friday',
-        DATEADD(DAY, 
-            CAST((RAND(CHECKSUM(NEWID())) * DATEDIFF(DAY, DATEADD(MONTH, -1, GETDATE()), DATEADD(MONTH, 1, GETDATE()))) AS INT), 
-            DATEADD(MONTH, -1, GETDATE())),
-        '08:00', '10:00');
+    (1, N'Monday', '2025-08-02', '08:00', '10:00'),
+    (1, N'Wednesday', '2025-08-04', '08:00', '10:00'),
+    (1, N'Friday', '2025-08-06', '08:00', '10:00');
 
 
 -- Enroll all students in the Math A1 class
