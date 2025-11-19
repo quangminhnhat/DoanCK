@@ -145,7 +145,6 @@ footer {
                 <table class="modern-table">
                     <thead>
                         <tr>
-                            <th>ID</th>
                             <th>Course</th>
                             <th>File Name</th>
                             <th>Upload Date</th>
@@ -160,7 +159,6 @@ footer {
                         <% } else { %>
                         <% materials.forEach(material => { %>
                         <tr>
-                            <td><%= material.id %></td>
                             <td><%= material.course_name %></td>
                             <td><a href="/<%= material.file_path %>" target="_blank" class="text-blue-600 hover:text-blue-900 hover:underline"><%= material.file_name %></a></td>
                             <td><%= new Date(material.uploaded_at).toLocaleDateString() %></td>
