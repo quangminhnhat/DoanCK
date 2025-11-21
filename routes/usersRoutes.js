@@ -2,13 +2,27 @@ const express = require("express");
 const sql = require("msnodesqlv8");
 const { authenticateRole } = require("../middleware/roleAuth");
 const fs = require("fs");
+const path = require("path");
+const multer = require("multer");
 const connectionString = process.env.CONNECTION_STRING;
 const executeQuery = require("../middleware/executeQuery");
 const {
   checkAuthenticated,
 } = require("../middleware/auth");
 const router = express.Router();
-
+const profilePicStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const dir = 'uploads/profile_pic';
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    cb(null, dir);
+  },
+  filename: function (req, file, cb) {
+    cb(null, `user-${req.user.id}-${Date.now()}${path.extname(file.originalname)}`);
+  }
+});
+const profilePicUpload = multer({ storage: profilePicStorage });
 
 
 
@@ -37,7 +51,7 @@ router.get("/users/:id/edit", checkAuthenticated, async (req, res) => {
   try {
     const userId = req.params.id;
     const query = `
-          SELECT u.id, u.username, u.role, u.full_name, u.email, u.phone_number, t.salary
+          SELECT u.id, u.username, u.role, u.full_name, u.email, u.phone_number, u.profile_pic, t.salary
           FROM users u
           LEFT JOIN teachers t ON u.id = t.user_id
           WHERE u.id = ?
@@ -59,8 +73,8 @@ router.get("/users/:id/edit", checkAuthenticated, async (req, res) => {
   }
 });
 
-router.post("/users/:id", checkAuthenticated, async (req, res) => {
-  const { username, role, full_name, email, phone_number, salary } = req.body;
+router.post("/users/:id", checkAuthenticated, profilePicUpload.single('profile_pic'), async (req, res) => {
+  const { username, role, full_name, email, phone_number, salary, profile_pic } = req.body;
   const userId = req.params.id;
   let connection; // Define connection here to be accessible in catch/finally
 
@@ -72,7 +86,7 @@ router.post("/users/:id", checkAuthenticated, async (req, res) => {
     await connection.promises.beginTransaction();
 
     // 2. Get the current role of the user being edited
-    const roleResult = await connection.promises.query("SELECT role FROM users WHERE id = ?", [userId]);
+    const roleResult = await connection.promises.query("SELECT role, profile_pic FROM users WHERE id = ?", [userId]);
     const oldRole = roleResult.first[0]?.role;
 
     if (!oldRole) {
@@ -80,12 +94,25 @@ router.post("/users/:id", checkAuthenticated, async (req, res) => {
       return res.status(404).send("User not found.");
     }
 
+    let newProfilePicPath = roleResult.first[0]?.profile_pic;
+    if (req.file) {
+      newProfilePicPath = req.file.path;
+      // If there was an old picture, delete it
+      const oldPicPath = roleResult.first[0]?.profile_pic;
+      if (oldPicPath && fs.existsSync(oldPicPath)) {
+        fs.unlink(oldPicPath, (err) => {
+          if (err) console.error("Error deleting old profile picture:", err);
+        });
+      }
+    }
+
+
     // 3. Update the central users table
     const updateUserQuery = `
       UPDATE users 
-      SET username = ?, role = ?, full_name = ?, email = ?, phone_number = ?, updated_at = GETDATE()
+      SET username = ?, role = ?, full_name = ?, email = ?, phone_number = ?, profile_pic = ?, updated_at = GETDATE()
       WHERE id = ?`;
-    await connection.promises.query(updateUserQuery, [username, role, full_name, email, phone_number, userId]);
+    await connection.promises.query(updateUserQuery, [username, role, full_name, email, phone_number, newProfilePicPath, userId]);
 
     // 4. Handle role-specific table changes if the role was modified
     if (oldRole !== role) {
@@ -120,6 +147,12 @@ router.post("/users/:id", checkAuthenticated, async (req, res) => {
     }
   } catch (error) {
     console.error("Error updating user:", error);
+    // If an error occurs and a new file was uploaded, delete it
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlink(req.file.path, (err) => {
+        if (err) console.error("Error deleting uploaded file after failed update:", err);
+      });
+    }
     if (connection) {
       console.log("Attempting to rollback transaction...");
       await connection.promises.rollback();
@@ -204,7 +237,7 @@ router.get("/profile", checkAuthenticated, async (req, res) => {
 
     // The user's details are all in the 'users' table now.
     const query = `
-      SELECT username, role, full_name, email, phone_number, address, CONVERT(varchar(10), date_of_birth, 23) as date_of_birth
+      SELECT username, role, full_name, email, phone_number, address, profile_pic, CONVERT(varchar(10), date_of_birth, 23) as date_of_birth, created_at, updated_at
       FROM users
       WHERE id = ?
     `;

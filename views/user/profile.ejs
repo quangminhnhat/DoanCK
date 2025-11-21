@@ -127,6 +127,13 @@
                     <i class="fas fa-edit"></i> Edit Profile
                 </a>
             </div>
+            <div class="flex justify-center mb-6">
+                <img 
+                    src="<%= details.profile_pic ? '/' + details.profile_pic.replace(/\\/g, '/') : '/uploads/profile_pic/default_profile_pic.png' %>" 
+                    alt="Profile Picture" 
+                    class="rounded-full h-32 w-32 object-cover border-4 border-blue-200 shadow-lg"
+                >
+            </div>
             <div class="modern-section">
                 <div class="modern-section-title">Account Information</div>
                 <div class="modern-info-grid">

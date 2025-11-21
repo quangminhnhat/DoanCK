@@ -108,11 +108,30 @@
     <div class="modern-container">
         <div class="modern-header">
             <div class="modern-title">Edit User</div>
-            <a href="/profile" class="modern-btn-primary" style="font-size:1rem;padding:0.5rem 1.2rem;">
-                <i class="fas fa-user"></i> View Profile
-            </a>
+            <% if (user.role === 'admin' && user.id !== editUser.id) { %>
+                <a href="/users" class="modern-btn-primary" style="font-size:1rem;padding:0.5rem 1.2rem;">
+                    <i class="fas fa-arrow-left"></i> Back to Users
+                </a>
+            <% } else { %>
+                <a href="/profile" class="modern-btn-primary" style="font-size:1rem;padding:0.5rem 1.2rem;">
+                    <i class="fas fa-user"></i> View Profile
+                </a>
+            <% } %>
         </div>
-        <form action="/users/<%= editUser.id %>" method="POST" class="space-y-6">
+        <form action="/users/<%= editUser.id %>" method="POST" enctype="multipart/form-data" class="space-y-6">
+            <div class="modern-section">
+                <div class="modern-section-title">Profile Picture</div>
+                <div class="flex items-center space-x-6">
+                    <img 
+                        src="<%= editUser.profile_pic ? '/' + editUser.profile_pic.replace(/\\/g, '/') : '/uploads/profile_pic/default_profile_pic.png' %>" 
+                        alt="Current Profile Picture" 
+                        class="rounded-full h-24 w-24 object-cover border-2 border-gray-300">
+                    <div>
+                        <label for="profile_pic" class="modern-info-label">Change Picture</label>
+                        <input type="file" name="profile_pic" id="profile_pic" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                    </div>
+                </div>
+            </div>
             <div class="modern-section">
                 <div class="modern-section-title">Account Information</div>
                 <div class="modern-info-grid">
@@ -123,10 +142,11 @@
                     </div>
                     <div class="modern-info-item">
                         <label class="modern-info-label">Role</label>
-                        <select name="role" class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 modern-info-value">
+                        <select name="role" class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 modern-info-value <%= (user.role !== 'admin' && user.id === editUser.id) ? 'bg-gray-200 cursor-not-allowed' : '' %>"
+                            <%= (user.role !== 'admin' && user.id === editUser.id) ? 'disabled' : '' %>>
                             <option value="student" <%= editUser.role === 'student' ? 'selected' : '' %>>Student</option>
                             <option value="teacher" <%= editUser.role === 'teacher' ? 'selected' : '' %>>Teacher</option>
-                            <option value="admin" <%= editUser.role === 'admin' ? 'selected' : '' %>>Admin</option>
+                            <option value="admin" <%= editUser.role === 'admin' ? 'selected' : '' %> <%= user.role !== 'admin' ? 'disabled' : '' %>>Admin</option>
                         </select>
                     </div>
                 </div>

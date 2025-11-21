@@ -13,6 +13,7 @@ CREATE TABLE users
     email NVARCHAR(100) NULL,
     phone_number VARCHAR(20) NULL,
     address NVARCHAR(255) NULL,
+    profile_pic NVARCHAR(500) NULL,
     date_of_birth DATE NULL,
     created_at DATETIME DEFAULT GETDATE() NOT NULL,
     updated_at DATETIME DEFAULT GETDATE() NOT NULL,
@@ -1070,6 +1071,3 @@ VALUES
         END
     END
 END;
-
-
-

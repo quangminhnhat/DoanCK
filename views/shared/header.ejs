@@ -100,18 +100,20 @@
             <div id="nav-footer">
                 <div id="nav-footer-heading">
                     <div id="nav-footer-avatar">
-                        <img src="/images/gv1.png" />
+                        <img src="<%= user.profile_pic ? '/' + user.profile_pic.replace(/\\/g, '/') : '/uploads/profile_pic/default_profile_pic.png' %>" alt="User Avatar" />
                     </div>
                     <div id="nav-footer-titlebox">
-                        <a id="nav-footer-title" href="https://codepen.io/uahnbu/pens/public" target="_blank">User</a>
-                        <span id="nav-footer-subtitle">Role</span>
+                        <a id="nav-footer-title" href="/profile"><%= user.username %></a>
+                        <span id="nav-footer-subtitle"><%= user.role %></span>
                     </div>
                     <label for="nav-footer-toggle">
                         <i class="fas fa-caret-up"></i>
                     </label>
                 </div>
                 <div id="nav-footer-content">
-
+                    <p><i class="fas fa-user fa-fw"></i> <%= user.full_name || 'N/A' %></p>
+                    <p><i class="fas fa-envelope fa-fw"></i> <%= user.email || 'N/A' %></p>
+                    <p><i class="fas fa-phone fa-fw"></i> <%= user.phone_number || 'N/A' %></p>
                 </div>
             </div>
         </div>
