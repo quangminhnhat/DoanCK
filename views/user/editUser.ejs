@@ -118,6 +118,20 @@
                 </a>
             <% } %>
         </div>
+
+        <% if (locals.messages && messages.error && messages.error.length > 0) { %>
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6" role="alert">
+                <p class="font-bold">Error</p>
+                <p><%= messages.error[0] %></p>
+            </div>
+        <% } %>
+        <% if (locals.messages && messages.success && messages.success.length > 0) { %>
+            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6" role="alert">
+                <p class="font-bold">Success</p>
+                <p><%= messages.success[0] %></p>
+            </div>
+        <% } %>
+
         <form action="/users/<%= editUser.id %>" method="POST" enctype="multipart/form-data" class="space-y-6">
             <div class="modern-section">
                 <div class="modern-section-title">Profile Picture</div>
