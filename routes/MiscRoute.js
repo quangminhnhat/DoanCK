@@ -108,6 +108,7 @@ router.post(
       console.log("Hitting registration endpoint with body:", req.body);
       const {
         Name: username,
+        fullName,
         email,
         birthday: birth,
         phone,
@@ -120,6 +121,7 @@ router.post(
       if (
         !username ||
         !email ||
+        !fullName ||
         !birth ||
         !phone ||
         !address ||
@@ -129,6 +131,7 @@ router.post(
         console.log("Missing required fields:", {
           username,
           email,
+          fullName,
           birth,
           phone,
           address,
@@ -170,7 +173,7 @@ router.post(
         username,
         hashpassword,
         role,
-        username, // Using username as full_name for now
+        fullName,
         email,
         phone,
         address,
