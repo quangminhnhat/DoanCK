@@ -160,63 +160,64 @@ router.post(
         );
       };
 
+      // The user's personal information (full_name, email, etc.) should be in the 'users' table.
+      // The role-specific tables (students, teachers, admins) only need the user_id to link back to the users table.
+      const userInsertQuery = `
+        INSERT INTO users (username, password, role, full_name, email, phone_number, address, date_of_birth, created_at, updated_at) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, GETDATE(), GETDATE());
+      `;
+      const userValues = [
+        username,
+        hashpassword,
+        role,
+        username, // Using username as full_name for now
+        email,
+        phone,
+        address,
+        birth,
+      ];
+
       if (role === "student") {
         const insertQuery = `
         BEGIN TRANSACTION;
-        INSERT INTO users (username, password, role, created_at, updated_at) 
-        VALUES (?, ?, ?, GETDATE(), GETDATE());
+        ${userInsertQuery}
         
         DECLARE @NewUserId INT;
         SET @NewUserId = SCOPE_IDENTITY();
         
-        INSERT INTO students (user_id, full_name, email, phone_number, address, date_of_birth, created_at, updated_at)
-        VALUES (@NewUserId, ?, ?, ?, ?, ?, GETDATE(), GETDATE());
+        INSERT INTO students (user_id, created_at, updated_at)
+        VALUES (@NewUserId, GETDATE(), GETDATE());
         
         COMMIT TRANSACTION;
       `;
-        const values = [
-          username,
-          hashpassword,
-          role,
-          username,
-          email,
-          phone,
-          address,
-          birth,
-        ];
 
-        sql.query(connectionString, insertQuery, values, (err, result) => {
+        sql.query(connectionString, insertQuery, userValues, (err, result) => {
           if (err) return handleSqlError(err);
           console.log("Student registered:", result);
           return sendResponse(200, "Registration successful");
         });
       } else if (role === "teacher") {
+        // Add salary to the user insert query for teachers
+        const teacherUserInsertQuery = `
+          INSERT INTO users (username, password, role, full_name, email, phone_number, address, date_of_birth, created_at, updated_at) 
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, GETDATE(), GETDATE());
+        `;
+        const teacherUserValues = [...userValues, salary || null];
+
         const insertQuery = `
         BEGIN TRANSACTION;
-        INSERT INTO users (username, password, role, created_at, updated_at) 
-        VALUES (?, ?, ?, GETDATE(), GETDATE());
+        ${teacherUserInsertQuery}
         
         DECLARE @NewUserId INT;
         SET @NewUserId = SCOPE_IDENTITY();
         
-        INSERT INTO teachers (user_id, full_name, email, phone_number, address, date_of_birth, salary, created_at, updated_at)
-        VALUES (@NewUserId, ?, ?, ?, ?, ?, ?, GETDATE(), GETDATE());
+        INSERT INTO teachers (user_id, salary, created_at, updated_at)
+        VALUES (@NewUserId, ?, GETDATE(), GETDATE());
         
         COMMIT TRANSACTION;
       `;
-        const values = [
-          username,
-          hashpassword,
-          role,
-          username,
-          email,
-          phone,
-          address,
-          birth,
-          salary,
-        ];
 
-        sql.query(connectionString, insertQuery, values, (err, result) => {
+        sql.query(connectionString, insertQuery, teacherUserValues, (err, result) => {
           if (err) return handleSqlError(err);
           console.log("Teacher registered:", result);
           return sendResponse(200, "Registration successful");
@@ -224,20 +225,18 @@ router.post(
       } else if (role === "admin") {
         const insertQuery = `
         BEGIN TRANSACTION;
-        INSERT INTO users (username, password, role, created_at, updated_at) 
-        VALUES (?, ?, ?, GETDATE(), GETDATE());
+        ${userInsertQuery}
         
         DECLARE @NewUserId INT;
         SET @NewUserId = SCOPE_IDENTITY();
-        
-        INSERT INTO admins (user_id, full_name, email, phone_number, created_at, updated_at)
-        VALUES (@NewUserId, ?, ?, ?, GETDATE(), GETDATE());
+
+        INSERT INTO admins (user_id, created_at, updated_at)
+        VALUES (@NewUserId, GETDATE(), GETDATE());
         
         COMMIT TRANSACTION;
       `;
-        const values = [username, hashpassword, role, username, email, phone];
 
-        sql.query(connectionString, insertQuery, values, (err, result) => {
+        sql.query(connectionString, insertQuery, userValues, (err, result) => {
           if (err) return handleSqlError(err);
           console.log("Admin registered:", result);
           return sendResponse(200, "Registration successful");
