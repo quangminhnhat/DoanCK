@@ -1,159 +1,171 @@
-<section id="Slider"></section>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trang Chủ</title>
+    <title>Add New Question</title>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://demos.creative-tim.com/notus-js/assets/styles/tailwind.css">
-    <!-- link swiper-->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <link rel="stylesheet"
         href="https://demos.creative-tim.com/notus-js/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css">
+    
+    <style>
+        .modern-container {
+            max-width: 800px;
+            margin: 48px auto;
+            padding: 2.25rem 2rem;
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 6px 30px rgba(44,62,80,0.08);
+            border: 1px solid #e6e9ef;
+            animation: fadeIn 0.4s ease;
+        }
+        .modern-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #2375D8;
+            margin-bottom: 1.25rem;
+            display:flex;
+            align-items:center;
+            gap:0.6rem;
+        }
+        .modern-form-group { margin-bottom: 1.1rem; }
+        .modern-form-group label { display:block; margin-bottom:0.45rem; font-weight:600; color:#374151; }
+        .modern-form-control {
+            width:100%;
+            padding:0.7rem;
+            border:1px solid #e2e8f0;
+            border-radius:8px;
+            font-size:1rem;
+        }
+        .modern-btn-primary, .modern-btn-secondary, .modern-btn-outline {
+            font-weight:700;
+            padding:0.75rem 1rem;
+            border:none;
+            border-radius:10px;
+            cursor:pointer;
+            display:inline-flex;
+            gap:0.6rem;
+            align-items:center;
+            justify-content:center;
+            text-decoration: none;
+        }
+        .modern-btn-primary {
+            background: linear-gradient(90deg, #2375D8 0%, #0c9083 100%);
+            color: #fff;
+        }
+        .modern-btn-secondary {
+            background:#e6eef8;
+            color:#2b6cb0;
+        }
+        .modern-btn-outline {
+            background: transparent;
+            color: #2375D8;
+            border: 1px solid #2375D8;
+        }
+        #mcqOptions h4 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #374151;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e6e9ef;
+        }
+        .modern-option-item {
+            background: #f9fafb;
+            border: 1px solid #e6e9ef;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .modern-option-item .option-inputs { flex-grow: 1; }
+        .modern-option-item .option-actions { display:flex; flex-direction:column; align-items:center; gap:0.5rem; }
+        .modern-option-item .form-check-label { font-size: 0.9rem; }
+        .modern-btn-danger { color: #ef4444; background:none; border:none; cursor:pointer; }
+
+        @keyframes fadeIn { from { opacity:0; transform:translateY(10px);} to { opacity:1; transform:translateY(0);} }
+    </style>
 </head>
 
 <body>
 <%- include('../shared/header') %>
 
-<div class="container mt-4">
-    <div class="row mb-4">
-        <div class="col">
-            <h2>Add New Question</h2>
+<main>
+    <div class="modern-container">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+            <div class="modern-title">
+                <i class="fas fa-plus-circle"></i>
+                Add New Question
+            </div>
+            <div>
+                <a href="/exams/<%= examId %>/edit" class="modern-btn-secondary"><i class="fas fa-arrow-left"></i> Back to Exam</a>
+            </div>
         </div>
-        <div class="col-auto">
-            <a href="/exams/<%= examId %>/edit" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Back to Exam
-            </a>
-        </div>
-    </div>
 
-    <div class="row">
-        <div class="col-md-8 offset-md-2">
-            <form id="questionForm" enctype="multipart/form-data">
-                <div class="mb-3">
-                    <label for="questionType" class="form-label">Question Type*</label>
-                    <select class="form-select" id="questionType" name="type_id" required>
-                        <option value="">Select Question Type</option>
-                        <option value="1">Multiple Choice</option>
-                        <option value="2">Essay</option>
-                    </select>
+        <form id="questionForm" enctype="multipart/form-data">
+            <div class="modern-form-group">
+                <label for="questionType">Question Type*</label>
+                <select class="modern-form-control" id="questionType" name="type_id" required>
+                    <option value="">Select Question Type</option>
+                    <option value="1">Multiple Choice</option>
+                    <option value="2">Essay</option>
+                </select>
+            </div>
+
+            <div class="modern-form-group">
+                <label for="questionText">Question Text*</label>
+                <textarea class="modern-form-control" id="questionText" name="question_text" rows="4" required></textarea>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                <div class="modern-form-group">
+                    <label for="points">Points*</label>
+                    <input type="number" class="modern-form-control" id="points" name="points" min="1" value="1" required>
                 </div>
-
-                <div class="mb-3">
-                    <label for="questionText" class="form-label">Question Text*</label>
-                    <textarea class="form-control" id="questionText" name="question_text" rows="3" required></textarea>
-                </div>
-
-                <div class="mb-3">
-                    <label for="points" class="form-label">Points*</label>
-                    <input type="number" class="form-control" id="points" name="points" min="1" value="1" required>
-                </div>
-
-                <div class="mb-3">
-                    <label for="difficulty" class="form-label">Difficulty Level</label>
-                    <select class="form-select" id="difficulty" name="difficulty">
+                <div class="modern-form-group">
+                    <label for="difficulty">Difficulty Level</label>
+                    <select class="modern-form-control" id="difficulty" name="difficulty">
                         <option value="">Select Difficulty</option>
                         <option value="1">Easy</option>
                         <option value="2">Medium</option>
                         <option value="3">Hard</option>
                     </select>
                 </div>
+            </div>
 
-                <div id="mcqOptions" style="display: none;">
-                    <h4>Multiple Choice Options</h4>
-                    <div id="optionsList">
-                        <!-- Initial two options -->
-                        <div class="option-item mb-3">
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="row align-items-center">
-                                        <div class="col">
-                                            <div class="form-floating mb-2">
-                                                <input type="text" class="form-control option-text" 
-                                                       id="option0" name="option_text[]" 
-                                                       placeholder="Option text">
-                                                <label for="option0">Option A</label>
-                                            </div>
-                                            <div class="form-floating">
-                                                <input type="text" class="form-control option-explanation" 
-                                                       id="explanation0" name="option_explanation[]" 
-                                                       placeholder="Explanation">
-                                                <label for="explanation0">Explanation (Optional)</label>
-                                            </div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <div class="form-check mt-2">
-                                                <input type="radio" class="form-check-input option-correct" 
-                                                       name="correct_option" required>
-                                                <label class="form-check-label">Correct Answer</label>
-                                            </div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <button type="button" class="btn btn-danger btn-sm delete-option">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="option-item mb-3">
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="row align-items-center">
-                                        <div class="col">
-                                            <div class="form-floating mb-2">
-                                                <input type="text" class="form-control option-text" 
-                                                       id="option1" name="option_text[]" 
-                                                       placeholder="Option text">
-                                                <label for="option1">Option B</label>
-                                            </div>
-                                            <div class="form-floating">
-                                                <input type="text" class="form-control option-explanation" 
-                                                       id="explanation1" name="option_explanation[]" 
-                                                       placeholder="Explanation">
-                                                <label for="explanation1">Explanation (Optional)</label>
-                                            </div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <div class="form-check mt-2">
-                                                <input type="radio" class="form-check-input option-correct" 
-                                                       name="correct_option" required>
-                                                <label class="form-check-label">Correct Answer</label>
-                                            </div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <button type="button" class="btn btn-danger btn-sm delete-option">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <button type="button" id="addOption" class="btn btn-outline-primary mb-3">
-                        <i class="fas fa-plus"></i> Add Option
-                    </button>
+            <div id="mcqOptions" style="display: none;">
+                <h4>Multiple Choice Options</h4>
+                <div id="optionsList">
+                    <!-- Initial options will be added by JS -->
                 </div>
+                <button type="button" id="addOption" class="modern-btn-outline mb-3">
+                    <i class="fas fa-plus"></i> Add Option
+                </button>
+            </div>
 
-                <div class="mb-3">
-                    <label for="media" class="form-label">Add Media Files</label>
-                    <input type="file" class="form-control" id="media" name="media" multiple>
-                    <div class="form-text">You can upload multiple images or documents</div>
-                </div>
+            <div class="modern-form-group">
+                <label for="media">Add Media Files</label>
+                <input type="file" class="modern-form-control" id="media" name="media" multiple>
+                <div style="font-size:0.9rem; color:#6b7280; margin-top:0.5rem;">You can upload multiple images or documents</div>
+            </div>
 
-                <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> Create Question
-                    </button>
-                </div>
-            </form>
-        </div>
+            <div style="display:flex; justify-content:flex-end; gap:1rem; margin-top:2rem;">
+                <a href="/exams/<%= examId %>/edit" class="modern-btn-secondary"><i class="fas fa-times"></i> Cancel</a>
+                <button type="submit" class="modern-btn-primary">
+                    <i class="fas fa-save"></i> Create Question
+                </button>
+            </div>
+        </form>
     </div>
-</div>
+</main>
+
 
 <script>
 const questionForm = document.getElementById('questionForm');
@@ -162,157 +174,128 @@ const mcqOptions = document.getElementById('mcqOptions');
 const optionsList = document.getElementById('optionsList');
 const addOptionBtn = document.getElementById('addOption');
 
-// Show/hide MCQ options based on question type selection
-questionType.addEventListener('change', () => {
-    mcqOptions.style.display = questionType.value === '1' ? 'block' : 'none';
-    
-    // Make radio buttons required only for MCQ questions
-    const radioButtons = document.querySelectorAll('.option-correct');
-    radioButtons.forEach(radio => {
-        radio.required = questionType.value === '1';
-    });
-});
-
-// Add new MCQ option
-if (addOptionBtn) {
-    addOptionBtn.addEventListener('click', () => {
-        const optionIndex = optionsList.children.length;
-        const optionLetter = String.fromCharCode(65 + optionIndex);
-        
-        const optionHtml = `
-            <div class="option-item mb-3">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col">
-                                <div class="form-floating mb-2">
-                                    <input type="text" class="form-control option-text" 
-                                           id="option${optionIndex}" name="option_text[]" 
-                                           placeholder="Option text">
-                                    <label for="option${optionIndex}">Option ${optionLetter}</label>
-                                </div>
-                                <div class="form-floating">
-                                    <input type="text" class="form-control option-explanation" 
-                                           id="explanation${optionIndex}" name="option_explanation[]" 
-                                           placeholder="Explanation">
-                                    <label for="explanation${optionIndex}">Explanation (Optional)</label>
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <div class="form-check mt-2">
-                                    <input type="radio" class="form-check-input option-correct" 
-                                           name="correct_option" required>
-                                    <label class="form-check-label">Correct Answer</label>
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <button type="button" class="btn btn-danger btn-sm delete-option">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+function createOptionElement(index) {
+    const optionLetter = String.fromCharCode(65 + index);
+    const div = document.createElement('div');
+    div.className = 'modern-option-item';
+    div.innerHTML = `
+        <div class="option-inputs">
+            <input type="text" class="modern-form-control option-text" 
+                   placeholder="Option ${optionLetter} Text" required>
+            <input type="text" class="modern-form-control option-explanation mt-2" 
+                   placeholder="Explanation (optional)">
+        </div>
+        <div class="option-actions">
+            <div class="form-check">
+                <input class="form-check-input option-correct" type="radio" name="correct_option" required>
+                <label class="form-check-label">Correct</label>
             </div>
-        `;
-        
-        optionsList.insertAdjacentHTML('beforeend', optionHtml);
+            <button type="button" class="modern-btn-danger delete-option" title="Delete Option">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    `;
+    return div;
+}
+
+function updateDeleteButtons() {
+    const optionItems = optionsList.querySelectorAll('.modern-option-item');
+    optionItems.forEach((item, index) => {
+        const deleteBtn = item.querySelector('.delete-option');
+        deleteBtn.disabled = optionItems.length <= 2;
     });
 }
 
-// Delete option handler
+function addInitialOptions() {
+    optionsList.innerHTML = ''; // Clear list
+    optionsList.appendChild(createOptionElement(0));
+    optionsList.appendChild(createOptionElement(1));
+    updateDeleteButtons();
+}
+
+questionType.addEventListener('change', () => {
+    const isMcq = questionType.value === '1';
+    mcqOptions.style.display = isMcq ? 'block' : 'none';
+    
+    if (isMcq && optionsList.children.length === 0) {
+        addInitialOptions();
+    }
+    
+    document.querySelectorAll('.option-correct, .option-text').forEach(el => {
+        el.required = isMcq;
+    });
+});
+
+addOptionBtn.addEventListener('click', () => {
+    const optionIndex = optionsList.children.length;
+    if (optionIndex < 10) { // Limit options
+        optionsList.appendChild(createOptionElement(optionIndex));
+        updateDeleteButtons();
+    }
+});
+
 optionsList.addEventListener('click', (e) => {
-    if (e.target.closest('.delete-option')) {
-        const optionItem = e.target.closest('.option-item');
-        if (optionsList.children.length > 2) {
-            optionItem.remove();
-            // Update option letters
-            Array.from(optionsList.children).forEach((item, index) => {
-                const letter = String.fromCharCode(65 + index);
-                const input = item.querySelector('.option-text');
-                const label = item.querySelector('.form-floating label');
-                input.id = `option${index}`;
-                label.htmlFor = `option${index}`;
-                label.textContent = `Option ${letter}`;
-            });
-        } else {
-            alert('MCQ questions must have at least 2 options');
-        }
+    const deleteBtn = e.target.closest('.delete-option');
+    if (deleteBtn && !deleteBtn.disabled) {
+        deleteBtn.closest('.modern-option-item').remove();
+        // Update letters and states
+        optionsList.querySelectorAll('.modern-option-item').forEach((item, index) => {
+            const letter = String.fromCharCode(65 + index);
+            item.querySelector('.option-text').placeholder = `Option ${letter} Text`;
+        });
+        updateDeleteButtons();
     }
 });
 
 questionForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    // Get basic question data
-    const questionText = document.getElementById('questionText').value.trim();
-    if (!questionText) {
-        alert('Question text is required');
+    const typeId = questionType.value;
+    if (!typeId) {
+        alert('Please select a question type.');
         return;
     }
-    
-    // Validate MCQ options if applicable
-    const typeId = questionType.value;
-    if (typeId === '1') {
-        const options = document.querySelectorAll('.option-item');
-        if (options.length < 2) {
-            alert('MCQ questions must have at least 2 options');
-            return;
-        }
-        
-        // Check if all options have text
-        let hasEmptyOption = false;
-        options.forEach((item, index) => {
-            const optionText = item.querySelector('.option-text').value.trim();
-            if (!optionText) {
-                alert(`Option ${String.fromCharCode(65 + index)} text is required`);
-                hasEmptyOption = true;
-            }
-        });
-        if (hasEmptyOption) return;
-        
-        const hasCorrectAnswer = Array.from(options).some(option => 
-            option.querySelector('.option-correct').checked
-        );
-        
-        if (!hasCorrectAnswer) {
-            alert('Please select a correct answer for the MCQ question');
-            return;
-        }
-    }
-    
+
     const formData = new FormData();
-    
-    // Add basic question data
-    formData.append('question_text', questionText);
+    formData.append('question_text', document.getElementById('questionText').value.trim());
     formData.append('points', document.getElementById('points').value);
     formData.append('difficulty', document.getElementById('difficulty').value || null);
     formData.append('type_id', typeId);
 
-    // Add MCQ options if applicable
     if (typeId === '1') {
         const options = [];
-        const optionItems = document.querySelectorAll('.option-item');
+        const optionItems = document.querySelectorAll('.modern-option-item');
         
-        optionItems.forEach((item, index) => {
+        let allOptionsValid = true;
+        optionItems.forEach(item => {
+            const text = item.querySelector('.option-text').value.trim();
+            if (!text) allOptionsValid = false;
             options.push({
-                text: item.querySelector('.option-text').value,
+                text: text,
                 isCorrect: item.querySelector('.option-correct').checked,
-                explanation: item.querySelector('.option-explanation').value || null
+                explanation: item.querySelector('.option-explanation').value.trim() || null
             });
         });
+
+        if (!allOptionsValid) {
+            alert('All option text fields must be filled.');
+            return;
+        }
+        if (!options.some(o => o.isCorrect)) {
+            alert('Please select a correct answer.');
+            return;
+        }
         
         formData.append('options', JSON.stringify(options));
     }
 
-    // Add media files
     const mediaFiles = document.getElementById('media').files;
     for (let i = 0; i < mediaFiles.length; i++) {
         formData.append('media', mediaFiles[i]);
     }
 
     try {
-        const response = await fetch(`/<%= examId %>/questions/add`, {
+        const response = await fetch('/<%= examId %>/questions/add', {
             method: 'POST',
             body: formData
         });
@@ -326,7 +309,7 @@ questionForm.addEventListener('submit', async (e) => {
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('Error creating question');
+        alert('An unexpected error occurred.');
     }
 });
 </script>
