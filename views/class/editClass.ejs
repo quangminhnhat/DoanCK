@@ -158,11 +158,11 @@
           <div style="display: flex; gap: 1rem;">
             <div style="flex:1;">
               <label>Start Time</label>
-              <input type="time" name="start_time" value="<%= classItem.formatted_start_time %>" required>
+              <input type="time" name="start_time" value="<%= classItem.formatted_start_time %>" step="3600" required>
             </div>
             <div style="flex:1;">
               <label>End Time</label>
-              <input type="time" name="end_time" value="<%= classItem.formatted_end_time %>" required>
+              <input type="time" name="end_time" value="<%= classItem.formatted_end_time %>" step="3600" required>
             </div>
           </div>
 

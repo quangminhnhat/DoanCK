@@ -532,25 +532,25 @@ INSERT INTO courses
 VALUES
     (N'Khoá học Toán, Lý, Hoá, Anh',
         N'Các khoá học Toán, Lý, Hoá, Anh được thiết kế phù hợp với từng trình độ, giúp học sinh củng cố kiến thức nền tảng, phát triển tư duy logic và nâng cao kỹ năng ngoại ngữ. Đội ngũ giáo viên chuyên môn, phương pháp giảng dạy hiện đại, hỗ trợ học sinh đạt kết quả cao trong học tập.',
-        '2025-08-01', '2025-08-31', 3000000, 'slide1.jpg', '/Toan,Ly,Hoaclass'),
+        DATEADD(month, -1, GETDATE()), DATEADD(month, 1, GETDATE()), 3000000, 'slide1.jpg', '/Toan,Ly,Hoaclass'),
     (N'Khoá học Anh Văn',
         N'Chương trình Anh văn giúp học sinh phát triển toàn diện các kỹ năng nghe, nói, đọc, viết với giáo viên giàu kinh nghiệm và phương pháp hiện đại.',
-        '2025-09-01', '2025-09-30', 1500000, 'slide2.jpg', '/AnhVanClass'),
+        DATEADD(month, -1, GETDATE()), DATEADD(month, 1, GETDATE()), 1500000, 'slide2.jpg', '/AnhVanClass'),
     (N'Khoá học Văn',
         N'Khoá học Văn giúp học sinh nâng cao khả năng cảm thụ, phân tích tác phẩm và phát triển kỹ năng viết, trình bày ý tưởng một cách logic, sáng tạo.',
-        '2025-10-01', '2025-10-31', 1800000, 'slide3.jpg', '/VanClass'),
+        DATEADD(month, -1, GETDATE()), DATEADD(month, 1, GETDATE()), 1800000, 'slide3.jpg', '/VanClass'),
     (N'Khoá học Toán',
         N'Khoá học Toán xây dựng nền tảng vững chắc, phát triển tư duy logic và khả năng giải quyết vấn đề cho học sinh ở mọi cấp độ.',
-        '2025-08-15', '2025-09-15', 2000000, 'slide4.jpg', '/ToanClass'),
+        DATEADD(month, -1, GETDATE()), DATEADD(month, 1, GETDATE()), 2000000, 'slide4.jpg', '/ToanClass'),
     (N'Khoá học Lý',
         N'Khoá học Vật lý giúp học sinh hiểu sâu các khái niệm, vận dụng kiến thức vào thực tiễn và đạt kết quả cao trong các kỳ thi.',
-        '2025-09-05', '2025-10-05', 2000000, 'slide5.png', '/LyClass'),
+        DATEADD(month, -1, GETDATE()), DATEADD(month, 1, GETDATE()), 2000000, 'slide5.png', '/LyClass'),
     (N'Khoá học Hoá',
         N'Chương trình Hoá học chú trọng thực hành, giúp học sinh nắm vững lý thuyết và ứng dụng vào các bài tập, thí nghiệm thực tế.',
-        '2025-10-10', '2025-11-10', 2000000, 'slide6.png', '/HoaClass'),
+        DATEADD(month, -1, GETDATE()), DATEADD(month, 1, GETDATE()), 2000000, 'slide6.png', '/HoaClass'),
     (N'Khoá học Sử',
         N'Khoá học Lịch sử giúp học sinh hiểu rõ các sự kiện, nhân vật lịch sử và phát triển tư duy phản biện, phân tích.',
-        '2025-11-01', '2025-11-30', 1700000, 'slide7.jpg', '/SuClass');
+        DATEADD(month, -1, GETDATE()), DATEADD(month, 1, GETDATE()), 1700000, 'slide7.jpg', '/SuClass');
 
 -- Insert materials
 INSERT INTO materials
@@ -568,13 +568,23 @@ VALUES
     (N'Math A1', 1, @teacher_id, '08:00', '10:00', '2,4,6');
 -- Tue, Thu, Sat
 
--- Schedules table does NOT have course_id; insert only the columns that existINSERT INTO ExamAssignments
+-- Insert schedules with random dates within the course duration
+DECLARE @course_start_date DATE;
+DECLARE @course_end_date DATE;
+DECLARE @date_diff INT;
+
+-- Get the date range for course_id = 1 (linked to class_id = 1)
+SELECT @course_start_date = start_date, @course_end_date = end_date
+FROM courses WHERE id = 1;
+
+SET @date_diff = DATEDIFF(day, @course_start_date, @course_end_date);
+
 INSERT INTO schedules
     (class_id, day_of_week, schedule_date, start_time, end_time)
 VALUES
-    (1, N'Monday', '2025-08-02', '08:00', '10:00'),
-    (1, N'Wednesday', '2025-08-04', '08:00', '10:00'),
-    (1, N'Friday', '2025-08-06', '08:00', '10:00');
+    (1, N'Monday', DATEADD(day, ABS(CHECKSUM(NEWID())) % @date_diff, @course_start_date), '08:00', '10:00'),
+    (1, N'Wednesday', DATEADD(day, ABS(CHECKSUM(NEWID())) % @date_diff, @course_start_date), '08:00', '10:00'),
+    (1, N'Friday', DATEADD(day, ABS(CHECKSUM(NEWID())) % @date_diff, @course_start_date), '08:00', '10:00');
 
 
 -- Enroll all students in the Math A1 class
