@@ -171,7 +171,9 @@ footer {
                             <td><%= cls.scheduleDisplay %></td>
                             <td><%= cls.student_count %> enrolled</td>
                             <td class="actions">
+                                <a href="/classes/<%= cls.id %>/students" title="View Students"><i class="fas fa-users"></i></a>
                                 <a href="/classes/<%= cls.id %>/edit" title="Edit"><i class="fas fa-edit"></i></a>
+                                
                                 <form action="/classes/<%= cls.id %>?_method=DELETE" method="POST" style="display:inline;">
                                     <button type="submit" title="Delete" class="delete" onclick="return confirm('Are you sure you want to delete this class? This will also delete all enrollments and schedules for this class.');"><i class="fas fa-trash-alt"></i></button>
                                 </form>

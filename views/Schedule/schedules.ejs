@@ -11,370 +11,234 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <link rel="stylesheet"
         href="https://demos.creative-tim.com/notus-js/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css">
-    <!-- DataTables CSS -->
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.css">
-    <link rel="stylesheet" type="text/css"
-        href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
-    <script type="text/javascript" src="https://code.jquery.com/jquery-3.7.0.js"></script>
-    <script type="text/javascript" src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-    <script type="text/javascript"
-        src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
     <style>
-        html,
-        body {
-            height: 100%;
-            min-height: 100%;
-            margin: 0;
-            padding: 0;
-        }
+    html,
+    body {
+        height: 100%;
+        min-height: 100%;
+        margin: 0;
+        padding: 0;
+    }
 
-        body {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
+    body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        background-color: #f4f7f6;
+    }
 
-        .main-content {
-            flex: 1 0 auto;
-        }
+    .main-content {
+        flex: 1 0 auto;
+        padding: 20px;
+    }
 
-        footer {
-            flex-shrink: 0;
-            width: 100%;
-        }
+    footer {
+        flex-shrink: 0;
+        width: 100%;
+    }
 
-        .modern-table-container {
-            max-width: 1100px;
-            margin: 40px auto 0 auto;
-            background: #fff;
-            border-radius: 18px;
-            box-shadow: 0 4px 24px rgba(44, 62, 80, 0.10);
-            border: 1px solid #e3e6ed;
-            padding: 2.5rem 2rem 2rem 2rem;
-            animation: fadeIn 0.5s;
-        }
+    .modern-table-title {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: #2375D8;
+        text-align: left;
+        margin-bottom: 2rem;
+    }
 
-        .modern-table-title {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #2375D8;
-            text-align: center;
-            margin-bottom: 2rem;
-            letter-spacing: 1px;
-        }
+    .modern-table-title.no-margin {
+        margin-bottom: 0;
+    }
 
-        #scheduleTable {
-            font-size: 1rem;
-            width: 100% !important;
-            border-radius: 12px;
-            overflow: hidden;
-            background: #fff;
-        }
+    .title-and-button-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
 
-        #scheduleTable th {
-            background: linear-gradient(90deg, #2375D8 0%, #0c9083 100%);
-            color: #fff;
-            font-weight: 700;
-            border: none;
-            padding: 12px 8px;
-        }
+    .add-schedule-button-container {
+    }
 
-        #scheduleTable td {
-            background: #f9fafb;
-            border: none;
-            padding: 10px 8px;
-            color: #22223b;
-        }
+    .schedule-card-body p strong {
+        font-weight: 500;
+        margin-right: 5px;
+    }
 
-        #scheduleTable tr {
-            border-bottom: 1px solid #e5e7eb;
-        }
+    .modern-btn-primary {
+        background: linear-gradient(90deg, #2375D8 0%, #0c9083 100%);
+        color: #fff;
+        font-weight: 700;
+        font-size: 1rem;
+        padding: 0.8rem 1.6rem;
+        border-radius: 10px;
+        box-shadow: 0 4px 16px rgba(36, 117, 216, 0.15);
+        transition: all 0.3s ease;
+    }
 
-        #scheduleTable tr:last-child {
-            border-bottom: none;
-        }
+    .modern-btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(36, 117, 216, 0.2);
+    }
 
-        .modern-btn-primary {
-            background: linear-gradient(90deg, #2375D8 0%, #0c9083 100%);
-            color: #fff;
-            font-weight: 700;
-            font-size: 1.1rem;
-            padding: 0.7rem 1.5rem;
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 4px 16px rgba(36, 117, 216, 0.10);
-            transition: background 0.2s, transform 0.15s;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.7rem;
-            margin-bottom: 10px;
-        }
+    .schedule-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
 
-        .modern-btn-primary:hover {
-            background: linear-gradient(90deg, #0c9083 0%, #2375D8 100%);
-            transform: translateY(-2px) scale(1.03);
-            box-shadow: 0 8px 24px rgba(36, 117, 216, 0.18);
-        }
+    .schedule-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s;
+        display: flex;
+        flex-direction: column;
+    }
 
-        .modern-btn-secondary {
-            background: #e5e7eb;
-            color: #2375D8;
-            font-weight: 700;
-            font-size: 1.1rem;
-            padding: 0.7rem 1.5rem;
-            border: none;
-            border-radius: 10px;
-            margin-left: 10px;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.7rem;
-            transition: background 0.2s, color 0.2s;
-        }
+    .schedule-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    }
 
-        .modern-btn-secondary:hover {
-            background: #d1d5db;
-            color: #0c9083;
-        }
+    .schedule-card-header {
+        background-color: #2375D8;
+        color: white;
+        padding: 1rem;
+        font-size: 1.2rem;
+        font-weight: 700;
+    }
 
-        .btn-edit,
-        .btn-delete {
-            border: none;
-            border-radius: 6px;
-            padding: 6px 12px;
-            font-size: 1rem;
-            margin: 0 2px;
-            cursor: pointer;
-            transition: background 0.2s, color 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-        }
+    .schedule-card-body {
+        padding: 1rem;
+        flex-grow: 1;
+    }
 
-        .btn-edit {
-            background: #e0f2fe;
-            color: #2375D8;
-        }
+    .schedule-card-body p {
+        margin-bottom: 0.75rem;
+        color: #555;
+        display: flex;
+        align-items: center;
+    }
 
-        .btn-edit:hover {
-            background: #bae6fd;
-            color: #0c9083;
-        }
+    .schedule-card-body i {
+        color: #0c9083;
+        margin-right: 10px;
+        width: 20px;
+        text-align: center;
+    }
 
-        .btn-delete {
-            background: #fee2e2;
-            color: #ef4444;
-        }
+    .schedule-card-footer {
+        padding: 1rem;
+        background-color: #f9fafb;
+        border-top: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+    }
 
-        .btn-delete:hover {
-            background: #fecaca;
-            color: #b91c1c;
-        }
+    .btn-edit, .btn-delete {
+        border: none;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        font-weight: 600;
+    }
 
-        .dataTables_wrapper .dataTables_length,
-        .dataTables_wrapper .dataTables_filter {
-            margin-bottom: 10px;
-            font-size: 1rem;
-        }
+    .btn-edit {
+        background-color: #e0f2fe;
+        color: #2375D8;
+    }
 
-        .dataTables_wrapper .dataTables_length select,
-        .dataTables_wrapper .dataTables_filter input {
-            height: 32px;
-            padding: 4px 10px;
-            font-size: 1rem;
-            border-radius: 6px;
-            border: 1px solid #e5e7eb;
-        }
+    .btn-edit:hover {
+        background-color: #bae6fd;
+    }
 
-        .dataTables_info,
-        .dataTables_paginate {
-            font-size: 1rem;
-            margin-top: 10px;
-        }
+    .btn-delete {
+        background-color: #fee2e2;
+        color: #ef4444;
+    }
 
-        .paginate_button {
-            padding: 6px 14px !important;
-            font-size: 1rem !important;
-            border-radius: 6px !important;
-            margin: 0 2px !important;
-            background: #f3f4f6 !important;
-            color: #2375D8 !important;
-            border: none !important;
-        }
-
-        .paginate_button.current {
-            background: linear-gradient(90deg, #2375D8 0%, #0c9083 100%) !important;
-            color: #fff !important;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-    </style>
+    .btn-delete:hover {
+        background-color: #fecaca;
+    }
+</style>
 </head>
 
 <body>
     <%- include('../shared/header.ejs') %>
- 
-<% if (messages.error) { %>
-<div id="loginPopup" class="fixed inset-0 flex items-center justify-center z-50">
-  <div class="fixed inset-0 bg-black opacity-50"></div>
-  <div class="bg-white rounded-lg p-8 relative z-10">
-    <div class="flex flex-col items-center">
-      <div class="text-xl font-bold text-red-600 mb-4">
-        <i class="fas fa-exclamation-circle mr-2"></i>
-        Authentication Required
+
+    <% if (messages.error) { %>
+    <div id="loginPopup" class="fixed inset-0 flex items-center justify-center z-50">
+      <div class="fixed inset-0 bg-black opacity-50"></div>
+      <div class="bg-white rounded-lg p-8 relative z-10 shadow-lg">
+        <div class="flex flex-col items-center">
+          <div class="text-xl font-bold text-red-600 mb-4">
+            <i class="fas fa-exclamation-circle mr-2"></i>
+            Authentication Required
+          </div>
+          <p class="text-gray-700 mb-4"><%= messages.error %></p>
+          <button onclick="closePopup()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+            OK
+          </button>
+        </div>
       </div>
-      <p class="text-gray-700 mb-4"><%= messages.error %></p>
-      <button onclick="closePopup()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
-        OK
-      </button>
     </div>
-  </div>
-</div>
-
-<script>
-  function closePopup() {
-    const popup = document.getElementById('loginPopup');
-    if (popup) {
-      popup.classList.add('fade-out');
-      setTimeout(() => {
-        popup.remove();
-      }, 300);
-    }
-  }
-
-  // Auto close after 3 seconds
-  setTimeout(closePopup, 3000);
-</script>
-
-<style>
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-
-    to {
-      opacity: 1;
-    }
-  }
-
-  @keyframes fadeOut {
-    from {
-      opacity: 1;
-    }
-
-    to {
-      opacity: 0;
-    }
-  }
-
-  #loginPopup {
-    animation: fadeIn 0.3s ease-in;
-  }
-
-  #loginPopup.fade-out {
-    animation: fadeOut 0.3s ease-out;
-  }
-</style>
-<% } %>
-
-
-   
     <script>
-        $(document).ready(function () {
-            $('#scheduleTable').DataTable({
-                responsive: true,
-                pageLength: 25,
-                order: [[0, 'desc']],
-                columnDefs: [
-                    {
-                        targets: -1,
-                        orderable: false,
-                        searchable: false,
-                        width: '110px'
-                    },
-                    {
-                        targets: '_all',
-                        className: 'dt-center'
-                    },
-                    {
-                        targets: [0], // ID column
-                        width: '40px'
-                    },
-                    {
-                        targets: [2, 4, 5], // Day, Start, End columns
-                        width: '70px'
-                    }
-                ],
-                dom: '<"top"lf>rt<"bottom"ip>',
-                language: {
-                    search: "",
-                    searchPlaceholder: "Search...",
-                    lengthMenu: "_MENU_",
-                    info: "_START_-_END_ of _TOTAL_"
-                }
-            });
-        });
+      function closePopup() {
+        const popup = document.getElementById('loginPopup');
+        if (popup) {
+            popup.style.opacity = '0';
+            setTimeout(() => popup.remove(), 300);
+        }
+      }
+      setTimeout(closePopup, 3000);
     </script>
-</div> <!-- end of .modern-table-container -->
-</div> <!-- end of .main-content -->
+    <% } %>
 
-<footer class="relative bg-blueGray-200 pt-8 pb-6">
-    <div class="container mx-auto px-4">
-        <div class="flex flex-wrap text-left lg:text-left">
-            <div class="w-full lg:w-6/12 px-4">
-                <h4 class="text-3xl fonat-semibold text-blueGray-700">Liên hệ với chúng tôi!</h4>
-                <h5 class="text-lg mt-0 mb-2 text-blueGray-600">
-                    Tìm kiếm chúng tôi trên bất kỳ mạng xã hội nào và gửi cho chúng tôi một tin nhắn! Chúng tôi sẽ
-                    trả lời bạn ngay khi có thể.
-                </h5>
-                <div class="mt-6 lg:mb-0 mb-6">
-                    <button class="bg-white text-lightBlue-400 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2" type="button">
-                        <i class="fab fa-twitter"></i></button><button class="bg-white text-lightBlue-600 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2" type="button">
-                        <i class="fab fa-facebook-square"></i></button><button class="bg-white text-pink-400 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2" type="button">
-                        <i class="fab fa-dribbble"></i></button><button class="bg-white text-blueGray-800 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2" type="button">
-                        <i class="fab fa-github"></i>
-                    </button>
-                </div>
+    <div class="main-content">
+        <div class="title-and-button-container">
+        <h1 class="modern-table-title no-margin">Schedule</h1>
+        <% if (user && (user.role === 'admin' || user.role === 'staff')) { %>
+            <div class="add-schedule-button-container">
+                <a href="/schedules/new" class="modern-btn-primary">
+                    <i class="fas fa-plus-circle mr-2"></i> Add Schedule
+                </a>
             </div>
-            <div class="w-full lg:w-6/12 px-4">
-                <div class="flex flex-wrap items-top mb-6">
-                    <div class="w-full lg:w-4/12 px-4 ml-auto">
-                        <span class="block uppercase text-blueGray-500 text-sm font-semibold mb-2">Bạn Đang Tìm Kiếm</span>
-                        <ul class="list-unstyled">
-                            <li>
-                                <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm" href="">Liên Hệ</a>
-                            </li>
-                            <li>
-                                <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm" href="">Thông Tin Mới</a>
-                            </li>
-                            <li>
-                                <a class="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm" href="">Tuyển Dụng</a>
-                            </li>
-                        </ul>
+        <% } %>
+        </div>
+
+        <div class="schedule-list">
+            <% schedules.forEach(schedule => { %>
+                <div class="schedule-card">
+                    <div class="schedule-card-header">
+                        <%= schedule.ClassName %>
                     </div>
+                    <div class="schedule-card-body">
+                        <p><i class="fas fa-chalkboard-teacher"></i> <strong>Teacher:</strong> <%= schedule.TeacherName %></p>
+                        <p><i class="fas fa-calendar-day"></i> <strong>Day:</strong> <%= schedule.DayOfWeek %></p>
+                        <p><i class="fas fa-clock"></i> <strong>Time:</strong> <%= schedule.StartTime %> - <%= schedule.EndTime %></p>
+                        <p><i class="fas fa-map-marker-alt"></i> <strong>Location:</strong> <%= schedule.Location %></p>
+                    </div>
+                    <% if (user && (user.role === 'admin' || user.role === 'staff')) { %>
+                        <div class="schedule-card-footer">
+                            <a href="/schedules/<%= schedule.ScheduleID %>/edit" class="btn-edit">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            <form action="/schedules/<%= schedule.ScheduleID %>?_method=DELETE" method="POST" style="display:inline;">
+                                <button type="submit" class="btn-delete" onclick="return confirm('Are you sure you want to delete this schedule?');">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </form>
+                        </div>
+                    <% } %>
                 </div>
-            </div>
+            <% }); %>
         </div>
-        <hr class="my-6 border-blueGray-300">
-        <div class="flex flex-wrap items-center md:justify-between justify-center">
-            <div class="w-full md:w-4/12 px-4 mx-auto text-center">
-                <div class="text-sm text-blueGray-500 font-semibold py-1">
-                    Copyright © <span id="get-current-year">2025</span><a href="https://www.facebook.com/ttgdvpttnht" class="text-blueGray-500 hover:text-gray-800" target="_blank"> Talent Education</a>. Made by
-                    <a href="https://github.com/Rin-0808" class="text-blueGray-500 hover:text-blueGray-800">Rin</a>.
-                </div>
-            </div>
-        </div>
-    </div>
-</footer>
+    <%- include('../shared/footer.ejs') %>
+</div>
 </body>
+
 </html>
