@@ -398,4 +398,62 @@ router.get(
   }
 );
 
+router.get(
+  "/classes/:id/students",
+  checkAuthenticated,
+  authenticateRole(["admin", "teacher"]),
+  async (req, res) => {
+    try {
+      const classId = req.params.id;
+
+      // Query to get class details
+      const classQuery = `
+        SELECT 
+          c.id, 
+          c.class_name,
+          co.course_name,
+          u.full_name AS teacher_name
+        FROM classes c
+        JOIN courses co ON c.course_id = co.id
+        JOIN teachers t ON c.teacher_id = t.id
+        JOIN users u ON t.user_id = u.id
+        WHERE c.id = ?
+      `;
+      const classInfo = await executeQuery(classQuery, [classId]);
+
+      if (!classInfo.length) {
+        req.flash("error", "Class not found.");
+        return res.redirect("/classes");
+      }
+
+      // Query to get enrolled students
+      const studentsQuery = `
+        SELECT 
+          u.full_name,
+          u.email,
+          u.phone_number,
+          e.enrollment_date,
+          e.payment_status,
+          e.payment_date
+        FROM enrollments e
+        JOIN students s ON e.student_id = s.id
+        JOIN users u ON s.user_id = u.id
+        WHERE e.class_id = ?
+        ORDER BY u.full_name
+      `;
+      const students = await executeQuery(studentsQuery, [classId]);
+
+      res.render("class/classStudents", {
+        user: req.user,
+        classInfo: classInfo[0],
+        students: students,
+      });
+    } catch (error) {
+      console.error("Error fetching class students:", error);
+      req.flash("error", "Failed to load student list.");
+      res.redirect("/classes");
+    }
+  }
+);
+
 module.exports = router;
