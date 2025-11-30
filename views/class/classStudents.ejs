@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Students in <%= classInfo.class_name %></title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <%- include('../shared/header') %>
+
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h1>Students in <%= classInfo.class_name %></h1>
+                <p class="lead">Course: <%= classInfo.course_name %> | Teacher: <%= classInfo.teacher_name %></p>
+            </div>
+            <a href="/classes" class="btn btn-secondary">Back to Classes</a>
+        </div>
+
+        <% if (students && students.length > 0) { %>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Phone Number</th>
+                        <th>Enrollment Date</th>
+                        <th>Payment Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% students.forEach((student, index) => { %>
+                    <tr>
+                        <td><%= index + 1 %></td>
+                        <td><%= student.full_name %></td>
+                        <td><%= student.email %></td>
+                        <td><%= student.phone_number %></td>
+                        <td><%= new Date(student.enrollment_date).toLocaleDateString() %></td>
+                        <td>
+                            <% if (student.payment_status) { %>
+                            <span class="badge bg-success">Paid</span>
+                            <% if (student.payment_date) { %>
+                            <small class="d-block text-muted"><%= new Date(student.payment_date).toLocaleDateString() %></small>
+                            <% } %>
+                            <% } else { %>
+                            <span class="badge bg-warning text-dark">Unpaid</span>
+                            <% } %>
+                        </td>
+                    </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+        <% } else { %>
+        <div class="alert alert-info" role="alert">
+            There are no students enrolled in this class yet.
+        </div>
+        <% } %>
+    </div>
+
+    <%- include('../shared/footer') %>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
