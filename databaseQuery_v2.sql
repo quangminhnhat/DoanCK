@@ -367,12 +367,10 @@ BEGIN
             JOIN QuestionTypes qt ON q.type_id = qt.type_id
             WHERE r.attempt_id = a.attempt_id AND qt.type_code = 'ESSAY'
         ), 0),
-        total_score = a.auto_score + ISNULL((
+        total_score = ISNULL((
             SELECT SUM(r.score_awarded)
             FROM Responses r
-            JOIN Questions q ON r.question_id = q.question_id
-            JOIN QuestionTypes qt ON q.type_id = qt.type_id
-            WHERE r.attempt_id = a.attempt_id AND qt.type_code = 'ESSAY'
+            WHERE r.attempt_id = a.attempt_id
         ), 0),
         status = CASE WHEN EXISTS(
             SELECT 1 FROM Responses r2
