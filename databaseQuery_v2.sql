@@ -532,7 +532,7 @@ INSERT INTO courses
 VALUES
     (N'Khoá học Toán, Lý, Hoá, Anh',
         N'Các khoá học Toán, Lý, Hoá, Anh được thiết kế phù hợp với từng trình độ, giúp học sinh củng cố kiến thức nền tảng, phát triển tư duy logic và nâng cao kỹ năng ngoại ngữ. Đội ngũ giáo viên chuyên môn, phương pháp giảng dạy hiện đại, hỗ trợ học sinh đạt kết quả cao trong học tập.',
-        DATEADD(month, -1, GETDATE()), DATEADD(month, 1, GETDATE()), 3000000, 'slide1.jpg', '/Toan,Ly,Hoaclass'),
+        DATEADD(month, 1, GETDATE()), DATEADD(month, 2, GETDATE()), 3000000, 'slide1.jpg', '/Toan,Ly,Hoaclass'),
     (N'Khoá học Anh Văn',
         N'Chương trình Anh văn giúp học sinh phát triển toàn diện các kỹ năng nghe, nói, đọc, viết với giáo viên giàu kinh nghiệm và phương pháp hiện đại.',
         DATEADD(month, -1, GETDATE()), DATEADD(month, 1, GETDATE()), 1500000, 'slide2.jpg', '/AnhVanClass'),
