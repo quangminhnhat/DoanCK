@@ -29,11 +29,11 @@
         .modern-container {
             max-width: 600px;
             margin: 48px auto 0 auto;
-            padding: 2.5rem 2rem 2rem 2rem;
-            background: #fff;
-            border-radius: 18px;
-            box-shadow: 0 4px 24px rgba(44,62,80,0.10);
-            border: 1px solid #e3e6ed;
+            padding: 2.5rem;
+            background: #f0f9ff; /* Light blue background */
+            border-radius: 24px; /* Increased roundness */
+            box-shadow: 0 8px 32px rgba(35, 117, 216, 0.15); /* Softer, colored shadow */
+            border: 1px solid #dbeeff;
             animation: fadeIn 0.5s;
         }
         .modern-title {
@@ -135,60 +135,39 @@
             from { opacity: 0; transform: translateY(18px);}
             to { opacity: 1; transform: translateY(0);}
         }
+        .alert-box {
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 500;
+            animation: fadeIn 0.4s ease-out;
+        }
+        .alert-error {
+            background-color: #fee2e2; /* bg-red-100 */
+            color: #b91c1c; /* text-red-800 */
+            border: 1px solid #fca5a5; /* border-red-300 */
+        }
     </style>
 </head>
 
 <body>
     <%- include('../shared/header') %>
 
-
-    
-    <% if (messages.error) { %>
-    <div id="loginPopup" class="fixed inset-0 flex items-center justify-center z-50">
-        <div class="fixed inset-0 bg-black opacity-50"></div>
-        <div class="bg-white rounded-lg p-8 relative z-10">
-            <div class="flex flex-col items-center">
-                <div class="text-xl font-bold text-red-600 mb-4">
-                    <i class="fas fa-exclamation-circle mr-2"></i>
-                    Authentication Required
-                </div>
-                <p class="text-gray-700 mb-4"><%= messages.error %></p>
-                <button onclick="closePopup()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
-                    OK
-                </button>
-            </div>
-        </div>
-    </div>
-    <script>
-        function closePopup() {
-            const popup = document.getElementById('loginPopup');
-            if (popup) {
-                popup.classList.add('fade-out');
-                setTimeout(() => {
-                    popup.remove();
-                }, 300);
-            }
-        }
-        setTimeout(closePopup, 3000);
-    </script>
-    <style>
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes fadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; }
-        }
-        #loginPopup { animation: fadeIn 0.3s ease-in; }
-        #loginPopup.fade-out { animation: fadeOut 0.3s ease-out; }
-    </style>
-    <% } %>
-
     <main>
         <div class="modern-container">
             <div class="modern-title">
                 <i class="fas fa-plus"></i> Add New Class
+            </div>
+            <div id="warning-container">
+                <% if (messages.error && messages.error.length > 0) { %>
+                    <div class="alert-box alert-error">
+                        <i class="fas fa-times-circle fa-lg"></i>
+                        <span><%= messages.error %></span>
+                    </div>
+                <% } %>
             </div>
             <form action="/classes" method="POST">
                 <div class="modern-form-group">
@@ -276,20 +255,34 @@
         </div>
     </main>
     <script>
+        const warningContainer = document.getElementById('client-side-warnings');
+    
+        function showWarning(message) {
+            warningContainer.innerHTML = `<div class="alert-box alert-error"><i class="fas fa-exclamation-triangle fa-lg"></i><span>${message}</span></div>`;
+        }
+    
+        function clearWarnings() {
+            warningContainer.innerHTML = '';
+        }
+
         document.querySelector('form').addEventListener('submit', function(e) {
+            clearWarnings(); // Clear previous warnings
+
             const startTime = document.getElementById('start_time').value;
-            const endTime = document.getElementById('end_time').value;
+            const endTime = document.getElementById('end_time').value; 
             const weeklyDays = document.querySelectorAll('input[name="weekly_days"]:checked');
+            
             if (weeklyDays.length === 0) {
                 e.preventDefault();
-                alert('Please select at least one day for the weekly schedule');
+                showWarning('Please select at least one day for the weekly schedule.');
                 return;
             }
+            
             if (startTime >= endTime) {
                 e.preventDefault();
-                alert('End time must be after start time');
+                showWarning('End time must be after start time.');
                 return;
-            }
+            } 
         });
     </script>
 </body>
