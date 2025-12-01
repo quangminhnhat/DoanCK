@@ -262,8 +262,8 @@ router.post("/courses",
     const { course_name, description, start_date, end_date, tuition_fee } = req.body;
 
       // Handle image path
-      const image_path = req.file ? 
-        path.join('uploads', 'image', req.file.filename) : null;
+      // Store path using POSIX-style forward slashes so URL paths are consistent
+      const image_path = req.file ? path.posix.join('uploads', 'image', req.file.filename) : null;
 
     const query = `
         INSERT INTO courses (
@@ -331,12 +331,20 @@ router.post("/courses/:id",
       // If new image uploaded, update path and delete old image
       if (req.file) {
         if (image_path) {
-          const oldImagePath = path.join(__dirname, image_path);
-          fs.unlink(oldImagePath, err => {
-            if (err) console.error("Error deleting old image:", err);
-          });
+          // image_path stored in DB is relative to project root, resolve correctly
+          const oldImagePath = path.join(__dirname, '..', image_path);
+          try {
+            if (fs.existsSync(oldImagePath)) {
+              fs.unlink(oldImagePath, err => {
+                if (err) console.error("Error deleting old image:", err);
+              });
+            }
+          } catch (e) {
+            console.error('Old image deletion check failed:', e);
+          }
         }
-        image_path = path.join('uploads', 'image', req.file.filename);
+        // Use POSIX join to store URL-friendly forward slashes
+        image_path = path.posix.join('uploads', 'image', req.file.filename);
       }
 
     const query = `
@@ -390,10 +398,16 @@ router.delete("/courses/:id",
 
       // Delete image file if exists
       if (course[0]?.image_path) {
-        const imagePath = path.join(__dirname, course[0].image_path);
-        fs.unlink(imagePath, err => {
-          if (err) console.error("Error deleting course image:", err);
-        });
+        const imagePath = path.join(__dirname, '..', course[0].image_path);
+        try {
+          if (fs.existsSync(imagePath)) {
+            fs.unlink(imagePath, err => {
+              if (err) console.error("Error deleting course image:", err);
+            });
+          }
+        } catch (e) {
+          console.error('Course image deletion check failed:', e);
+        }
       }
 
       // Delete course record

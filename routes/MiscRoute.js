@@ -56,6 +56,7 @@ router.get("/", async (req, res) => {
       ORDER BY created_at DESC
     `;
     const courses = await executeQuery(query);
+    console.log("Homepage courses images:", courses.map(c => c.img));
 
     res.render("index.ejs", { user: req.user, courses });
   } catch (error) {

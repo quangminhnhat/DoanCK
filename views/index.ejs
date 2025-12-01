@@ -110,9 +110,21 @@
     <div class="news-section swiper news-swiper">
       <div class="swiper-wrapper">
         <% if (courses && courses.length) { %>
-        <% courses.forEach(function(course) { %>
+           <% /* normalize various stored image paths and provide a fallback */ %>
+           <% function imageSrc(img) {
+             if (!img) return '/images/placeholder.svg';
+             if (typeof img !== 'string') return '/images/placeholder.svg';
+             img = String(img).replace(/\\\\/g, '/'); // backslashes -> slashes
+             if (/^https?:\/\//i.test(img)) return img; // full url
+             if (img.startsWith('/')) return img; // already absolute
+             if (img.startsWith('uploads/')) return '/' + img; // uploaded files served at /uploads
+             if (img.startsWith('images/')) return '/' + img; // existing public images
+             // bare filename — assume it's in public/images
+             return '/images/' + img;
+           } %>
+           <% courses.forEach(function(course) { %>
         <div class="news-item2 swiper-slide">
-          <img src="/images/<%= course.img %>" alt="Course Image">
+          <img src="<%= imageSrc(course.img) %>" alt="Course Image" onerror="this.onerror=null;this.src='/images/placeholder.svg'">
           <div class="news-content">
             <div class="news-title">
               <a href="<%= course.link %>"><%= course.title %></a>

@@ -114,7 +114,8 @@
 
 
   <main>
-    <form method="POST" action="/courses/<%= course.id %>" class="modern-container" autocomplete="off">
+    <!-- single multipart form for editing course, includes file upload -->
+    <form method="POST" action="/courses/<%= course.id %>" class="modern-container" autocomplete="off" enctype="multipart/form-data">
       <legend class="modern-title">
         <i class="fas fa-edit mr-2"></i>
         Edit Course
@@ -136,20 +137,8 @@
         <label for="tuition_fee"><i class="fas fa-money-bill-wave mr-2"></i>Tuition Fee</label>
         <input type="number" name="tuition_fee" id="tuition_fee" value="<%= course.tuition_fee %>" min="0" step="1000" class="modern-form-control" />
 
-
-    <form method="POST" action="/courses/<%= course.id %>" class="space-y-4" enctype="multipart/form-data">
-      <div class="form-group">
-        <label for="course_name" class="block text-gray-700 font-medium mb-2">Course Name:</label>
-        <input type="text" 
-               name="course_name" 
-               id="course_name" 
-               value="<%= course.course_name %>" 
-               required 
-               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-      </div>
-
       <!-- Add image upload section -->
-      <div class="form-group">
+      <div class="form-group" style="margin-top:1rem;">
         <label for="course_image" class="block text-gray-700 font-medium mb-2">Course Image:</label>
         <div class="flex items-center space-x-4">
           <% if (course.image_path) { %>
@@ -172,14 +161,9 @@
           </div>
         </div>
       </div>
+      <!-- (file input is above) -->
 
-      <div class="form-group">
-        <label for="description" class="block text-gray-700 font-medium mb-2">Description:</label>
-        <textarea name="description" 
-                  id="description" 
-                  rows="4" 
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"><%= course.description %></textarea>
-      </div>
+      <!-- description already present above; keep the main textarea only (no duplicate) -->
       <div class="modern-form-group">
         <label for="start_date"><i class="fas fa-calendar-alt mr-2"></i>Start Date</label>
         <input type="date" name="start_date" id="start_date" value="<%= course.formatted_start_date %>" required class="modern-form-control" />
