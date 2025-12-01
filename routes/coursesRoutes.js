@@ -12,6 +12,35 @@ const {
 const router = express.Router();
 
 
+router.get("/course-detail/:id", async (req, res) => {
+  try {
+    const courseId = req.params.id;
+    const query = `
+      SELECT 
+        id,
+        course_name,
+        description,
+        image_path
+      FROM courses
+      WHERE id = ?
+    `;
+    const [course] = await executeQuery(query, [courseId]);
+
+    if (!course) {
+      return res.status(404).render("error", {
+        message: "Course not found.",
+        user: req.user,
+      });
+    }
+
+    res.render("courses/course-detail", { course, user: req.user });
+  } catch (error) {
+    console.error("Error fetching public course details:", error);
+    res.status(500).send("Error loading course details");
+  }
+});
+
+
 
 
 router.get(

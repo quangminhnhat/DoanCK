@@ -48,6 +48,7 @@ router.get("/", async (req, res) => {
   try {
     const query = `
       SELECT 
+        id,
         course_name AS title,
         description AS course_desc,
         image_path AS img,

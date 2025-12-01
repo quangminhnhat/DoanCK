@@ -127,7 +127,7 @@
           <img src="<%= imageSrc(course.img) %>" alt="Course Image" onerror="this.onerror=null;this.src='/images/placeholder.svg'">
           <div class="news-content">
             <div class="news-title">
-              <a href="<%= course.link %>"><%= course.title %></a>
+              <a href="/course-detail/<%= course.id %>"><%= course.title %></a>
             </div>
             <div class="news-description">
               <%= course.course_desc %>
