@@ -298,32 +298,30 @@ router.post(
         return res.redirect("/classes/new");
       }
 
-      // Check teacher availability
-      // For a new class, we don't need to exclude any class ID from the check.
-      const teacherQuery = `
-      SELECT id FROM classes 
-      WHERE teacher_id = ?
-      AND (
-        (start_time < ? AND end_time > ?) OR -- Overlaps start
-        (start_time < ? AND end_time > ?) OR -- Overlaps end
-        (start_time >= ? AND end_time <= ?)  -- Is contained within
-      )
-    `;
+      // Check for teacher schedule conflicts (time and day)
+      const conflictQuery = `
+        SELECT c.class_name, c.weekly_schedule,
+               CONVERT(VARCHAR(5), c.start_time, 108) as start_time,
+               CONVERT(VARCHAR(5), c.end_time, 108) as end_time
+        FROM classes c
+        WHERE c.teacher_id = ?
+          AND c.start_time < ? -- Existing class starts before new one ends
+          AND c.end_time > ?   -- Existing class ends after new one starts
+      `;
+      const potentialConflicts = await executeQuery(conflictQuery, [teacher_id, end_time, start_time]);
 
-      const teacherConflicts = await executeQuery(teacherQuery, [
-        teacher_id,
-        end_time, // Check if new class starts during an existing one
-        start_time,
-        end_time, // Check if new class ends during an existing one
-        end_time,
-        start_time, // Check if new class contains an existing one
-        end_time,
-      ]);
+      const newDays = Array.isArray(weekly_days) ? weekly_days.map(String) : [String(weekly_days)];
+      const teacherConflicts = potentialConflicts.filter(existingClass => {
+          if (!existingClass.weekly_schedule) return false;
+          const existingDays = existingClass.weekly_schedule.split(',');
+          // Check if there is any overlap in days
+          return newDays.some(newDay => existingDays.includes(newDay));
+      });
 
       if (teacherConflicts.length > 0) {
         req.flash(
           "error",
-          "Schedule Conflict: The selected teacher is already assigned to another class during the chosen time slot."
+          `Schedule Conflict: The selected teacher is already assigned to another class during the chosen time and day. Conflicting class: ${teacherConflicts[0].class_name}`
         );
         return res.redirect("/classes/new");
       }
