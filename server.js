@@ -45,6 +45,7 @@ const miscroutes = require("./routes/MiscRoute");
 const requestRoute = require("./routes/requestRoute");
 const examRoutes = require("./routes/examRoutes");
 
+
 // Essential middleware
 app.use(express.json());
 // Use extended: true so nested form fields like scores[123] are parsed into objects
@@ -125,6 +126,7 @@ app.use(enrollmentsRoutes);
 app.use(miscroutes);
 app.use(requestRoute);
 app.use(examRoutes);
+
 
 app.post(
   "/login",
