@@ -134,6 +134,26 @@ padding: 10px 0;
     margin-left: 10px;   
 }
 
+/* Modern primary button used on exam list (copied to global stylesheet) */
+.modern-btn-primary {
+  background: linear-gradient(90deg, #2375D8 0%, #0c9083 100%);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(36,117,216,0.10);
+  transition: background 0.2s, transform 0.12s;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none;
+}
+.modern-btn-primary:hover { transform: translateY(-2px); }
+
+
 /* slider */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@100..900&display=swap');
 * {
