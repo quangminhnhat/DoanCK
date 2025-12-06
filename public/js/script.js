@@ -52,3 +52,45 @@ const kn2Swiper = new Swiper('.kn2-swiper', {
   },
   autoplay: {delay: 2000}
 });
+
+
+
+
+
+// Add this to your /js/script.js file
+
+document.addEventListener('DOMContentLoaded', function () {
+  // ... (keep your existing script.js code)
+
+  // Initialize the Teacher Profile Swiper
+  const profileSwiper = new Swiper('.profile-swiper', {
+    loop: true,
+    slidesPerView: 4, // Show 4 profiles at a time
+    spaceBetween: 30, // Space between profile cards
+    
+    // Connect the navigation arrows
+    navigation: {
+      nextEl: '#teacher-slider-next',
+      prevEl: '#teacher-slider-prev',
+    },
+
+    // Responsive settings
+    breakpoints: {
+      // when window width is >= 320px
+      320: {
+        slidesPerView: 1,
+        spaceBetween: 10
+      },
+      // when window width is >= 640px
+      640: {
+        slidesPerView: 2,
+        spaceBetween: 20
+      },
+      // when window width is >= 1024px
+      1024: {
+        slidesPerView: 4,
+        spaceBetween: 30
+      }
+    }
+  });
+});

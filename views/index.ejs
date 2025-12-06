@@ -26,7 +26,7 @@
           <h3 class="slide-subtitle"></h3>
           <h2 class="slide-title"></h2>
           <p class="slide-description"></p>
-          
+
         </div>
       </div>
       <div class="slider-item swiper-slide">
@@ -34,7 +34,7 @@
           <h3 class="slide-subtitle"></h3>
           <h2 class="slide-title"></h2>
           <p class="slide-description"></p>
-          
+
         </div>
       </div>
       <div class="slider-item swiper-slide">
@@ -42,7 +42,7 @@
           <h3 class="slide-subtitle"></h3>
           <h2 class="slide-title"></h2>
           <p class="slide-description"></p>
-          
+
         </div>
       </div>
       <div class="slider-item swiper-slide">
@@ -50,7 +50,7 @@
           <h3 class="slide-subtitle"></h3>
           <h2 class="slide-title"></h2>
           <p class="slide-description"> </p>
-          
+
         </div>
       </div>
       <div class="slider-item swiper-slide">
@@ -58,14 +58,14 @@
           <h3 class="slide-subtitle"></h3>
           <h2 class="slide-title"></h2>
           <p class="slide-description"></p>
-          
+
         </div>
       </div>
     </div>
     <!-- slide button-->
     <div class="slider-controls">
 
-      
+
     </div>
   </div>
 
@@ -76,7 +76,7 @@
   text-align: center;
   margin: 40px 0 30px 0;
   letter-spacing: 2px;
-  text-shadow: 0 2px 8px rgba(37,99,235,0.08), 0 1px 0 #fff;
+  text-shadow: 0 2px 8px rgba(37,99,235,0.08), 0 1px 0 #ffffff;
   font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
   position: relative;
   display: inline-block;
@@ -84,7 +84,7 @@
 ">
     <span style="
     background: linear-gradient(90deg, #2563eb 60%, #60a5fa 100%);
-    color: #fff;
+    color: #ffffff;
     padding: 8px 36px;
     border-radius: 32px;
     box-shadow: 0 2px 12px rgba(37,99,235,0.10);
@@ -98,49 +98,64 @@
     </span>
   </div>
 
-  <div class="news-slider-container">
-    <button class="news-slider-arrow left"><i class="fas fa-chevron-left"></i></button>
-    <div class="news-section swiper news-swiper">
-      <div class="swiper-wrapper">
-        <% if (courses && courses.length) { %>
-           <% /* normalize various stored image paths and provide a fallback */ %>
-           <% function imageSrc(img) {
-             if (!img) return '/images/placeholder.svg';
-             if (typeof img !== 'string') return '/images/placeholder.svg';
-             img = String(img).replace(/\\\\/g, '/'); // backslashes -> slashes
-             if (/^https?:\/\//i.test(img)) return img; // full url
-             if (img.startsWith('/')) return img; // already absolute
-             if (img.startsWith('uploads/')) return '/' + img; // uploaded files served at /uploads
-             if (img.startsWith('images/')) return '/' + img; // existing public images
-             // bare filename — assume it's in public/images
-             return '/images/' + img;
-           } %>
-           <% courses.slice(0, 5).forEach(function(course) { %>
-        <div class="news-item2 swiper-slide">
-          <img src="<%= imageSrc(course.img) %>" alt="Course Image" onerror="this.onerror=null;this.src='/images/placeholder.svg'">
-          <div class="news-content">
-            <div class="news-title">
-              <a href="/course-detail/<%= course.id %>"><%= course.title %></a>
-            </div>
-            <div class="news-description">
-              <%= course.course_desc %>
+  <div class="featured-courses-container" style="
+    width: 1200px;
+    margin: 0 auto 40px auto;
+    background: #f5f7fa;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    overflow: hidden; /* Ensures content respects the border-radius */
+  ">
+    <div class="news-slider-container" style="
+      position: relative;
+      padding: 0; /* Vertical padding only */
+    ">
+      <button id="featured-courses-prev" class="news-slider-arrow left" style="left: 25px; z-index: 10;"><i class="fas fa-chevron-left"></i></button>
+      <!-- The slider now has horizontal margins to create space for the arrows -->
+      <div class="news-section swiper news-swiper" style="margin: 0 60px;">
+        <div class="swiper-wrapper">
+          <% if (courses && courses.length) { %>
+          <% /* normalize various stored image paths and provide a fallback */ %>
+          <% function imageSrc(img) {
+               if (!img) return '/images/placeholder.svg';
+               if (typeof img !== 'string') return '/images/placeholder.svg';
+               img = String(img).replace(/\\\\/g, '/'); // backslashes -> slashes
+               if (/^https?:\/\//i.test(img)) return img; // full url
+               if (img.startsWith('/')) return img; // already absolute
+               if (img.startsWith('uploads/')) return '/' + img; // uploaded files served at /uploads
+               if (img.startsWith('images/')) return '/' + img; // existing public images
+               // bare filename — assume it's in public/images
+               return '/images/' + img;
+             } %>
+          <% courses.slice(0, 5).forEach(function(course) { %>
+          <div class="news-item2 swiper-slide">
+            <img src="<%= imageSrc(course.img) %>" alt="Course Image"
+              onerror="this.onerror=null;this.src='/images/placeholder.svg'">
+            <div class="news-content">
+              <div class="news-title">
+                <a href="/course-detail/<%= course.id %>"><%= course.title %></a>
+              </div>
+              <div class="news-description">
+                <%= course.course_desc %>
+              </div>
             </div>
           </div>
-        </div>
-        <% }); %>
-        <% } else { %>
-        <div class="news-item2 swiper-slide">
-          <div class="news-content">
-            <div class="news-title">No courses available</div>
+          <% }); %>
+          <% } else { %>
+          <div class="news-item2 swiper-slide">
+            <div class="news-content">
+              <div class="news-title">No courses available</div>
+            </div>
           </div>
+          <% } %>
         </div>
-        <% } %>
       </div>
+    
+      <button id="featured-courses-next" class="news-slider-arrow right" style="right: 305px; z-index: 10;"><i
+          class="fas fa-chevron-right"></i></button>
     </div>
-    <button class="news-slider-arrow right"><i class="fas fa-chevron-right"></i></button>
   </div>
-  <button class="news-slider-arrow right"><i class="fas fa-chevron-right"></i></button>
-  
+
   <!-- news-slider-container dưới khoá học kỹ năng -->
 
   <!-- School section (merged from school.ejs) -->
@@ -178,89 +193,126 @@
       <!-- slide button-->
       <div class="slider-controls">
 
-        
+
       </div>
     </div>
-
-    <div class="profile-slider-container">
-      <button class="profile-slider-arrow left"><i class="fas fa-chevron-left"></i></button>
-      <div class="profile-swiper swiper">
-        <div class="swiper-wrapper">
-          <div class="swiper-slide">
-            <div class="profile-card">
-              <div class="profile-image">
-                <img src="/images/gv8.png" alt="Hoàng Long">
+    <div class="slider-title" style="
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: #2563eb;
+      text-align: center;
+      margin: 40px 0 30px 0;
+      letter-spacing: 2px;
+      text-shadow: 0 2px 8px rgba(37,99,235,0.08), 0 1px 0 #ffffff;
+      font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    ">
+      <span style="
+        background: linear-gradient(90deg, #2563eb 60%, #60a5fa 100%);
+        color: #ffffff;
+        padding: 8px 36px;
+        border-radius: 32px;
+        box-shadow: 0 2px 12px rgba(37,99,235,0.10);
+        display: inline-block;
+        position: relative;
+        z-index: 1;
+      ">
+        <i class="fas fa-chalkboard-teacher" style="color:#facc15;margin-right:12px;"></i>
+        Đội ngũ giáo viên
+        <i class="fas fa-chalkboard-teacher" style="color:#facc15;margin-left:12px;"></i>
+      </span>
+    </div>
+    <div class="teacher-slider-card" style="
+      width: 1200px;
+      margin: 0 auto 40px auto;
+      background: #f5f7fa;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      overflow: hidden; /* Ensures content respects the border-radius */
+    ">
+      <div class="news-slider-container" style="position: relative;">
+        <button id="teacher-slider-prev" class="news-slider-arrow left" style="left: 25px; z-index: 10;"><i class="fas fa-chevron-left"></i></button>
+        <div class="profile-swiper swiper" style="margin: 0 60px;">
+          <div class="swiper-wrapper">
+            <!-- Teacher profile slides go here -->
+            <div class="swiper-slide">
+              <div class="profile-card">
+                <div class="profile-image">
+                  <img src="/images/gv8.png" alt="Hoàng Long">
+                </div>
+                <h2 class="profile-name">Hoàng Long</h2>
+                <p class="profile-title">Giám đốc Trung tâm</p>
               </div>
-              <h2 class="profile-name">Hoàng Long</h2>
-              <p class="profile-title">Giám đốc Trung tâm</p>
             </div>
-          </div>
-          <div class="swiper-slide">
-            <div class="profile-card">
-              <div class="profile-image">
-                <img src="/images/gv2.png" alt="Nguyễn Thị Lan">
+            <div class="swiper-slide">
+              <div class="profile-card">
+                <div class="profile-image">
+                  <img src="/images/gv2.png" alt="Nguyễn Thị Lan">
+                </div>
+                <h2 class="profile-name">Nguyễn Thị Lan</h2>
+                <p class="profile-title">Giáo viên IELTS</p>
               </div>
-              <h2 class="profile-name">Nguyễn Thị Lan</h2>
-              <p class="profile-title">Giáo viên IELTS</p>
             </div>
-          </div>
-          <div class="swiper-slide">
-            <div class="profile-card">
-              <div class="profile-image">
-                <img src="/images/gv4.jpg" alt="Trần Văn Minh">
+            <div class="swiper-slide">
+              <div class="profile-card">
+                <div class="profile-image">
+                  <img src="/images/gv4.jpg" alt="Trần Văn Minh">
+                </div>
+                <h2 class="profile-name">Trần Văn Minh</h2>
+                <p class="profile-title">Giáo viên Toán</p>
               </div>
-              <h2 class="profile-name">Trần Văn Minh</h2>
-              <p class="profile-title">Giáo viên Toán</p>
             </div>
-          </div>
-          <div class="swiper-slide">
-            <div class="profile-card">
-              <div class="profile-image">
-                <img src="/images/gv3.png" alt="Lê Thị Hương">
+            <div class="swiper-slide">
+              <div class="profile-card">
+                <div class="profile-image">
+                  <img src="/images/gv3.png" alt="Lê Thị Hương">
+                </div>
+                <h2 class="profile-name">Lê Thị Hương</h2>
+                <p class="profile-title">Giáo viên Văn</p>
               </div>
-              <h2 class="profile-name">Lê Thị Hương</h2>
-              <p class="profile-title">Giáo viên Văn</p>
             </div>
-          </div>
-          <div class="swiper-slide">
-            <div class="profile-card">
-              <div class="profile-image">
-                <img src="/images/gv5.jpg" alt="Phạm Quốc Anh">
+            <div class="swiper-slide">
+              <div class="profile-card">
+                <div class="profile-image">
+                  <img src="/images/gv5.jpg" alt="Phạm Quốc Anh">
+                </div>
+                <h2 class="profile-name">Phạm Quốc Anh</h2>
+                <p class="profile-title">Giáo viên SAT</p>
               </div>
-              <h2 class="profile-name">Phạm Quốc Anh</h2>
-              <p class="profile-title">Giáo viên SAT</p>
             </div>
-          </div>
-          <div class="swiper-slide">
-            <div class="profile-card">
-              <div class="profile-image">
-                <img src="/images/gv6.jpg" alt="Ngô Thị Mai">
+            <div class="swiper-slide">
+              <div class="profile-card">
+                <div class="profile-image">
+                  <img src="/images/gv6.jpg" alt="Ngô Thị Mai">
+                </div>
+                <h2 class="profile-name">Ngô Thị Mai</h2>
+                <p class="profile-title">Giáo viên Tiếng Anh</p>
               </div>
-              <h2 class="profile-name">Ngô Thị Mai</h2>
-              <p class="profile-title">Giáo viên Tiếng Anh</p>
             </div>
-          </div>
-          <div class="swiper-slide">
-            <div class="profile-card">
-              <div class="profile-image">
-                <img src="/images/gv7.jpg" alt="Đặng Văn Sơn">
+            <div class="swiper-slide">
+              <div class="profile-card">
+                <div class="profile-image">
+                  <img src="/images/gv7.jpg" alt="Đặng Văn Sơn">
+                </div>
+                <h2 class="profile-name">Đặng Văn Sơn</h2>
+                <p class="profile-title">Trợ giảng</p>
               </div>
-              <h2 class="profile-name">Đặng Văn Sơn</h2>
-              <p class="profile-title">Trợ giảng</p>
             </div>
-          </div>
-          <div class="swiper-slide">
-            <div class="profile-card">
-              <div class="profile-image">
-                <img src="/images/gv1.png" alt="Vũ Thị Thu">
+            <div class="swiper-slide">
+              <div class="profile-card">
+                <div class="profile-image">
+                  <img src="/images/gv1.png" alt="Vũ Thị Thu">
+                </div>
+                <h2 class="profile-name">Vũ Thị Thu</h2>
+                <p class="profile-title">Nhân viên tư vấn</p>
               </div>
-              <h2 class="profile-name">Vũ Thị Thu</h2>
-              <p class="profile-title">Nhân viên tư vấn</p>
             </div>
           </div>
         </div>
+        <button id="teacher-slider-next" class="news-slider-arrow right" style="right: 305px; z-index: 10;"><i class="fas fa-chevron-right"></i></button>
       </div>
-      <button class="profile-slider-arrow right"><i class="fas fa-chevron-right"></i></button>
     </div>
 
     <div class="container-about">
@@ -269,11 +321,13 @@
           <h2>Về chúng tôi</h2>
           <p>
             <strong>Trung tâm ngoại ngữ Talent Education</strong> Chúng tôi là một trung tâm uy tín hoạt động hợp pháp
-            theo Giấy phép kinh doanh số 0822488288, được cấp bởi Sở Kế hoạch & Đầu tư Thành phố Hà Tĩnh vào ngày 07 tháng
+            theo Giấy phép kinh doanh số 0822488288, được cấp bởi Sở Kế hoạch & Đầu tư Thành phố Hà Tĩnh vào ngày 07
+            tháng
             01 năm 2025 (Mã số thuế: 3002268128). Người đại diện pháp luật của công ty là ông Hoàng Long.
           </p>
           <p>
-            - Thấu hiểu rằng mỗi học viên có một mục tiêu và xuất phát điểm khác nhau, chúng tôi đã thiết kế các khóa học
+            - Thấu hiểu rằng mỗi học viên có một mục tiêu và xuất phát điểm khác nhau, chúng tôi đã thiết kế các khóa
+            học
             đa dạng, bám sát nhu cầu thực tế:
           </p>
           <ul>
@@ -283,7 +337,8 @@
             </li>
             <li>
               <strong>Khóa học tiếng Anh IELTS:</strong> Được thiết kế cho học sinh cuối cấp 2, cấp 3, sinh viên đại học
-              và những người đi làm có mục tiêu du học, định cư hoặc làm việc tại các quốc gia nói tiếng Anh như: Mỹ, Úc,
+              và những người đi làm có mục tiêu du học, định cư hoặc làm việc tại các quốc gia nói tiếng Anh như: Mỹ,
+              Úc,
               Anh, Canada. Khóa học cung cấp chiến lược và kỹ năng làm bài thi IELTS hiệu quả ở cả 4 kỹ năng: nghe, nói,
               đọc và viết.
             </li>
@@ -315,17 +370,21 @@
           <p>
             Kính gửi quý phụ huynh và các bạn học viên,<br>
             Trung tâm Tiếng Anh của chúng tôi xin gửi lời chào trân trọng nhất tới quý vị. Chúng tôi rất vui mừng được
-            chia sẻ với các bạn sứ mệnh của mình trong việc mang đến cho mọi người một môi trường học tập tiếng Anh chuyên
+            chia sẻ với các bạn sứ mệnh của mình trong việc mang đến cho mọi người một môi trường học tập tiếng Anh
+            chuyên
             nghiệp và hiệu quả.
           </p>
           <p>
-            Tại trung tâm chúng tôi, chúng tôi cam kết cung cấp cho các bạn các khóa học chất lượng cao, được thiết kế để
+            Tại trung tâm chúng tôi, chúng tôi cam kết cung cấp cho các bạn các khóa học chất lượng cao, được thiết kế
+            để
             phát triển kỹ năng ngôn ngữ một cách toàn diện. Chương trình học của chúng tôi không chỉ tập trung vào việc
             nâng cao khả năng giao tiếp mà còn đảm bảo cho các bạn có được nền tảng vững chắc về ngữ pháp và từ vựng.
           </p>
           <p>
-            Đội ngũ giáo viên tại trung tâm là những người có kinh nghiệm và trình độ chuyên môn cao, luôn sẵn sàng hỗ trợ
-            và truyền đạt kiến thức một cách truyền cảm hứng. Chúng tôi tin rằng việc học ngoại ngữ không chỉ là việc học
+            Đội ngũ giáo viên tại trung tâm là những người có kinh nghiệm và trình độ chuyên môn cao, luôn sẵn sàng hỗ
+            trợ
+            và truyền đạt kiến thức một cách truyền cảm hứng. Chúng tôi tin rằng việc học ngoại ngữ không chỉ là việc
+            học
             một môn học, mà còn là việc khám phá văn hóa và mở rộng tầm nhìn.
           </p>
           <p>
@@ -458,7 +517,7 @@
             <p><a href="#">Học sinh nỗ lực học tập cho kì thi THPT quốc gia</a></p>
           </div>
         </div>
-    </div>
+      </div>
   </section>
 
   <%- include('../views/shared/footer.ejs') %>
