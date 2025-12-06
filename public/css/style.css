@@ -179,13 +179,15 @@ padding: 10px 0;
     position: absolute;
     content: '';
     top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    left: 50%; /* Đưa ảnh ra giữa theo chiều ngang */
+    transform: translateX(-50%); /* Căn giữa chính xác */
+    width: 92%;
+    height: 92%;
     filter: grayscale(20%);
     background-image: url("/images/4.jpg");
     background-size: cover;
     background-position: center;
+    border-radius: 12px; /* Bo góc - điều chỉnh giá trị theo ý muốn */
 }
 .slider-wrapper .slider-item:nth-child(2):before {
     background-image: url("/images/2.jpg");
@@ -1255,7 +1257,7 @@ label[for="nav-footer-toggle"] {
 
 /* News Page Layout */
 .container-news {
-    max-width: 1200px;
+    max-width: 92%;
     margin: 40px auto 0 auto;
     padding: 32px 20px 20px 20px;
     background: #fff;
