@@ -69,46 +69,26 @@
     </div>
   </div>
 
-  <div class="slider-title" style="
-  font-size: 2.5rem;
-  font-weight: bold;
-  color: #2563eb;
-  text-align: center;
-  margin: 40px 0 30px 0;
-  letter-spacing: 2px;
-  text-shadow: 0 2px 8px rgba(37,99,235,0.08), 0 1px 0 #ffffff;
-  font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
-  position: relative;
-  display: inline-block;
-  width: 100%;
-">
-    <span style="
-    background: linear-gradient(90deg, #2563eb 60%, #60a5fa 100%);
-    color: #ffffff;
-    padding: 8px 36px;
-    border-radius: 32px;
-    box-shadow: 0 2px 12px rgba(37,99,235,0.10);
-    display: inline-block;
-    position: relative;
-    z-index: 1;
-  ">
-      <i class="fas fa-star" style="color:#facc15;margin-right:12px;"></i>
-      Khóa học nổi bật
-      <i class="fas fa-star" style="color:#facc15;margin-left:12px;"></i>
-    </span>
-  </div>
-
   <div class="featured-courses-container" style="
     width: 1200px;
     margin: 0 auto 40px auto;
-    background: #f5f7fa;
+    background: #ffffff;
     border-radius: 12px;
+    padding-top: 40px; /* Add space for the title */
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     overflow: hidden; /* Ensures content respects the border-radius */
   ">
+    <div class="slider-title" style="margin-top: 0; margin-bottom: 30px; text-align: center; font-size: 3rem;">
+      <span class="slider-title-inner" style="background: #2563eb; border: 2px solid #2563eb; color: #ffffff; border-radius: 32px;">
+        <i class="fas fa-star" style="color:#facc15;margin-right:12px;"></i>
+        Khóa học nổi bật
+        <i class="fas fa-star" style="color:#facc15;margin-left:12px;"></i>
+      </span>
+    </div>
+  
     <div class="news-slider-container" style="
       position: relative;
-      padding: 0; /* Vertical padding only */
+      padding: 20px 0; /* Vertical padding only */
     ">
       <button id="featured-courses-prev" class="news-slider-arrow left" style="left: 25px; z-index: 10;"><i class="fas fa-chevron-left"></i></button>
       <!-- The slider now has horizontal margins to create space for the arrows -->
@@ -196,42 +176,16 @@
 
       </div>
     </div>
-    <div class="slider-title" style="
-      font-size: 2.5rem;
-      font-weight: bold;
-      color: #2563eb;
-      text-align: center;
-      margin: 40px 0 30px 0;
-      letter-spacing: 2px;
-      text-shadow: 0 2px 8px rgba(37,99,235,0.08), 0 1px 0 #ffffff;
-      font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
-      position: relative;
-      display: inline-block;
-      width: 100%;
-    ">
-      <span style="
-        background: linear-gradient(90deg, #2563eb 60%, #60a5fa 100%);
-        color: #ffffff;
-        padding: 8px 36px;
-        border-radius: 32px;
-        box-shadow: 0 2px 12px rgba(37,99,235,0.10);
-        display: inline-block;
-        position: relative;
-        z-index: 1;
-      ">
-        <i class="fas fa-chalkboard-teacher" style="color:#facc15;margin-right:12px;"></i>
-        Đội ngũ giáo viên
-        <i class="fas fa-chalkboard-teacher" style="color:#facc15;margin-left:12px;"></i>
-      </span>
-    </div>
+    <!-- Teacher Slider Section -->
     <div class="teacher-slider-card" style="
       width: 1200px;
       margin: 0 auto 40px auto;
-      background: #f5f7fa;
+      background: #ffffff;
       border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.08);
       overflow: hidden; /* Ensures content respects the border-radius */
     ">
+    
       <div class="news-slider-container" style="position: relative;">
         <button id="teacher-slider-prev" class="news-slider-arrow left" style="left: 25px; z-index: 10;"><i class="fas fa-chevron-left"></i></button>
         <div class="profile-swiper swiper" style="margin: 0 60px;">
