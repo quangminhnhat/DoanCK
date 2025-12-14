@@ -17,7 +17,7 @@
 <body>
   <%- include('../views/shared/header.ejs') %>
 
-  <div class="slideshow-frame">
+  
     <!-- Slideshow container -->
     <div class="slideshow-container">
 
@@ -65,7 +65,7 @@
       <span class="dot" onclick="currentSlide(4)"></span>
       <span class="dot" onclick="currentSlide(5)"></span>
     </div>
-  </div>
+  
 
   <div class="featured-courses-container" style="
     width: 92%;
@@ -105,7 +105,7 @@
                // bare filename — assume it's in public/images
                return '/images/' + img;
              } %>
-          <% courses.slice(0, 5).forEach(function(course) { %>
+          <% courses.slice(0, 6).forEach(function(course) { %>
           <div class="news-item2 swiper-slide">
             <img src="<%= imageSrc(course.img) %>" alt="Course Image"
               onerror="this.onerror=null;this.src='/images/placeholder.svg'">
