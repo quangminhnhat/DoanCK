@@ -244,14 +244,7 @@
                                             placeholder="Enter your answer here..."
                                         ><% if(question.response && question.response[0] && question.response[0].response_text) { %><%= question.response[0].response_text %><% } %></textarea>
                                     </div>
-                                    <div class="mt-3">
-                                        <input type="file" 
-                                            class="modern-file-input" 
-                                            data-question-id="<%= question.question_id %>"
-                                            multiple
-                                            accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
-                                        >
-                                    </div>
+                                    
                                 <% } %>
                             </div>
                         </div>
