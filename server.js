@@ -45,20 +45,6 @@ const miscroutes = require("./routes/MiscRoute");
 const requestRoute = require("./routes/requestRoute");
 const examRoutes = require("./routes/examRoutes");
 
-// API Routes (JSON responses)
-const apiClassesRoutes = require("./routes/aip/apiclassesRoutes");
-const apiCoursesRoutes = require("./routes/aip/apicoursesRoutes");
-const apiEnrollmentsRoutes = require("./routes/aip/apienrollmentsRoutes");
-const apiExamRoutes = require("./routes/aip/apiexamRoutes");
-const apiMaterialRoutes = require("./routes/aip/apimaterialRoutes");
-const apiMaterialsRoutes = require("./routes/aip/apimaterialsroute");
-const apiMiscRoutes = require("./routes/aip/apiMiscRoute");
-const apiNotificationRoutes = require("./routes/aip/apinotificationsroutes");
-const apiRequestRoutes = require("./routes/aip/apirequestRoute");
-const apiScheduleRoutes = require("./routes/aip/apischeduleRoutes");
-const apiUploadMaterialRoutes = require("./routes/aip/apiupload-materialRoutes");
-const apiUsersRoutes = require("./routes/aip/apiusersRoutes");
-
 
 // Essential middleware
 app.use(express.json());
@@ -141,20 +127,6 @@ app.use(miscroutes);
 app.use(requestRoute);
 app.use(examRoutes);
 
-// API Routes (JSON responses)
-app.use("/api", apiClassesRoutes);
-app.use("/api", apiCoursesRoutes);
-app.use("/api", apiEnrollmentsRoutes);
-app.use("/api", apiExamRoutes);
-app.use("/api", apiMaterialRoutes);
-app.use("/api", apiMaterialsRoutes);
-app.use("/api", apiMiscRoutes);
-app.use("/api", apiNotificationRoutes);
-app.use("/api", apiRequestRoutes);
-app.use("/api", apiScheduleRoutes);
-app.use("/api", apiUploadMaterialRoutes);
-app.use("/api", apiUsersRoutes);
-
 
 app.post(
   "/login",
@@ -232,7 +204,30 @@ app.delete("/logout", (req, res) => {
   });
 });
 
-
+app.get("/GiaoTiepClass", (req, res) => {
+  res.render("GiaoTiepClass.ejs", { user: req.user });
+});
+app.get("/Toan,Ly,Hoaclass", (req, res) => {
+  res.render("Toan,Ly,Hoaclass.ejs", { user: req.user });
+});
+app.get("/AnhVanClass", (req, res) => {
+  res.render("AnhVanClass.ejs", { user: req.user });
+});
+app.get("/VanClass", (req, res) => {
+  res.render("VanClass.ejs", { user: req.user });
+});
+app.get("/ToanClass", (req, res) => {
+  res.render("ToanClass.ejs", { user: req.user });
+});
+app.get("/LyClass", (req, res) => {
+  res.render("LyClass.ejs", { user: req.user });
+});
+app.get("/HoaClass", (req, res) => {
+  res.render("HoaClass.ejs", { user: req.user });
+});
+app.get("/SuClass", (req, res) => {
+  res.render("SuClass.ejs", { user: req.user });
+});
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
