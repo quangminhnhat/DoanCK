@@ -200,7 +200,7 @@ app.delete("/logout", (req, res) => {
       console.error("Error during logout:", err);
       return res.status(500).send("Logout error");
     }
-    res.redirect("/");
+    res.redirect("/login");
   });
 });
 
