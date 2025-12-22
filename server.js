@@ -204,30 +204,6 @@ app.delete("/logout", (req, res) => {
   });
 });
 
-app.get("/GiaoTiepClass", (req, res) => {
-  res.render("GiaoTiepClass.ejs", { user: req.user });
-});
-app.get("/Toan,Ly,Hoaclass", (req, res) => {
-  res.render("Toan,Ly,Hoaclass.ejs", { user: req.user });
-});
-app.get("/AnhVanClass", (req, res) => {
-  res.render("AnhVanClass.ejs", { user: req.user });
-});
-app.get("/VanClass", (req, res) => {
-  res.render("VanClass.ejs", { user: req.user });
-});
-app.get("/ToanClass", (req, res) => {
-  res.render("ToanClass.ejs", { user: req.user });
-});
-app.get("/LyClass", (req, res) => {
-  res.render("LyClass.ejs", { user: req.user });
-});
-app.get("/HoaClass", (req, res) => {
-  res.render("HoaClass.ejs", { user: req.user });
-});
-app.get("/SuClass", (req, res) => {
-  res.render("SuClass.ejs", { user: req.user });
-});
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
