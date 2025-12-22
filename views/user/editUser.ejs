@@ -187,9 +187,11 @@
                 </div>
             </div>
             <div class="flex justify-between items-center mt-6">
+                <% if (user.role==='admin' ) { %>
                 <a href="/users" class="modern-btn-primary" style="background:#f7fafc;color:#2375D8;border:1px solid #2375D8;box-shadow:none;">
                     <i class="fas fa-arrow-left"></i> Back to users
                 </a>
+                <% } %>
                 <button type="submit" class="modern-btn-primary">
                     <i class="fas fa-save"></i> Save Changes
                 </button>
@@ -265,4 +267,6 @@
             </div>
         </div>
     </footer>
+    <script src="/js/script.js"></script>
+    <script src="/js/main.js"></script>
 </body>

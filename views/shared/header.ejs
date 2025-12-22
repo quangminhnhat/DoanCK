@@ -4,33 +4,17 @@
             <img src="/images/z6459306582259_85ca173d9f6beddf7ed7cd6dbfcaf7b1-removebg-preview.png" alt="Logo"
                 width="90" height="90">
         </div>
-        <nav>
-            <ul>
-                <li><a href="/">Trang Chủ</a></li>
-                <li><a href="/#school">Trung Tâm</a></li>
-                <li>
-                    <a href="#0">Thư Viện</a>
-                    <ul>
-                        <li><a href="https://drive.google.com/drive/folders/1j_lNKViTx_UUyZNXRlkhRd-w9ghDxAYB">Sách Giáo
-                                Khoa</a>
-                        </li>
-                        <li><a href="#0">Tài Liệu Tham Khảo</a></li>
-                        <li><a href="#0">Tài Liệu Tiếng Anh</a></li>
-                    </ul>
-                </li>
-                <li>
-                    <a href="/#news">Tin Tức - Sự Kiện</a>
-                </li>
-            </ul>
-        </nav>
+      
 
         <% if (!user) { %>
         <a href="/login" class="modern-btn-primary login-btn">
             <i class="fas fa-user"></i> Login
         </a>
         <% } else { %>
+        <label class="sidebar-toggle-btn" id="sidebar-toggle">
+            <span class="hamburger"></span>
+        </label>
         <div id="nav-bar">
-            <input type="checkbox" id="nav-toggle" />
             <div id="nav-header">
                 <a id="nav-title" href="https://codepen.io" target="_blank"
                     style="display:flex;align-items:center;gap:12px;">
@@ -38,19 +22,23 @@
                         alt="Logo" style="width:40px;height:40px;object-fit:contain;">
 
                 </a>
-                <label for="nav-toggle">
-                    <span id="nav-toggle-burger"></span>
-                </label>
                 <hr>
             </div>
             <div id="nav-content">
-                <a href="/" class="nav-button"><i class="fas fa-house"></i><span>Home</span></a>
+                <a href="/" class="nav-button"><i class="fas fa-house"></i><span>Trang Chủ</span></a>
+                <a href="/#school" class="nav-button"><i class="fas fa-school"></i><span>Trung Tâm</span></a>
+                <a href="https://drive.google.com/drive/folders/1j_lNKViTx_UUyZNXRlkhRd-w9ghDxAYB" class="nav-button"
+                    target="_blank"><i class="fas fa-book"></i><span>Sách Giáo Khoa</span></a>
+                <a href="#0" class="nav-button"><i class="fas fa-file-alt"></i><span>Tài Liệu Tham Khảo</span></a>
+                <a href="#0" class="nav-button"><i class="fas fa-language"></i><span>Tài Liệu Tiếng Anh</span></a>
+                <a href="/#news" class="nav-button"><i class="fas fa-newspaper"></i><span>Tin Tức - Sự Kiện</span></a>
+                <hr>
 
                 <!-- Common options for all authenticated users -->
                 <% if (user.role === 'teacher' || user.role === 'student') { %>
                 <a href="/schedule" class="nav-button"><i class="fas fa-calendar"></i><span>My Schedule</span></a>
                 <a href="/my-courses" class="nav-button"><i class="fas fa-chalkboard"></i><span>My courses</span></a>
-                
+
                 <% } %>
                 <a href="/notifications" class="nav-button"><i class="fas fa-bell"></i><span>Notifications</span></a>
                 <a href="/profile" class="nav-button"><i class="fas fa-user"></i><span>Profile</span></a>
@@ -100,7 +88,8 @@
             <div id="nav-footer">
                 <div id="nav-footer-heading">
                     <div id="nav-footer-avatar">
-                        <img src="<%= user.profile_pic ? '/' + user.profile_pic.replace(/\\/g, '/') : '/uploads/profile_pic/default_profile_pic.png' %>" alt="User Avatar" />
+                        <img src="<%= user.profile_pic ? '/' + user.profile_pic.replace(/\\/g, '/') : '/uploads/profile_pic/default_profile_pic.png' %>"
+                            alt="User Avatar" />
                     </div>
                     <div id="nav-footer-titlebox">
                         <a id="nav-footer-title" href="/profile"><%= user.username %></a>

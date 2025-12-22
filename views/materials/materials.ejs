@@ -138,9 +138,11 @@ footer {
                 <div class="modern-title">
                     <i class="fas fa-file"></i> Course Materials
                 </div>
+                <% if (user.role==='admin' || user.role==='teacher' ) { %>
                 <a href="/upload" class="modern-btn-primary">
                     <i class="fas fa-upload"></i> Upload Material
                 </a>
+                <% } %>
             </div>
             <div class="overflow-x-auto">
                 <table class="modern-table">
@@ -310,7 +312,7 @@ footer {
             });
         });
     </script>
-
+    <script src="/js/main.js"></script>
 </body>
 
 </html>

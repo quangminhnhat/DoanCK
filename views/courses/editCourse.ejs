@@ -121,7 +121,7 @@
         <i class="fas fa-edit mr-2"></i>
         Edit Course
       </legend>
-      <% if (messages.error) { %>
+      <% if (messages.error && messages.error.length > 0) { %>
         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
           <%= messages.error %>
         </div>
@@ -196,6 +196,8 @@
         <i class="fas fa-arrow-left"></i> Back
       </a>
     </form>
+    <script src="/js/script.js"></script>
+    <script src="/js/main.js"></script>
     <script>
       document.querySelector('form').addEventListener('submit', function(e) {
         // Existing date validation

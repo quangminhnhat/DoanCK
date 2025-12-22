@@ -1,4 +1,3 @@
-<section id="Slider"></section>
 <html lang="en">
 
 <head>
@@ -363,25 +362,9 @@
 
   <!-- News section (merged from news.ejs) -->
   <section id="news">
-    <div class="container-news" style="
-      width: 92%;
-      margin: 40px auto;
-      padding: 40px 20px;
-      background: #f5f7fa;
-      border-radius: 12px;
-    ">
-      <h1 style="
-        text-align: center;
-        font-size: 2.5rem;
-        font-weight: bold;
-        color: #2375D8;
-        margin-bottom: 30px;
-      ">Tin tức</h1>
-      <div class="main-content-news" style="
-        display: grid;
-        grid-template-columns: 2fr 1fr;
-        gap: 40px;
-      ">
+    <div class="container-news">
+      <h1>Tin tức</h1>
+      <div class="main-content-news">
         <div class="news-section">
           <div class="news-item">
             <img src="/images/thpt.jpg" alt="News Image 1">
@@ -437,23 +420,9 @@
           </div>
         </div>
 
-        <div class="sidebar" style="
-          display: flex;
-          flex-direction: column;
-          gap: 30px;
-        ">
-          <div class="popular-section" style="
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-          ">
-            <h2 style="
-              font-size: 1.5rem;
-              font-weight: bold;
-              color: #2375D8;
-              margin-bottom: 15px;
-            ">Xem nhiều</h2>
+        <div class="sidebar">
+          <div class="popular-section">
+            <h2>Xem nhiều</h2>
             <ul>
               <li><a href="#">Ngày thi THPT quốc gia</a> <span>153</span></li>
               <li><a href="#">Phân tích đề lý thi thử THPT quốc gia</a> <span>279</span></li>
@@ -470,6 +439,7 @@
           </div>
         </div>
       </div>
+    </div>
   </section>
 
   <%- include('../views/shared/footer.ejs') %>

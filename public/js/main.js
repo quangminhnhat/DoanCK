@@ -14,6 +14,17 @@ const showMenu = (toggleId, navbarId, bodyId) => {
 
 showMenu('nav-toggle','navbar', 'body-pd');
 
+// Sidebar toggle functionality
+const sidebarToggle = document.getElementById('sidebar-toggle');
+const navBar = document.getElementById('nav-bar');
+
+if (sidebarToggle && navBar) {
+    sidebarToggle.addEventListener('click', () => {
+        navBar.classList.toggle('sidebar-open');
+        sidebarToggle.classList.toggle('sidebar-open');
+    });
+}
+
 // Changing Active Link
 
 const linkColor = document.querySelectorAll('.nav-link');
