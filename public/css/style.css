@@ -910,52 +910,6 @@ overlay{
   --navbar-light-secondary: #8392a5;
 }
 
-/* NAVBAR COLLAPSE BEHAVIOR */
-#nav-toggle:checked ~ #nav-header {
-  width: calc(var(--navbar-width-min) - 16px);
-}
-#nav-toggle:checked ~ #nav-content,
-#nav-toggle:checked ~ #nav-footer {
-  width: var(--navbar-width-min);
-}
-#nav-toggle:checked ~ #nav-header #nav-title {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .1s;
-}
-#nav-toggle:checked ~ #nav-header label[for="nav-toggle"] {
-  left: calc(50% - 8px);
-  transform: translate(-50%);
-}
-#nav-toggle:checked ~ #nav-header #nav-toggle-burger {
-  background: var(--navbar-light-primary);
-}
-#nav-toggle:checked ~ #nav-header #nav-toggle-burger:before,
-#nav-toggle:checked ~ #nav-header #nav-toggle-burger::after {
-  width: 16px;
-  background: var(--navbar-light-secondary);
-  transform: translate(0, 0) rotate(0deg);
-}
-#nav-toggle:checked ~ #nav-content .nav-button span {
-  opacity: 0;
-  transition: opacity .1s;
-}
-#nav-toggle:checked ~ #nav-content .nav-button .fas {
-  min-width: calc(100% - 16px);
-}
-#nav-toggle:checked ~ #nav-footer #nav-footer-avatar {
-  margin-left: 0;
-  left: 50%;
-  transform: translate(-50%);
-}
-#nav-toggle:checked ~ #nav-footer #nav-footer-titlebox,
-#nav-toggle:checked ~ #nav-footer label[for="nav-footer-toggle"] {
-  opacity: 0;
-  transition: opacity .1s;
-  pointer-events: none;
-}
-
-/* NAVBAR MAIN STRUCTURE */
 #nav-bar {
   position: fixed;
   right: 1vw;
@@ -970,6 +924,75 @@ overlay{
   overflow: hidden;
   user-select: none;
   z-index: 9999;
+  display: none;
+  transition: transform 0.3s ease;
+}
+
+#nav-bar.sidebar-open {
+  display: flex;
+  transform: translateX(0);
+}
+
+/* SIDEBAR TOGGLE BUTTON */
+.sidebar-toggle-btn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  background: var(--navbar-dark-primary);
+  border-radius: 10px;
+  cursor: pointer;
+  z-index: 10000;
+  transition: background 0.3s;
+}
+
+.sidebar-toggle-btn:hover {
+  background: var(--navbar-dark-secondary);
+}
+
+.hamburger {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: var(--navbar-light-primary);
+  position: relative;
+}
+
+.hamburger::before,
+.hamburger::after {
+  content: '';
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: var(--navbar-light-primary);
+  position: absolute;
+  transition: 0.3s;
+}
+
+.hamburger::before {
+  top: -6px;
+}
+
+.hamburger::after {
+  top: 6px;
+}
+
+.sidebar-toggle-btn.sidebar-open .hamburger {
+  background: transparent;
+}
+
+.sidebar-toggle-btn.sidebar-open .hamburger::before {
+  transform: rotate(45deg);
+  top: 0;
+}
+
+.sidebar-toggle-btn.sidebar-open .hamburger::after {
+  transform: rotate(-45deg);
+  top: 0;
 }
 
 #nav-bar hr {
@@ -1014,45 +1037,7 @@ overlay{
   transition: opacity 1s;
 }
 
-/* NAV TOGGLE BURGER */
-label[for="nav-toggle"] {
-  position: absolute;
-  right: 0;
-  width: 3rem;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
-#nav-toggle-burger {
-  position: relative;
-  width: 16px;
-  height: 2px;
-  background: var(--navbar-dark-primary);
-  border-radius: 99px;
-  transition: background .2s;
-}
-#nav-toggle-burger:before,
-#nav-toggle-burger:after {
-  content: '';
-  position: absolute;
-  left: 0;
-  width: 10px;
-  height: 2px;
-  background: var(--navbar-light-primary);
-  border-radius: 99px;
-  transition: .2s;
-}
-#nav-toggle-burger:before {
-  top: -6px;
-  transform: translate(2px, 8px) rotate(30deg);
-}
-#nav-toggle-burger:after {
-  top: 6px;
-  transform: translate(2px, -8px) rotate(-30deg);
-}
+/* NAV TOGGLE - REMOVED */
 
 /* NAV CONTENT */
 #nav-content {
@@ -1436,6 +1421,7 @@ label[for="nav-footer-toggle"] {
     }
     .news-item img {
         width: 100%;
+        max-width: 100%;
         height: 140px;
         border-radius: 12px 12px 0 0;
     }
@@ -1986,7 +1972,7 @@ label[for="nav-footer-toggle"] {
 
 /* Slideshow container adjustments */
 .slideshow-container {
-  max-width: 90%;
+  max-width: 92%;
   position: relative;
   margin: auto;
   border-radius: 10px; /* Rounded corners for the container itself */

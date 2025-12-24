@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Course Materials</title>
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/mobile.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://demos.creative-tim.com/notus-js/assets/styles/tailwind.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
@@ -137,9 +138,11 @@ footer {
                 <div class="modern-title">
                     <i class="fas fa-file"></i> Course Materials
                 </div>
+                <% if (user.role==='admin' || user.role==='teacher' ) { %>
                 <a href="/upload" class="modern-btn-primary">
                     <i class="fas fa-upload"></i> Upload Material
                 </a>
+                <% } %>
             </div>
             <div class="overflow-x-auto">
                 <table class="modern-table">
@@ -309,7 +312,7 @@ footer {
             });
         });
     </script>
-
+    <script src="/js/main.js"></script>
 </body>
 
 </html>

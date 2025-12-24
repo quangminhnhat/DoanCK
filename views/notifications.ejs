@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Notifications</title>
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/mobile.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://demos.creative-tim.com/notus-js/assets/styles/tailwind.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
@@ -221,11 +222,11 @@
                                     <td style="font-weight: 500;"><%= notification.receiver_name %></td>
                                     <td><%= notification.message %></td>
                                     <td><%= new Date(notification.created_at).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) %></td>
-                                    <td data-id="<%= notification.id %>" class="<%= !notification.read ? 'unread-notification' : '' %>" style="text-align: center;">
+                                    <td style="text-align: center;">
                                         <% if(notification.read) { %>
                                             <span class="badge bg-success">Read</span>
                                         <% } else { %>
-                                            <span class="badge bg-warning">Unread</span>
+                                            <span class="badge bg-warning unread-notification" data-id="<%= notification.id %>">Unread</span>
                                         <% } %>
                                     </td>
                                     <td>
@@ -251,6 +252,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script src="/js/script.js"></script>
+    <script src="/js/main.js"></script>
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.7.0.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
@@ -280,15 +282,15 @@
 
             $('#notificationsTable tbody').on('click', '.unread-notification', function () {
                 const notificationId = $(this).data('id');
-                const statusCell = $(this);
+                const badge = $(this);
 
                 $.post(`/notifications/${notificationId}/read`)
                     .done(function () {
-                        statusCell.find('.badge')
-                            .removeClass('bg-warning')
+                        badge
+                            .removeClass('bg-warning unread-notification')
                             .addClass('bg-success')
-                            .text('Read');
-                        statusCell.removeClass('unread-notification');
+                            .text('Read')
+                            .css('cursor', 'default');
                     })
                     .fail(function (err) {
                         console.error('Error marking notification as read:', err);

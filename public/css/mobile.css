@@ -1,0 +1,448 @@
+/* Mobile Responsive Stylesheet */
+/* Add this file to your HTML <head>: <link rel="stylesheet" href="/css/mobile.css"> */
+
+/* Base mobile-first approach */
+* {
+  box-sizing: border-box;
+}
+
+/* ===== Mobile Devices (up to 768px) ===== */
+@media (max-width: 768px) {
+  
+  /* Typography */
+  html {
+    font-size: 14px;
+  }
+  
+  body {
+    font-size: 14px;
+    margin: 0;
+    padding: 0;
+  }
+  
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.3rem; }
+  h3 { font-size: 1.1rem; }
+  h4, h5, h6 { font-size: 1rem; }
+  
+  /* Navigation */
+  nav {
+    position: static !important;
+    transform: none !important;
+    left: auto !important;
+    width: 100% !important;
+    border-radius: 0 !important;
+    display: flex !important;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 10px !important;
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .header-container {
+    flex-direction: column !important;
+    padding: 10px !important;
+  }
+  
+  .header-container ul {
+    flex-direction: column !important;
+    padding: 0 !important;
+    width: 100%;
+  }
+  
+  .header-container ul li {
+    margin-right: 0 !important;
+    margin-bottom: 8px;
+    width: 100%;
+  }
+  
+  .header-container ul li a {
+    display: block;
+    padding: 8px;
+  }
+  
+  .header-container ul li ul {
+    position: static !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    margin: 0 !important;
+    padding: 5px 0 5px 20px !important;
+    display: none;
+  }
+  
+  .header-container ul li:hover > ul {
+    display: block;
+  }
+  
+  /* Images */
+  .mySlides img {
+    height: 250px !important;
+  }
+  
+  /* Prev/Next buttons */
+  .prev, .next {
+    padding: 12px !important;
+    font-size: 16px !important;
+  }
+  
+  /* Table */
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .table-container table {
+    min-width: 100%;
+    font-size: 0.9rem;
+  }
+  
+  .table-container th,
+  .table-container td {
+    padding: 0.8rem 0.5rem;
+    word-break: break-word;
+  }
+  
+  /* Forms */
+  .form-container {
+    padding: 1rem !important;
+    margin: 1rem auto !important;
+    max-width: 100% !important;
+  }
+  
+  .input-box {
+    margin-bottom: 1rem;
+  }
+  
+  .input-box input,
+  .input-box select,
+  .input-box textarea {
+    font-size: 16px; /* Prevent zoom on iOS */
+    padding: 0.75rem;
+  }
+  
+  .button-container {
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+  }
+  
+  .button-container button,
+  .button-container a,
+  .btn-secondary {
+    width: 100% !important;
+    padding: 0.75rem !important;
+  }
+  
+  /* Action buttons in tables */
+  .actions {
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  
+  .edit-btn,
+  .delete-btn {
+    padding: 0.5rem !important;
+    font-size: 0.8rem;
+    width: 100%;
+  }
+  
+  /* Grid layouts */
+  .grid,
+  .grid-2,
+  .grid-3,
+  .grid-4 {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+  
+  /* Flexbox utilities */
+  .flex-wrap {
+    flex-wrap: wrap !important;
+  }
+  
+  .flex-col {
+    flex-direction: column !important;
+  }
+  
+  /* Cards */
+  .card,
+  .course-card,
+  .class-card,
+  .enrollment-card {
+    padding: 1rem !important;
+    margin: 0.5rem 0 !important;
+    border-radius: 8px !important;
+  }
+  
+  /* Containers */
+  .container,
+  .container-lg,
+  .container-md,
+  .container-sm {
+    padding: 10px !important;
+    max-width: 100% !important;
+  }
+  
+  /* Spacing */
+  .p-4, .p-5, .p-6 {
+    padding: 1rem !important;
+  }
+  
+  .m-4, .m-5, .m-6 {
+    margin: 0.5rem !important;
+  }
+  
+  /* Buttons */
+  button,
+  .btn,
+  .btn-primary,
+  .btn-secondary,
+  .login-btn {
+    padding: 0.75rem 1.5rem !important;
+    font-size: 1rem !important;
+    min-height: 44px; /* iOS touch target */
+    cursor: pointer;
+  }
+  
+  /* Links as buttons */
+  a[role="button"],
+  .button,
+  input[type="button"],
+  input[type="submit"] {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    min-height: 44px;
+    line-height: 44px;
+  }
+  
+  /* Status badges */
+  .status-badge {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8rem;
+  }
+  
+  /* Sections */
+  section {
+    padding: 1rem !important;
+  }
+}
+
+/* ===== Small Mobile Devices (up to 480px) ===== */
+@media (max-width: 480px) {
+  
+  html {
+    font-size: 13px;
+  }
+  
+  h1 { font-size: 1.3rem; }
+  h2 { font-size: 1.1rem; }
+  h3 { font-size: 1rem; }
+  
+  /* Navigation */
+  nav {
+    padding: 5px !important;
+    gap: 5px !important;
+  }
+  
+  .header-container {
+    padding: 5px !important;
+  }
+  
+  /* Images */
+  .mySlides img {
+    height: 200px !important;
+  }
+  
+  /* Forms */
+  .form-container {
+    padding: 0.75rem !important;
+  }
+  
+  .input-box input,
+  .input-box select,
+  .input-box textarea {
+    padding: 0.5rem;
+  }
+  
+  /* Tables */
+  .table-container th,
+  .table-container td {
+    padding: 0.5rem 0.3rem;
+    font-size: 0.85rem;
+  }
+  
+  /* Status badges */
+  .status-badge {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+  }
+  
+  /* Containers */
+  .container,
+  .container-lg,
+  .container-md,
+  .container-sm {
+    padding: 5px !important;
+  }
+  
+  /* Buttons */
+  button,
+  .btn,
+  .login-btn {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.9rem !important;
+  }
+}
+
+/* ===== Tablet Devices (769px to 1024px) ===== */
+@media (min-width: 769px) and (max-width: 1024px) {
+  
+  /* Navigation */
+  nav {
+    gap: 20px !important;
+  }
+  
+  .header-container ul li:not(:last-child) {
+    margin-right: 20px !important;
+  }
+  
+  /* Images */
+  .mySlides img {
+    height: 350px !important;
+  }
+  
+  /* Grid layouts */
+  .grid-4,
+  .grid-3 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  
+  /* Containers */
+  .container-lg {
+    max-width: 95% !important;
+  }
+}
+
+/* ===== Desktop Devices (1025px+) ===== */
+@media (min-width: 1025px) {
+  
+  /* Keep original desktop styles */
+  
+  /* Grid layouts */
+  .grid-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ===== Landscape Orientation (Mobile) ===== */
+@media (max-height: 500px) and (orientation: landscape) {
+  
+  .mySlides img {
+    height: auto !important;
+    max-height: 250px !important;
+  }
+  
+  nav {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  header {
+    padding: 5px 0 !important;
+  }
+}
+
+/* ===== Print Styles ===== */
+@media print {
+  
+  nav,
+  .header-container,
+  button,
+  .btn,
+  .actions {
+    display: none !important;
+  }
+  
+  body {
+    font-size: 12pt;
+    background: white;
+    color: black;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  th, td {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+  }
+}
+
+/* ===== Touch-friendly improvements ===== */
+@media (hover: none) and (pointer: coarse) {
+  
+  /* Remove hover effects on touch devices */
+  a:hover,
+  button:hover,
+  .btn:hover {
+    opacity: 1;
+  }
+  
+  /* Increase touch targets */
+  button,
+  a[role="button"],
+  .btn {
+    min-height: 48px;
+    min-width: 48px;
+  }
+  
+  /* Remove focus outlines for better mobile UX */
+  button:focus,
+  input:focus,
+  select:focus,
+  textarea:focus {
+    outline: 2px solid #2375D8;
+    outline-offset: 2px;
+  }
+}
+
+/* ===== Utility Classes for Responsive Design ===== */
+.hide-mobile {
+  display: none !important;
+}
+
+.show-mobile {
+  display: block !important;
+}
+
+@media (min-width: 769px) {
+  .hide-mobile {
+    display: block !important;
+  }
+  
+  .show-mobile {
+    display: none !important;
+  }
+}
+
+.responsive-img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.responsive-text {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}

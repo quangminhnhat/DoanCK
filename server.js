@@ -141,20 +141,6 @@ app.use(miscroutes);
 app.use(requestRoute);
 app.use(examRoutes);
 
-// API Routes (JSON responses)
-app.use("/api", apiClassesRoutes);
-app.use("/api", apiCoursesRoutes);
-app.use("/api", apiEnrollmentsRoutes);
-app.use("/api", apiExamRoutes);
-app.use("/api", apiMaterialRoutes);
-app.use("/api", apiMaterialsRoutes);
-app.use("/api", apiMiscRoutes);
-app.use("/api", apiNotificationRoutes);
-app.use("/api", apiRequestRoutes);
-app.use("/api", apiScheduleRoutes);
-app.use("/api", apiUploadMaterialRoutes);
-app.use("/api", apiUsersRoutes);
-
 
 app.post(
   "/login",
@@ -228,10 +214,9 @@ app.delete("/logout", (req, res) => {
       console.error("Error during logout:", err);
       return res.status(500).send("Logout error");
     }
-    res.redirect("/");
+    res.redirect("/login");
   });
 });
-
 
 
 app.set("view engine", "ejs");
