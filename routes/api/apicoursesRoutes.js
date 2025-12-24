@@ -1,12 +1,12 @@
 const express = require("express");
 const path = require("path");
 const sql = require("msnodesqlv8");
-const { authenticateRole } = require(".../middleware/roleAuth");
+const { authenticateRole } = require("../../middleware/roleAuth");
 const fs = require("fs");
 const connectionString = process.env.CONNECTION_STRING;
-const courseImageUpload = require(".../middleware/courseImageUpload");
-const executeQuery = require(".../middleware/executeQuery");
-const { checkAuthenticated } = require(".../middleware/auth");
+const courseImageUpload = require("../../middleware/courseImageUpload");
+const executeQuery = require("../../middleware/executeQuery");
+const { checkAuthenticated } = require("../../middleware/auth");
 const router = express.Router();
 
 router.get("/course-detail/:id", async (req, res) => {
@@ -668,3 +668,4 @@ router.get("/my-courses", checkAuthenticated, async (req, res) => {
 });
 
 module.exports = router;
+

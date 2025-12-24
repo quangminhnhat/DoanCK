@@ -1,12 +1,12 @@
 const express = require("express");
 const sql = require("msnodesqlv8");
-const { authenticateRole } = require(".../middleware/roleAuth");
+const { authenticateRole } = require("../../middleware/roleAuth");
 const fs = require("fs");
 const path = require("path");
 const multer = require("multer");
 const connectionString = process.env.CONNECTION_STRING;
-const executeQuery = require(".../middleware/executeQuery");
-const { checkAuthenticated } = require(".../middleware/auth");
+const executeQuery = require("../../middleware/executeQuery");
+const { checkAuthenticated } = require("../../middleware/auth");
 const router = express.Router();
 const profilePicStorage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -355,3 +355,4 @@ router.get("/profile", checkAuthenticated, async (req, res) => {
 });
 
 module.exports = router;
+

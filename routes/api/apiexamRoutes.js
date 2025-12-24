@@ -6,13 +6,13 @@ const bcrypt = require("bcrypt");
 const sql = require("msnodesqlv8");
 const multer = require("multer");
 const fs = require("fs");
-const { authenticateRole } = require(".../middleware/roleAuth");
-const executeQuery = require(".../middleware/executeQuery");
-const { createMCQQuestion, editMCQQuestion, deleteMCQQuestion } = require(".../middleware/mcqQuestionHelper");
+const { authenticateRole } = require("../../middleware/roleAuth");
+const executeQuery = require("../../middleware/executeQuery");
+const { createMCQQuestion, editMCQQuestion, deleteMCQQuestion } = require("../../middleware/mcqQuestionHelper");
 const {
   checkAuthenticated,
   checkNotAuthenticated,
-} = require(".../middleware/auth");
+} = require("../../middleware/auth");
 
 // Configure multer for question media uploads
 const storage = multer.diskStorage({
@@ -1603,3 +1603,4 @@ router.get('/exams/:assignmentId/take', checkAuthenticated, authenticateRole(['s
 
 
 module.exports = router;
+
