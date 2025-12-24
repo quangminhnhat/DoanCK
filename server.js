@@ -142,6 +142,21 @@ app.use(requestRoute);
 app.use(examRoutes);
 
 
+//api routing
+app.use("/api", apiClassesRoutes);
+app.use("/api", apiCoursesRoutes);
+app.use("/api", apiEnrollmentsRoutes);  
+app.use("/api", apiExamRoutes);
+app.use("/api", apiMaterialRoutes);
+app.use("/api", apiMaterialsRoutes);
+app.use("/api", apiMiscRoutes);
+app.use("/api", apiNotificationRoutes);
+app.use("/api", apiRequestRoutes);
+app.use("/api", apiScheduleRoutes);
+app.use("/api", apiUploadMaterialRoutes);
+app.use("/api", apiUsersRoutes);
+
+
 app.post(
   "/login",
   checkNotAuthenticated,
