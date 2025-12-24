@@ -45,6 +45,20 @@ const miscroutes = require("./routes/MiscRoute");
 const requestRoute = require("./routes/requestRoute");
 const examRoutes = require("./routes/examRoutes");
 
+// API Routes (JSON responses)
+const apiClassesRoutes = require("./routes/api/apiclassesRoutes");
+const apiCoursesRoutes = require("./routes/api/apicoursesRoutes");
+const apiEnrollmentsRoutes = require("./routes/api/apienrollmentsRoutes");
+const apiExamRoutes = require("./routes/api/apiexamRoutes");
+const apiMaterialRoutes = require("./routes/api/apimaterialRoutes");
+const apiMaterialsRoutes = require("./routes/api/apimaterialsroute");
+const apiMiscRoutes = require("./routes/api/apiMiscRoute");
+const apiNotificationRoutes = require("./routes/api/apinotificationsroutes");
+const apiRequestRoutes = require("./routes/api/apirequestRoute");
+const apiScheduleRoutes = require("./routes/api/apischeduleRoutes");
+const apiUploadMaterialRoutes = require("./routes/api/apiupload-materialRoutes");
+const apiUsersRoutes = require("./routes/api/apiusersRoutes");
+
 
 // Essential middleware
 app.use(express.json());
