@@ -230,6 +230,15 @@ router.post(
         details: details
       });
 
+      // Send automatic reply to the student
+      const adminQuery = `SELECT TOP 1 id FROM users WHERE role = 'admin'`;
+      const adminResult = await executeQuery(adminQuery);
+      if (adminResult && adminResult.length > 0) {
+        const adminId = adminResult[0].id;
+        const autoReplyQuery = `INSERT INTO notifications (user_id, message, sender_id) VALUES (?, ?, ?)`;
+        await executeQuery(autoReplyQuery, [userId, "Your request has been received. We will answer as soon as possible.", adminId]);
+      }
+
       // If it's a class-related request, notify relevant users
       if (classId) {
         const notifyQuery = `
