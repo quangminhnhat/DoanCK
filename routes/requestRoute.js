@@ -229,6 +229,18 @@ router.post(
         classId: classId,
         details: details
       });
+      console.log("Request inserted successfully (web route)");
+
+      // acknowledge back to the requester
+      try {
+        const ackQuery = `
+          INSERT INTO notifications (user_id, message, sender_id)
+          VALUES (@userId, 'Your request has been received; we will answer as soon as possible.', NULL)
+        `;
+        await executeQuery(ackQuery, { userId: userId });
+      } catch (ackErr) {
+        console.error('Error creating acknowledgement notification (web):', ackErr);
+      }
 
       // If it's a class-related request, notify relevant users
       if (classId) {
@@ -254,8 +266,13 @@ router.post(
         });
       }
 
-      res.status(200).json({ message: "Request submitted successfully" });
-
+      // respond with acknowledgement text as JSON (front-end fetch will handle it)
+      res
+        .status(200)
+        .json({
+          message:
+            "Chúng tôi đã nhận được yêu cầu của bạn; chúng tôi sẽ trả lời trong thời gian sớm nhất.",
+        });
     } catch (error) {
       console.error("Error submitting request:", error);
       res.status(500).json({ error: "Failed to submit request" });
@@ -263,66 +280,66 @@ router.post(
   }
 );
 
-router.delete(
-  "/requestDelete/:requestId",
-  checkAuthenticated,
-  authenticateRole(["student", "teacher", "admin"]),
-  async (req, res) => {
-    const requestId = req.params.requestId;
-    const userId = req.user.id;
+   router.put(
+     "/requestDelete/:requestId",
+     checkAuthenticated,
+     authenticateRole(["student", "teacher", "admin"]),
+     async (req, res) => {
+       const requestId = req.params.requestId;
+       const userId = req.user.id;
 
-    try {
-      // First check if request exists and belongs to user
-      const checkQuery = `
+       try {
+         // First check if request exists and belongs to user
+         const checkQuery = `
         SELECT status 
         FROM Requests 
         WHERE request_id = @requestId 
         AND user_id = @userId
       `;
 
-      const request = await executeQuery(checkQuery, {
-        requestId: requestId,
-        userId: userId
-      });
+         const request = await executeQuery(checkQuery, {
+           requestId: requestId,
+           userId: userId,
+         });
 
-      if (!request || request.length === 0) {
-        return res.status(404).json({ 
-          error: "Request not found or you don't have permission to delete it" 
-        });
-      }
+         if (!request || request.length === 0) {
+           return res.status(404).json({
+             error:
+               "Request not found or you don't have permission to delete it",
+           });
+         }
 
-      // Only allow deletion of pending requests
-      if (request[0].status !== 'pending') {
-        return res.status(400).json({
-          error: "Only pending requests can be deleted"
-        });
-      }
+         // Only allow deletion of pending requests
+         if (request[0].status !== "pending") {
+           return res.status(400).json({
+             error: "Only pending requests can be deleted",
+           });
+         }
 
-      // Delete the request
-      const deleteQuery = `
+         // Delete the request
+         const deleteQuery = `
         DELETE FROM Requests 
         WHERE request_id = @requestId 
         AND user_id = @userId 
         AND status = 'pending'
       `;
 
-      await executeQuery(deleteQuery, {
-        requestId: requestId,
-        userId: userId
-      });
+         await executeQuery(deleteQuery, {
+           requestId: requestId,
+           userId: userId,
+         });
 
-      res.status(200).json({ 
-        message: "Request deleted successfully" 
-      });
-
-    } catch (error) {
-      console.error("Error deleting request:", error);
-      res.status(500).json({ 
-        error: "Failed to delete request" 
-      });
-    }
-  }
-);
+         res.status(200).json({
+           message: "Request deleted successfully",
+         });
+       } catch (error) {
+         console.error("Error deleting request:", error);
+         res.status(500).json({
+           error: "Failed to delete request",
+         });
+       }
+     },
+   );
 
 router.put(
   "/requestEdit/:requestId",

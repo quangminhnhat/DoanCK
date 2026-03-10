@@ -131,10 +131,15 @@ document.getElementById('requestForm').addEventListener('submit', async function
             })
         });
 
+        const result = await response.json();
         if (response.ok) {
+            // show server acknowledgement in alert or just console
+            if (result.message) {
+                alert(result.message);
+            }
             window.location.href = '/requests';
         } else {
-            alert((await response.json()).error || 'Failed to submit request');
+            alert(result.error || 'Failed to submit request');
         }
     } catch (error) {
         alert('Error submitting request');

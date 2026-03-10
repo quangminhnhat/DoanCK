@@ -229,14 +229,18 @@ router.post(
         classId: classId,
         details: details
       });
-
-      // Send automatic reply to the student
-      const adminQuery = `SELECT TOP 1 id FROM users WHERE role = 'admin'`;
-      const adminResult = await executeQuery(adminQuery);
-      if (adminResult && adminResult.length > 0) {
-        const adminId = adminResult[0].id;
-        const autoReplyQuery = `INSERT INTO notifications (user_id, message, sender_id) VALUES (?, ?, ?)`;
-        await executeQuery(autoReplyQuery, [userId, "Your request has been received. We will answer as soon as possible.", adminId]);
+      console.log("Request inserted successfully");
+      // acknowledge to the sender that the request was received
+      try {
+        console.log("Creating acknowledgement notification for user:", userId);
+        const ackQuery = `
+          INSERT INTO notifications (user_id, message, sender_id)
+          VALUES (@userId, 'Your request has been received; we will answer as soon as possible.', NULL)
+        `;
+        await executeQuery(ackQuery, { userId: userId });
+      } catch (ackErr) {
+        console.error('Error creating acknowledgement notification:', ackErr);
+        // non‑critical, continue without failing the request creation
       }
 
       // If it's a class-related request, notify relevant users
@@ -263,7 +267,8 @@ router.post(
         });
       }
 
-      res.status(200).json({ message: "Request submitted successfully" });
+      // send acknowledgement message in API response as well
+      res.status(200).json({ message: "Your request has been received; we will answer as soon as possible." });
 
     } catch (error) {
       console.error("Error submitting request:", error);
